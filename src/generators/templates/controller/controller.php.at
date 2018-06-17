@@ -1,0 +1,60 @@
+<?= $this->phpTagOpen(); ?>
+
+namespace App\Controllers<?= $this->namespace; ?>;
+
+use Agility\HTTP\Controller;
+<?php if ($this->scaffold) { ?>
+use App\Models\<?= $this->scaffold; ?>;
+<?php } ?>
+
+	class <?= $this->controller; ?>Controller extends Controller {
+
+<?php if ($this->scaffold) { ?>
+		protected $<?= $this->scaffoldObject; ?>;
+<?php } ?>
+
+		function __construct() {
+			parent::__construct();
+<?php if ($this->scaffold) { ?>
+			$this->beforeAction("set<?= $this->scaffold; ?>", ["show", "update", "delete"]);
+<?php } ?>
+		}
+
+<?php if ($this->scaffold) { ?>
+		// GET /<?= $this->filePath."\n"; ?>
+		function index() {
+			$this-><?= $this->scaffoldObject; ?> = <?= $this->scaffold; ?>::all();
+		}
+
+		// POST /<?= $this->filePath."\n"; ?>
+		function create() {
+			$this-><?= $this->scaffoldObject; ?> = new <?= $this->scaffold; ?>;
+			$this-><?= $this->scaffoldObject; ?>->save();
+		}
+
+		// GET /<?= $this->filePath; ?>/1
+		function show() {
+
+		}
+
+		// PUT/PATCH /<?= $this->filePath; ?>/1
+		function update() {
+			$this-><?= $this->scaffoldObject; ?>->edit($this->params["<?= $this->scaffoldObject ?>"]);
+		}
+
+		// DELETE /<?= $this->filePath; ?>/1
+		function delete() {
+			$this-><?= $this->scaffoldObject; ?>->delete();
+		}
+<?php } ?>
+
+<?= $this->renderMethods(); ?>
+<?php if ($this->scaffold) {?>
+		private function set<?= $this->scaffold; ?>() {
+			$this-><?= $this->scaffoldObject; ?> = <?= $this->scaffold; ?>::find($this->params["id"]);
+		}
+<?php } ?>
+
+	}
+
+<?= $this->phpTagClose(); ?>

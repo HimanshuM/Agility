@@ -1,0 +1,36 @@
+<?= $this->phpTagOpen(); ?>
+
+namespace Db\Migrate;
+
+use Agility\Data\Migration;
+
+	class <?= $this->className; ?> extends Migration {
+
+		function change() {
+
+<?php if ($this->type == "create") { ?>
+			$this->createTable("<?= $this->tableName; ?>", function($t) {
+<?php foreach ($this->attributes as $c) { ?>
+				$t-><?= $c->dataType ?>("<?= $c->name ?>"<?= !empty($c->dataType->options()) ? ", ".$c->dataType->options() : "" ?>);
+<?php } ?>
+
+<?php if ($this->timestamps) { ?>
+				$t->timestamps();
+<?php } ?>
+			});
+
+<?php foreach ($this->attributesWithIndex as $i) { ?>
+			$t-><?= $i->indexed ? "index" : ($i->unique ? "unique" : "") ?>("<?= $this->tableName ?>", "<?= $i->name ?>");
+<?php }
+}
+else if ($this->type != "create") {
+foreach ($this->attributes as $c) { ?>
+			$this-><?= $this->type ?>Column("<?= $this->tableName ?>", "<?= $c->name ?>"<?= $this->type == "add" ? ", \"".$c->dataType."\"".($c->dataType->options() ? ", ".$c->dataType->options() : "") : "" ?>);
+<?php }
+}?>
+
+		}
+
+	}
+
+<?= $this->phpTagClose(); ?>

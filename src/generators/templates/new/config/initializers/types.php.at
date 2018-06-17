@@ -1,0 +1,13 @@
+<?= $this->phpTagOpen(); ?>
+
+namespace Config\Initializers;
+
+	class DataInitializer {
+
+		function configure() {
+			// \Agility\Data\Types\Base::register("your_type");
+		}
+
+	}
+
+<?= $this->phpTagClose(); ?>

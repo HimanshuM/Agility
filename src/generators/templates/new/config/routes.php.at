@@ -1,0 +1,7 @@
+<?= $this->phpTagOpen(); ?>
+
+	Agility\Routes::draw(function($r) {
+
+	});
+
+<?= $this->phpTagClose(); ?>

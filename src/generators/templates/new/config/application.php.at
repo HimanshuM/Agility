@@ -1,0 +1,15 @@
+<?= $this->phpTagOpen(); ?>
+
+namespace <?= $this->appName(); ?>;
+
+use Agility;
+
+	class Application extends Agility\Application {
+
+		protected function configure() {
+
+		}
+
+	}
+
+<?= $this->phpTagClose(); ?>
