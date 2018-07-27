@@ -6,7 +6,7 @@ use ArrayUtils\Arrays;
 
 	trait Validate {
 
-		protected static $_validations;
+		public $errors;
 
 		protected static function _getValidations() {
 
@@ -56,6 +56,10 @@ use ArrayUtils\Arrays;
 			// Do validations
 
 			$this->_runCallbacks("afterValidationOnUpdate");
+
+		}
+
+		static function validates($column, $with, $options = []) {
 
 		}
 

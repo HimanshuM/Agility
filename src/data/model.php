@@ -15,7 +15,7 @@ if (!defined("nil")) {
 
 		use Accessor;
 		use Associations\Builder;
-		use Callbacks;
+		use Callbacks\Callback;
 		use Helpers\Dispatch;
 		use Helpers\Initializer;
 		use Helpers\Inspect;
@@ -28,7 +28,6 @@ if (!defined("nil")) {
 		use Schema\Builder;
 		use Validations\Validate;
 
-		protected static $tableNames;
 		protected static $primaryKey = "id";
 		protected static $autoIncrementingPrimaryKey = true;
 		protected static $touchTimeStamps = true;

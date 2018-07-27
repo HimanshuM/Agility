@@ -2,7 +2,7 @@
 
 namespace Agility\Data\Types;
 
-	class Json extends Base {
+	class Serialized extends Base {
 
 		function __construct() {
 			parent::__construct();
@@ -11,7 +11,7 @@ namespace Agility\Data\Types;
 		function cast($value) {
 
 			if (is_string($value)) {
-				return json_decode($value, true);
+				return unserialize($value, true);
 			}
 
 			return $value;
@@ -19,7 +19,7 @@ namespace Agility\Data\Types;
 		}
 
 		function serialize($value) {
-			return json_encode($value);
+			return serialize($value);
 		}
 
 		function __toString() {

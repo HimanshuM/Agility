@@ -24,8 +24,8 @@ use InvalidArgumentException;
 			$return = [];
 			foreach ($collection as $name => $value) {
 
-				if (isset($this->_attributeObjects[$name])) {
-					$value = $this->_attributeObjects[$name]->dataType->serialize($value);
+				if (isset(static::attributeObjects()[$name])) {
+					$value = static::attributeObjects()[$name]->dataType->serialize($value);
 				}
 				else {
 					$value = static::generatedAttributes()[$name]->dataType->serialize($value);
@@ -61,8 +61,8 @@ use InvalidArgumentException;
 					$this->_fresh = false;
 				}
 
-				if (isset($this->_attributeObjects[$name])) {
-					$value = $this->_attributeObjects[$name]->dataType->unserialize($value);
+				if (isset(static::attributeObjects()[$name])) {
+					$value = static::attributeObjects()[$name]->dataType->unserialize($value);
 				}
 				else {
 					$value = static::generatedAttributes()[$name]->dataType->unserialize($value);
@@ -94,8 +94,8 @@ use InvalidArgumentException;
 
 		private function _setAttribute($name, $value) {
 
-			if (isset($this->_attributeObjects[$name])) {
-				$value = $this->_attributeObjects[$name]->dataType->cast($value);
+			if (isset(static::attributeObjects()[$name])) {
+				$value = static::attributeObjects()[$name]->dataType->cast($value);
 			}
 
 			$this->attributes->$name = $value;

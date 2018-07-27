@@ -7,13 +7,14 @@ use Agility\Data\Collection;
 use ArrayUtils\Arrays;
 use FileSystem\File;
 
-	class Pool {
+	final class Pool {
 
 		static $defaultConnection = 0;
 		static $pool;
 		static $defaultPoolSize = 100;
 
 		protected static $instanceType;
+		protected static $isInitialized = false;
 
 		static function getConnection($connectionName = null) {
 
@@ -38,6 +39,10 @@ use FileSystem\File;
 
 		}
 
+		static function initialized() {
+			return Pool::$isInitialized;
+		}
+
 		static function parseConfiguration($configuration) {
 
 			$configuration = Configuration::dbConfiguration(json_decode($configuration, true))[Configuration::environment()];
@@ -51,6 +56,8 @@ use FileSystem\File;
 				Pool::$pool[$connectionName] = $connectionObject;
 
 			}
+
+			Pool::$isInitialized = true;
 
 		}
 

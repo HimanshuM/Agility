@@ -4,6 +4,7 @@ namespace Agility\Data\Connection\Mysql;
 
 use Agility\Configuration;
 use Agility\Data\Connection\Base;
+use Agility\Data\Connection\InvalidFetchTypeException;
 use Aqua;
 use Aqua\Visitors\MysqlVisitor;
 use Exception;
@@ -75,6 +76,10 @@ use PDO;
 
 		}
 
+		function defaultEngine() {
+			return "InnoDB";
+		}
+
 		function delete($query, $params = []) {
 
 			$sql = $query;
@@ -103,17 +108,17 @@ use PDO;
 
 		}
 
-		function execute($query, $params = []) {
+		function execute($query, $params = [], $type = 0) {
 
 			if (is_string($query)) {
-				return $this->query($query, $params);
+				return $this->query($query, $params, $type);
 			}
 			else {
 
 				$mysqlVisitor = new MysqlVisitor;
 				$query->toSql($mysqlVisitor);
 				if (is_a($query, Aqua\SelectStatement::class)) {
-					return $this->query($mysqlVisitor);
+					return $this->query($mysqlVisitor, [], $type);
 				}
 				else if (is_a($query, Aqua\InsertStatement::class)) {
 					return $this->insert($mysqlVisitor);
@@ -136,10 +141,26 @@ use PDO;
 
 			$connection = $this->_connect();
 			$this->_logQuery($connection, $sql, $params);
+			if ($type == static::DDLStatement) {
+
+				try {
+					$connection->exec($sql);
+				}
+				catch (Exception $e) {
+					die($e->getMessage());
+				}
+
+				return;
+
+			}
+
 			$stmt = $connection->prepare($sql);
 
 			if ($type == 0) {
 				$stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, $this->_instanceType);
+			}
+			else if ($type == 4) {
+				$stmt->setFetchMode(PDO::FETCH_NUM);
 			}
 
 			if (!empty($params)) {
@@ -170,6 +191,19 @@ use PDO;
 			$result = false;
 			if ($type == 0) {
 				$result = $stmt->fetchAll();
+			}
+			else if ($type == 4) {
+
+				if ($stmt->columnCount() == 1) {
+					$result = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+				}
+				else {
+					$result = $stmt->fetchAll();
+				}
+
+			}
+			else if ($type == static::DDLStatement) {
+
 			}
 			else {
 
@@ -248,7 +282,7 @@ use PDO;
 
 		}
 
-		function query($query, $params = []) {
+		function query($query, $params = [], $type = 0) {
 
 			$sql = $query;
 			if (is_a($query, "Aqua\\Visitors\\MysqlVisitor")) {
@@ -258,7 +292,24 @@ use PDO;
 
 			}
 
-			return $this->_executeQuery($sql, $params);
+			if ($type != 0 && $type != 4 && $type != 10) {
+				throw new InvalidFetchTypeException($type);
+			}
+
+			return $this->_executeQuery($sql, $params, $type);
+
+		}
+
+		function quote($value, $connection = null) {
+
+			if (($nativeValue = $this->getTypeMapper()->getNativeConstant($value)) !== false) {
+				return $nativeValue;
+			}
+
+			if (empty($connection)) {
+				$connection = $this->_connect();
+			}
+			return $connection->quote($value);
 
 		}
 

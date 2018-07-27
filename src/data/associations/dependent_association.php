@@ -115,11 +115,11 @@ use StringHelpers\Str;
 				$throughClass = $this->_through->_associatedClass;
 				$throughTable = $throughClass::aquaTable();
 
-				if (!AssociationStore::instance()->belongsToAssociations->exists($throughClass) || !AssociationStore::instance()->belongsToAssociations[$throughClass]->exists($this->_associatedName)) {
+				if (!$throughClass::associationsCache()->belongsToAssociations->exists($this->_associatedName)) {
 					throw new Exceptions\HasManyThroughSourceNotFoundException($this->_through->_associatedName, $this->_associatedName, $this->_ownerClass);
 				}
 
-				$throughBelongsToAssociation = AssociationStore::instance()->belongsToAssociations[$throughClass][$this->_associatedName];
+				$throughBelongsToAssociation = $throughClass::associationsCache()->belongsToAssociations[$this->_associatedName];
 				$throughForeignKey = Str::snakeCase($throughBelongsToAssociation->associatedForeignKey);
 				$throughOwnerPrimaryKey = $throughBelongsToAssociation->primaryKey;
 

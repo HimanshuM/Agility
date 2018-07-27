@@ -4,90 +4,40 @@ namespace Agility\Data\Connection\Mysql;
 
 use Agility\Data\Connection\AbstractType;
 use Agility\Data\Connection\SqlTypeLengthException;
+use Agility\Data\Schema\ForeignKeyRelation;
 
 	class MysqlTypes extends AbstractType {
 
-		const NativeTypes = [
-			"boolean"	=> 	["name" => "tinyint", 		"limit" => 1, 		"regex" => '/tinyint/'],
-			"uint"		=> 	["name" => "int unsigned", 	"limit" => 10, 		"regex" => '/int(\(\d+\)) unsigned/'],
-			"integer"	=> 	["name" => "int", 			"limit" => 11, 		"regex" => '/int(\(\d+\))/'],
-			"float"		=> 	["name" => "float", 		"precision" => 10, 	"regex" => '/float(\(\d+(,\d+)?\))?/', "scale" => 2],
-			"double"	=> 	["name" => "double", 		"precision" => 10, 	"regex" => '/double(\(\d+(,\d+)?\))?/', "scale" => 0],
-			"str"		=> 	["name" => "varchar", 		"limit" => 255, 	"regex" => '/varchar(\(\d+\))/'],
-			"text"		=> 	["name" => "text", 			"limit" => 65535, 	"regex" => '/text(\(\d+\))?/'],
-			"enum"		=> 	["name" => "enum", 			"limit" => "",	 	"regex" => '/enum(\([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(,[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)*\))?/'],
-			"datetime"	=> 	["name" => "datetime", 		"precision" => 0, 	"regex" => '/datetime(\(\d+\))?/'],
-			"timestamp"	=> 	["name" => "timestamp",		"precision" => 0, 	"regex" => '/timestamp(\(\d+\))?/'],
-			"date"		=> 	["name" => "date", 			"limit" => "",	 	"regex" => '/date/'],
-			"binary"	=> 	["name" => "blob", 			"limit" => "",	 	"regex" => '/blob(\(\d+\))?/'],
+		const ForeignKeyModifiers = [
+			"NO ACTION",
+			"RESTRICT",
+			"SET NULL",
+			"CASCADE"
 		];
 
-		function getNativeType($type, $limit = null, $precision = null, $scale = null) {
+		const NativeConstants = [
+			"CURRENT_TIMESTAMP" => "CURRENT_TIMESTAMP",
+			"NULL" => "NULL"
+		];
 
-			if ($type == "integer") {
-				return $this->getNativeInteger($limit);
-			}
-			else if ($type == "uint") {
-				return $this->getNativeInteger($limit)." unsigned";
-			}
-			else if ($type == "text") {
-				return $this->getNativeText($limit);
-			}
-			else if ($type == "binary") {
-				return $this->getNativeBinary($limit);
-			}
-			else {
-				return parent::getNativeType($type, $limit, $precision, $scale);
-			}
+		const NativeTypes = [
+			"binary"	=> 	["name" => "blob", 			"limit" => "",	 	"regex" => '/blob(\(\d+\))?/'],
+			"boolean"	=> 	["name" => "tinyint", 		"limit" => 1, 		"regex" => '/tinyint/'],
+			"date"		=> 	["name" => "date", 			"limit" => "",	 	"regex" => '/date/'],
+			"datetime"	=> 	["name" => "datetime", 		"precision" => 0, 	"regex" => '/datetime(\(\d+\))?/'],
+			"double"	=> 	["name" => "double", 		"precision" => 10, 	"regex" => '/double(\(\d+(,\d+)?\))?/',		"scale" => 0],
+			"enum"		=> 	["name" => "enum", 			"limit" => "",	 	"regex" => '/enum(\([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(,[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)*\))?/'],
+			"float"		=> 	["name" => "float", 		"precision" => 10, 	"regex" => '/float(\(\d+(,\d+)?\))?/',		"scale" => 2],
+			"integer"	=> 	["name" => "int", 			"limit" => 11, 		"regex" => '/int(\(\d+\))/'],
+			"json"		=>	["name" => "json",			"limit" => 255,		"regex" => '/json/'],
+			"string"	=> 	["name" => "varchar", 		"limit" => 255, 	"regex" => '/varchar(\(\d+\))/'],
+			"text"		=> 	["name" => "text", 			"limit" => 65535, 	"regex" => '/text(\(\d+\))?/'],
+			"timestamp"	=> 	["name" => "timestamp",		"precision" => 0, 	"regex" => '/timestamp(\(\d+\))?/'],
+			"uint"		=> 	["name" => "int unsigned", 	"limit" => 10, 		"regex" => '/int(\(\d+\)) unsigned/'],
+		];
 
-		}
-
-		function getNativeInteger($limit = null) {
-
-			if (empty($limit)) {
-				return "int";
-			}
-
-			if ($limit == 1) {
-				return "tinyint";
-			}
-			else if ($limit < 3) {
-				return "smallint";
-			}
-			else if ($limit < 4) {
-				return "mediumint";
-			}
-			else if ($limit < 5) {
-				return "int";
-			}
-			else if ($limit < 8) {
-				return "bigint";
-			}
-
-		}
-
-		function getNativeText($limit) {
-
-			if (empty($limit)) {
-				return "text";
-			}
-
-			if ($limit <= 0xff) {
-				return "tinytext";
-			}
-			else if ($limit <= 0xffff) {
-				return "text";
-			}
-			else if ($limit <= 0xffffff) {
-				return "mediumtext";
-			}
-			else if ($limit <= 0xffffffff) {
-				return "longtext";
-			}
-			else {
-				throw new SqlTypeLengthException("text", $limit);
-			}
-
+		function compileForeignKey(ForeignKeyRelation $relation) {
+			return "ALTER TABLE `".$relation->referencingTableName."` ADD CONSTRAINT `".$relation->keyName."` FOREIGN KEY (`".$relation->referencingColumnName."`) REFERENCES `".$relation->sourceTableName."`(`".$relation->sourceColumnName."`) ON DELETE ".static::ForeignKeyModifiers[$relation->onDelete]." ON UPDATE ".static::ForeignKeyModifiers[$relation->onUpdate].";";
 		}
 
 		function getNativeBinary($limit) {
@@ -110,6 +60,76 @@ use Agility\Data\Connection\SqlTypeLengthException;
 			}
 			else {
 				throw new SqlTypeLengthException("blob", $limit);
+			}
+
+		}
+
+		function getNativeInteger($limit = null) {
+
+			$int = "int";
+			if (empty($limit)) {
+				$limit = 11;
+			}
+			else if ($limit == 1) {
+				$int = "tinyint";
+			}
+			else if ($limit < 3) {
+				$int = "smallint";
+			}
+			else if ($limit < 4) {
+				$int = "mediumint";
+			}
+			else if ($limit < 5) {
+				$int = "int";
+			}
+			else if ($limit < 8) {
+				$int = "bigint";
+			}
+
+			return $int."($limit)";
+
+		}
+
+		function getNativeText($limit) {
+
+			$text = "text";
+			if (empty($limit)) {}
+			else if ($limit <= 0xff) {
+				$text = "tinytext";
+			}
+			else if ($limit <= 0xffff) {
+				$text = "text";
+			}
+			else if ($limit <= 0xffffff) {
+				$text = "mediumtext";
+			}
+			else if ($limit <= 0xffffffff) {
+				$text = "longtext";
+			}
+			else {
+				throw new SqlTypeLengthException("text", $limit);
+			}
+
+			return $text."($limit)";
+
+		}
+
+		function getNativeType($type, $limit = null, $precision = null, $scale = null) {
+
+			if ($type == "integer") {
+				return $this->getNativeInteger($limit);
+			}
+			else if ($type == "uint") {
+				return $this->getNativeInteger($limit ?? 10)." unsigned";
+			}
+			else if ($type == "text") {
+				return $this->getNativeText($limit);
+			}
+			else if ($type == "binary") {
+				return $this->getNativeBinary($limit);
+			}
+			else {
+				return parent::getNativeType($type, $limit, $precision, $scale);
 			}
 
 		}

@@ -2,7 +2,7 @@
 
 namespace Agility\Data\Associations;
 
-use Agility\Data\Cache\AssociationStore;
+use Agility\Data\Metadata\AssociationStore;
 use Agility\Data\Helpers\NameHelper;
 use ArrayUtils\Arrays;
 use Exception;
@@ -11,7 +11,7 @@ use StringHelpers\Str;
 
 	trait Builder {
 
-		protected static $_collectionsCache;
+		protected static $_associationsCache;
 
 		protected static function belongsTo($associationName, $options = []) {
 
@@ -48,13 +48,11 @@ use StringHelpers\Str;
 		}
 
 		protected static function belongsToAssociations() {
+			return static::associationsCache()->belongsToAssociations;
+		}
 
-			if (!static::$_collectionsCache->belongsToAssociations->exists(static::class)) {
-				static::$_collectionsCache->belongsToAssociations[static::class] = new Arrays;
-			}
-
-			return static::$_collectionsCache->belongsToAssociations[static::class];
-
+		static function associationsCache() {
+			return static::initializeAssociations();
 		}
 
 		protected static function hasMany($associationName, $options = [], $callback = null) {
@@ -117,13 +115,7 @@ use StringHelpers\Str;
 		}
 
 		protected static function hasManyAssociations() {
-
-			if (!static::$_collectionsCache->hasManyAssociations->exists(static::class)) {
-				static::$_collectionsCache->hasManyAssociations[static::class] = new Arrays;
-			}
-
-			return static::$_collectionsCache->hasManyAssociations[static::class];
-
+			return static::associationsCache()->hasManyAssociations;
 		}
 
 		protected static function hasAndBelongsToMany() {
@@ -131,13 +123,7 @@ use StringHelpers\Str;
 		}
 
 		protected static function hasAndBelongsToManyAssociations() {
-
-			if (!static::$_collectionsCache->hasAndBelongsToManyAssociations->exists(static::class)) {
-				static::$_collectionsCache->hasAndBelongsToManyAssociations[static::class] = new Arrays;
-			}
-
-			return static::$_collectionsCache->hasAndBelongsToManyAssociations[static::class];
-
+			return static::associationsCache()->hasAndBelongsToManyAssociations;
 		}
 
 		protected static function hasOne() {
@@ -145,20 +131,20 @@ use StringHelpers\Str;
 		}
 
 		protected static function hasOneAssociations() {
-
-			if (!static::$_collectionsCache->hasOneAssociations->exists(static::class)) {
-				static::$_collectionsCache->hasOneAssociations[static::class] = new Arrays;
-			}
-
-			return static::$_collectionsCache->hasOneAssociations[static::class];
-
+			return static::associationsCache()->hasOneAssociations;
 		}
 
 		protected static function initializeAssociations() {
 
-			if (empty(static::$_collectionsCache)) {
-				static::$_collectionsCache = AssociationStore::instance();
+			if (empty(static::$_associationsCache)) {
+				static::$_associationsCache = new Arrays;
 			}
+
+			if (!static::$_associationsCache->exists(static::class)) {
+				static::$_associationsCache[static::class] = new AssociationStore;
+			}
+
+			return static::$_associationsCache[static::class];
 
 		}
 

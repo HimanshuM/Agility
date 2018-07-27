@@ -2,12 +2,12 @@
 
 namespace Agility\Data\Types;
 
-	class Str extends Base {
+	class Text extends Base {
 
 		function __construct($size = null) {
 
 			parent::__construct();
-			$this->limit = $size ?? 255;
+			$this->limit = $size;
 
 		}
 
@@ -20,7 +20,7 @@ namespace Agility\Data\Types;
 		}
 
 		function __toString() {
-			return "string";
+			return "text";
 		}
 
 	}

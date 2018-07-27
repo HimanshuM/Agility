@@ -13,7 +13,10 @@ use StringHelpers\Str;
 
 		function __construct() {
 
-			if (!defined("APP_PATH") || !Configuration::initialized()) {
+			// if (!defined("APP_PATH") || !Configuration::initialized()) {
+			// 	$this->initialize();
+			// }
+			if (Configuration::environment() == "production") {
 				$this->initialize();
 			}
 
@@ -44,24 +47,22 @@ use StringHelpers\Str;
 
 		protected function initialize() {
 
-			$environment = getenv("AGILITY_ENV") ?: "development";
-			$host = getenv("AGILITY_HOST") ?: "localhost";
-			$port = getenv("AGILITY_PORT") ?: "8000";
+			// $environment = getenv("AGILITY_ENV") ?: "development";
+			// $host = getenv("AGILITY_HOST") ?: "localhost";
+			// $port = getenv("AGILITY_PORT") ?: "8000";
 
-			Configuration::initialize($environment, $host, $port);
+			// Configuration::initialize($environment, $host, $port);
 
 			Configuration::uploadDir("storage");
 
 		}
 
-		protected function initializeComponents() {
+		function initializeComponents() {
 
 			$this->initializeLogging();
 			$this->initializeDatabase();
 			$this->initializeRouting();
 			$this->setupApplicationAutoloader();
-
-			$this->prepareApplication();
 
 		}
 
@@ -82,19 +83,7 @@ use StringHelpers\Str;
 		}
 
 		protected function prepareApplication() {
-
-			$models = Configuration::documentRoot()->children("app/models");
-			foreach ($models as $model) {
-
-				if ($model->isFile) {
-
-					$modelClass = "App\\Models\\".Str::camelCase($model->name);
-					$modelClass::staticInitialize();
-
-				}
-
-			}
-
+			AppLoader::loadModels();
 		}
 
 		protected function printBootupSequence() {
@@ -111,6 +100,7 @@ use StringHelpers\Str;
 
 			$this->executePreInitializers();
 			$this->initializeComponents();
+			$this->prepareApplication();
 
 			$this->initializeSwoole();
 			if (empty($this->_swoole)) {

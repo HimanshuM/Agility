@@ -14,7 +14,7 @@ namespace Agility\Data\Types;
 
 				$values = explode(",", $values);
 				foreach ($values as $value) {
-					$this->values[] = trim($value);
+					$this->values[] = "\"".trim($value)."\"";
 				}
 
 			}
@@ -26,15 +26,28 @@ namespace Agility\Data\Types;
 		}
 
 		function options() {
-			return "[".implode(", ", $this->values)."]";
+			return ["values" => "[".implode(", ", $this->values)."]"];
 		}
 
 		function serialize($value) {
 			return $value;
 		}
 
+		function setParameters($params = []) {
+
+			parent::setParameters($params);
+			if (!empty($params["values"])) {
+				$this->values = $params["values"];
+			}
+
+		}
+
 		function __toString() {
 			return "enum";
+		}
+
+		function valuesString() {
+			return implode(", ", array_map(function($e) { return "'".$e."'"; }, $this->values));
 		}
 
 	}

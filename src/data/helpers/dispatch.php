@@ -25,7 +25,7 @@ use Agility\Exceptions\PropertyNotFoundException;
 			else if (static::hasManyAssociations()->exists($name)) {
 				return static::hasManyAssociations()[$name]->prepare($this);
 			}
-			else if (static::hasAndManyBelongsToAssociations()->exists($name)) {
+			else if (static::hasAndBelongsToManyAssociations()->exists($name)) {
 
 			}
 			else if (static::hasOneAssociations()->exists($name)) {

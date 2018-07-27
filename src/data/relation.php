@@ -17,11 +17,12 @@ use ArrayUtils\Helpers\IndexFetcher;
 use StringHelpers\Inflect;
 use StringHelpers\Str;
 
-	class Relation {
+	class Relation implements Iterator, Serializable, JsonSerializable {
 
 		use Accessor;
 		use IndexFetcher;
 		use Sanitizer;
+		use Relations\CollectionCache;
 
 		const Select = 1;
 		const Insert = 2;
@@ -35,6 +36,8 @@ use StringHelpers\Str;
 
 		protected $_transformToModel = true;
 		protected $_includes = false;
+
+		protected $_fetchMode = 0;
 
 		const Ones = [
 			"first",
@@ -170,12 +173,22 @@ use StringHelpers\Str;
 
 		protected function _executeQuery() {
 
-			$collections = $this->_connection->execute($this->_statement);
-			if (is_a($this->_statment, SelectStatment::class)) {
-				return $this->_tryBuildingObjects($collections);
+			if (empty($this->cache)) {
+
+				$collections = $this->_connection->execute($this->_statement, [], $this->_fetchMode);
+				if ($this->_fetchMode != 0) {
+					return $collections;
+				}
+
+				if (is_a($this->_statement, SelectStatement::class)) {
+					return $this->_tryBuildingObjects($collections);
+				}
+
+				$this->cache = $collections;
+
 			}
 
-			return $collections;
+			return $this->cache;
 
 		}
 
@@ -249,6 +262,7 @@ use StringHelpers\Str;
 
 		function notExists($statement) {
 
+			$this->_statement->exists($statement, false);
 			return $this;
 
 		}
@@ -275,6 +289,13 @@ use StringHelpers\Str;
 			}
 
 			return $this;
+
+		}
+
+		function pluck() {
+
+			$this->_fetchMode = Connection\Base::FetchIndexedColumns;
+			return call_user_func_array([$this, "select"], func_get_args());
 
 		}
 

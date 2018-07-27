@@ -4,6 +4,7 @@ namespace Agility;
 
 use Swoole;
 use FileSystem\FileSystem;
+use StringHelpers\Str;
 
 	class AppLoader {
 
@@ -29,6 +30,41 @@ use FileSystem\FileSystem;
 			}
 
 			return false;
+
+		}
+
+		protected static function iterateThroughModels($children) {
+
+			foreach ($children as $model) {
+
+				if ($model->isFile) {
+					AppLoader::tryLoadingModel($model);
+				}
+				else {
+					AppLoader::iterateThroughModels($model->children);
+				}
+
+			}
+
+		}
+
+		static function loadModels() {
+
+			$models = Configuration::documentRoot()->children("app/models");
+			AppLoader::iterateThroughModels($models);
+
+		}
+
+		protected static function tryLoadingModel($modelFile) {
+
+			$modelClass = "App\\Models\\".Str::camelCase($modelFile->name);
+			if (class_exists($modelClass)) {
+
+				if (method_exists($modelClass, "staticInitialize")) {
+					$modelClass::staticInitialize();
+				}
+
+			}
 
 		}
 

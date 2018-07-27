@@ -6,10 +6,14 @@ use Agility\Data\Connection\SqlConnectionFailedException;
 use Exception;
 use PDO;
 
-	class Base {
+	abstract class Base {
 
 		public $prefix = "";
 		public $suffix = "";
+
+		const FetchIndexedColumns = 4;
+
+		const DDLStatement = 10;
 
 		function __construct($connectionArray) {
 
@@ -32,6 +36,8 @@ use PDO;
 			}
 
 		}
+
+		abstract function getTypeMapper();
 
 	}
 

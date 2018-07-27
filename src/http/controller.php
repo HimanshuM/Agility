@@ -2,7 +2,12 @@
 
 namespace Agility\Http;
 
+use ActionTriggers\Trigger;
+use Closure;
+
 	class Controller {
+
+		use Trigger;
 
 		protected $request;
 		protected $response;
@@ -30,6 +35,14 @@ namespace Agility\Http;
 
 		}
 
+		function html($template, $data) {
+
+		}
+
+		function json($data) {
+			return $this->render(["json" => json_encode($data)]);
+		}
+
 		function render($options = []) {
 
 			if ($this->_invoked) {
@@ -37,7 +50,18 @@ namespace Agility\Http;
 			}
 
 			$this->_invoked = true;
-			$this->response->write($options["html"]);
+			if (isset($options["html"])) {
+
+				$this->response->header("Content-Type", "text/html");
+				$this->response->write($options["html"]);
+
+			}
+			else if (isset($options["json"])) {
+
+				$this->response->header("Content-Type", "application/json");
+				$this->response->write($options["json"]);
+
+			}
 			$this->response->end();
 
 		}

@@ -2,13 +2,13 @@
 
 namespace Agility\Data;
 
-use Iterator;
-use Serializable;
-use JsonSerializable;
-use Agility\Exceptions\PropertyNotFoundException;
-use Agility\Exceptions\SerializationException;
 use ArrayUtils\Arrays;
 use AttributeHelper\Accessor;
+use Iterator;
+use JsonSerializable;
+use Phpm\Exceptions\ClassExceptions\SerializationException;
+use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
+use Serializable;
 use StringHelpers\Str;
 
 	class Collection implements Iterator, Serializable, JsonSerializable {

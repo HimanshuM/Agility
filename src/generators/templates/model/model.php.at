@@ -6,6 +6,11 @@ namespace App\Models<?= $this->namespace; ?>;
 	class <?= $this->model; ?> <?= $this->parentClass(); ?>{
 <?= $this->hasTableName(); ?>
 <?= $this->primaryKeyType(); ?>
+
+		static function initialize() {
+
+		}
+
 	}
 
 <?= $this->phpTagClose(); ?>

@@ -38,7 +38,7 @@ use StringHelpers\Str;
 
 		private function _invalidCommand($stub) {
 
-			echo "Invalid stub '$code'.\n";
+			echo "Invalid stub '$stub'.\n";
 			$this->_invokeHelp("generate/help");
 
 		}

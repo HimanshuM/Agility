@@ -59,7 +59,7 @@ use StringHelpers\Str;
 				}
 				else {
 
-					$this->_appRoot = clone $this->_appPath->cwd;
+					$this->_appRoot = $this->_appPath->parent;
 					$appName = $this->_appRoot->chdir("..")->basename;
 					$this->_appName = Str::camelCase($appName);
 

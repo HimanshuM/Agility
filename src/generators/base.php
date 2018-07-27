@@ -133,7 +133,7 @@ use StringHelpers\Str;
 				$keys[] = $key.(!is_bool($value) ? "=".$value : "");
 			}
 
-			$this->_args = $this->_args->diff($keys);
+			// $this->_args = $this->_args->diff($keys);
 
 		}
 

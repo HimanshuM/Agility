@@ -62,12 +62,17 @@ use AttributeHelper\Accessor;
 
 				if (empty($dataType)) {
 
-					foreach (Base::ValidTypes as $type => $validType) {
+					foreach (Base::ValidTypes as $typeName => $typeRegex) {
 
 						$matches = [];
-						if (preg_match($validType, $property, $matches)) {
+						if (preg_match($typeRegex, $property, $matches)) {
 
-							$dataType = Base::getType($type, isset($matches[1]) ? $matches[1] : null);
+							$args = null;
+							if (isset($matches[1])) {
+								$args = trim($matches[1], "[]");
+							}
+
+							$dataType = Base::getType($typeName, $args);
 							break;
 
 						}
@@ -98,6 +103,21 @@ use AttributeHelper\Accessor;
 
 		}
 
+		static function buildFromOptions($name, $dataType, $options) {
+
+			$nullable = $options["null"] ?? true;
+			$defaultValue = $options["default"] ?? null;
+			$onUpdate = $options["onUpdate"] ?? null;
+			$comment = $options["comment"] ?? "";
+			$indexed = false;
+			if ($dataType."" == "reference") {
+				$indexed = true;
+			}
+
+			return new Attribute($name, $dataType, $nullable, $defaultValue, false, $indexed, false, $onUpdate, $comment);
+
+		}
+
 		function __debugInfo() {
 
 			return [
@@ -114,6 +134,38 @@ use AttributeHelper\Accessor;
 
 		}
 
+		function index($is = true) {
+
+			$this->_indexed = $is;
+			return $this;
+
+		}
+
+		function options() {
+
+			return array_merge([
+				"default" => $this->_defaultValue,
+				"onUpdate" => $this->_onUpdate
+			], $this->_dataType->options());
+
+		}
+
+		function optionString() {
+
+			$optionsString = [];
+			$options = $this->options();
+			foreach ($options as $key => $value) {
+
+				if (!empty($value)) {
+					$optionsString[] = "\"".$key."\" => ".strval($value);
+				}
+
+			}
+
+			return empty($optionsString) ? "" : "[".implode(", ", $optionsString)."]";
+
+		}
+
 		static function parseDataType(AbstractType $typesMapper, $dataType) {
 
 			foreach ($typesMapper::NativeTypes as $type => $typeInfo) {
@@ -124,6 +176,50 @@ use AttributeHelper\Accessor;
 				}
 
 			}
+
+		}
+
+		function toSql($connection) {
+
+			$query = "`".$this->_name."`";
+			$dataType = $this->_dataType->nativeType($connection->getTypeMapper(), $this->_name);
+			$query .= " ".$dataType;
+			if ($this->_dataType == "enum") {
+				$query .= "(".$this->_dataType->valuesString().")";
+			}
+
+			if (!$this->_nullable) {
+				$query .= " NOT NULL";
+			}
+
+			if (!is_null($this->_defaultValue)) {
+				$query .= " DEFAULT ".$connection->quote($this->_defaultValue);
+			}
+
+			if (!is_null($this->_onUpdate)) {
+				$query .= " ON UPDATE ".$this->_onUpdate;
+			}
+
+			if (!empty($this->_comment)) {
+				$query .= " COMMENT ".$this->_comment;
+			}
+
+			if ($this->_autoIncrement === true) {
+				$query .= " AUTO_INCREMENT";
+			}
+
+			return $query;
+
+		}
+
+		function unique($is = true) {
+
+			$this->_unique = $is;
+			if ($is) {
+				$this->_indexed = false;
+			}
+
+			return $this;
 
 		}
 

@@ -3,7 +3,7 @@
 namespace Agility\Data\Generators;
 
 use Agility\Generators\Base;
-use Agility\Data\Abstraction\Attribute;
+use Agility\Data\Schema\Attribute;
 use FileSystem\File;
 use StringHelpers\Inflect;
 use StringHelpers\Str;
@@ -21,6 +21,8 @@ use StringHelpers\Str;
 
 		public $attributes = [];
 		public $attributesWithIndex = [];
+
+		protected $_overwriting = false;
 
 		function __construct($root, $args) {
 
@@ -165,8 +167,9 @@ use StringHelpers\Str;
 					}
 					else {
 
-						$this->echo("\t#B##Blue#overwrite    #N#db/migrate/".$migrationFile->basename);
+						// $this->echo("\t#B##Blue#overwrite    #N#db/migrate/".$migrationFile->basename);
 						$overwrite = $migrationFile;
+						$this->_overwriting = true;
 						break;
 
 					}
@@ -188,7 +191,12 @@ use StringHelpers\Str;
 			$file = File::open($this->_migrationFileName);
 			$file->write($this->_code);
 
-			$this->echo("\t#B##White#create  #N#".$this->_migrationFileName);
+			if (!$this->_overwriting) {
+				$this->echo("\t#B##White#create  #N#".$this->_migrationFileName);
+			}
+			else {
+				$this->echo("\t#B##Blue#overwrite    #N#db/migrate/".$this->_migrationFileName);
+			}
 
 		}
 

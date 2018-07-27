@@ -32,6 +32,10 @@ namespace Agility\Data\Relations;
 			return call_user_func_array([static::initializeRelation(), "orderBy"], func_get_args());
 		}
 
+		static function pluck() {
+			return call_user_func_array([static::initializeRelation(), "pluck"], func_get_args());
+		}
+
 		static function select() {
 			return call_user_func_array([static::initializeRelation(), "select"], func_get_args());
 		}

@@ -9,44 +9,48 @@ use StringHelpers\Str;
 
 	trait Builder {
 
-		private $_attributeObjects;
-		private $_accessibleAttributes = [];
-		private $_protectedAttributes = [];
+		protected static function accessibleAttributes() {
+			return static::metaStore()->accessibleAttributes;
+		}
 
-		protected function attribute($name, $type, $default = null) {
+		protected static function attribute($name, $type, $default = null) {
 
 			$attribute = new Attribute($name, Base::getType($type));
 			if ($default !== null && $default !== false) {
 				$attribute->defaultValue = $default;
 			}
 
-			$this->_attributeObjects[$name] = $attribute;
+			static::attributeObjects()[$name] = $attribute;
 
 		}
 
-		protected function attrAccessible() {
+		protected static function attributeObjects() {
+			return static::metaStore()->attributeObjects;
+		}
+
+		protected static function attrAccessible() {
 
 			foreach (func_get_args() as $attribute) {
 
-				if (in_array($attribute, $this->_protectedAttributes)) {
+				if (in_array($attribute, static::protectedAttributes())) {
 					throw new Exception("'$attribute' has already been marked protected", 1);
 				}
 
-				$this->_accessibleAttributes[] = $attribute;
+				static::accessibleAttributes()[] = $attribute;
 
 			}
 
 		}
 
-		protected function attrProtected() {
+		protected static function attrProtected() {
 
 			foreach (func_get_args() as $attribute) {
 
-				if (in_array($attribute, $this->_accessibleAttributes)) {
+				if (in_array($attribute, static::accessibleAttributes())) {
 					throw new Exception("'$attribute' has already been marked mass accessible", 1);
 				}
 
-				$this->_protectedAttributes[] = $attribute;
+				static::protectedAttributes()[] = $attribute;
 
 			}
 
@@ -78,17 +82,15 @@ use StringHelpers\Str;
 
 			}
 
-			static::$_metaStore->generatedAttributes[static::class][Str::pascalCase($attribute->field)] = new Attribute($attribute->field, $dataType, $nullable, $attribute->default, $autoIncrement, $index, $unique, $onUpdate);
+			static::metaStore()->generatedAttributes[Str::pascalCase($attribute->field)] = new Attribute($attribute->field, $dataType, $nullable, $attribute->default, $autoIncrement, $index, $unique, $onUpdate);
 
 		}
 
 		protected static function generateAttributes() {
 
-			if (static::$_metaStore->generatedAttributes->exists(static::class)) {
+			if (!static::metaStore()->generatedAttributes->empty) {
 				return;
 			}
-
-			static::$_metaStore->generatedAttributes[static::class] = new Arrays;
 
 			$resultSet = static::connection()->execute(static::aquaTable()->describe());
 			foreach ($resultSet as $attribute) {
@@ -98,7 +100,27 @@ use StringHelpers\Str;
 		}
 
 		static function generatedAttributes() {
-			return static::$_metaStore->generatedAttributes[static::class];
+			return static::metaStore()->generatedAttributes;
+		}
+
+		protected static function json() {
+
+			foreach (func_get_args() as $attribute) {
+				static::attribute($attribute, "Json");
+			}
+
+		}
+
+		protected static function protectedAttributes() {
+			return static::metaStore()->protectedAttributes;
+		}
+
+		protected static function serialize() {
+
+			foreach (func_get_args() as $attribute) {
+				static::attribute($attribute, "Serialized");
+			}
+
 		}
 
 	}

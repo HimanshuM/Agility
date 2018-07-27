@@ -2,36 +2,90 @@
 
 namespace Agility\Data\Types;
 
+use AttributeHelper\Accessor;
+use Phpm\Exceptions\MethodExceptions\InsufficientParametersException;
+use StringHelpers\Inflect;
+
 	class Reference extends Base {
+
+		use Accessor;
 
 		protected $polymorphic = false;
 		protected $foreignKey = false;
 
-		function __construct($size) {
+		protected $onUpdate;
+		protected $onDelete;
+
+		function __construct($type) {
 
 			parent::__construct();
-			if ($size == "polymorphic") {
+			if ($type == "polymorphic") {
 				$this->polymorphic = true;
 			}
 			else {
+				$this->foreignKey = Inflect::pluralize($type);
+			}
 
-				$this->foreignKey = $size;
-				$this->fieldSize = "foreignKey";
+			$this->readonly("foreignKey", "polymorphic", "onUpdate", "onDelete");
+
+		}
+
+		function cast($value) {
+			return $value;
+		}
+
+		function nativeType($typeMapper) {
+
+			if ($this->foreignKey) {
+				return $typeMapper->getNativeType("uint");
+			}
+
+			if (func_num_args() == 1) {
+				throw new InsufficientParametersException("Agility\\Data\\Types\\Reference::nativeType", 2, 1);
+			}
+
+			$name = func_get_arg(1);
+			return [$name."_type" => $typeMapper->getNativeType("string"), $name."_id" => $typeMapper->getNativeType("uint")];
+
+		}
+
+		function options() {
+
+			$option = [];
+			if ($this->polymorphic) {
+				$option["polymorphic"] = "true";
+			}
+			else {
+				$option["foreignKey"] = "\"".$this->foreignKey."\"";
+			}
+
+			return $option;
+
+		}
+
+		function serialize($value) {
+			return $value;
+		}
+
+		function setParameters($params = []) {
+
+			parent::setParameters($params);
+
+			if (!empty($params["polymorphic"])) {
+				$this->polymorphic = true;
+			}
+			else if (!empty($params["foreignKey"])) {
+
+				$this->foreignKey = $params["foreignKey"];
+				$this->onUpdate = $params["onUpdate"] ?? 1;
+				$this->onDelete = $params["onDelete"] ?? 1;
 
 			}
 
 		}
 
-		static function getType($fieldSize = null) {
-			return parent::getType("reference", $fieldSize);
-		}
-
-		function options() {
-			return "[\"".$this->fieldSize."\" => ".($this->fieldSize == "polymorphic" ? "true" : "\"".$this->foreignKey."\"")."]";
-		}
-
 		function __toString() {
-			return "references";
+			return "reference";
 		}
 
 	}

@@ -4,25 +4,26 @@ namespace Agility\Data\Types;
 
 	abstract class Base {
 
-		protected $limit;
-		protected $precision;
-		protected $scale;
+		protected $limit = null;
+		protected $precision = null;
+		protected $scale = null;
 
 		protected static $registeredTypes = [];
 
 		const ValidTypes = [
+			"binary" => '/binary(\[\d+\])?/',
 			"boolean" => '/bool/',
-			"integer" => '/int(eger)?(\[\d+\])?/',
+			"date" => '/date/',
+			"datetime" => '/datetime(\[\d+\])/',
+			"double" => '/double(\[\d+(,\s*\d+)?\])?/',
+			"enum" => '/enum(\[[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(,[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)*\])?/',
 			"float" => '/float(\[\d+(,\d+)?\])?/',
-			"double" => '/double(\[\d+(,\d+)?\])?/',
+			"integer" => '/int(eger)?(\[\d+\])?/',
+			"reference" => '/references(\[\w+\])?/',
 			"str" => '/string(\[\d+\])?/',
 			"text" => '/text(\[\d+\])?/',
-			"enum" => '/enum(\[[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(,[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)*\])?/',
-			"datetime" => '/datetime(\[\d+\])/',
-			"date" => '/date/',
 			"timestamp" => '/timestamp(\[\d+\])/',
-			"binary" => '/binary(\[\d+\])?/',
-			"reference" => '/references(\[\w+\])?/',
+			"uint" => '/uint(\[\d+\]?)/'
 		];
 
 		function __construct() {
@@ -33,6 +34,8 @@ namespace Agility\Data\Types;
 		abstract function cast($value);
 
 		static function getType($name, $size = null) {
+
+			$name = $name == "string" ? "str" : $name;
 
 			if (in_array($name, Base::$registeredTypes)) {
 				return new $name($size);
@@ -55,13 +58,17 @@ namespace Agility\Data\Types;
 
 		}
 
+		function nativeType($typeMapper) {
+			return $typeMapper->getNativeType($this->__toString(), $this->limit, $this->precision, $this->scale);
+		}
+
 		function options() {
 
-			if ($this->fieldSize != static::DefaultFieldSize) {
-				return "[\"size\" => ".$this->fieldSize."]";
-			}
-
-			return false;
+			return [
+				"limit" => $this->limit,
+				"precision" => $this->precision,
+				"scale" => $this->scale
+			];
 
 		}
 
@@ -75,6 +82,20 @@ namespace Agility\Data\Types;
 
 		// Used for casting objects to database types
 		abstract function serialize($value);
+
+		function setParameters($params = []) {
+
+			if (!empty($params["limit"])) {
+				$this->limit = $params["limit"];
+			}
+			if (!empty($params["precision"])) {
+				$this->precision = $params["precision"];
+			}
+			if (!empty($params["scale"])) {
+				$this->scale = $params["scale"];
+			}
+
+		}
 
 		abstract function __toString();
 

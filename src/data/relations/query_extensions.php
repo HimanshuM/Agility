@@ -8,8 +8,8 @@ use Agility\Data\Relation;
 
 		protected static function initializeScope() {
 
-			if (!static::$_metaStore->scope->exists(static::class)) {
-				static::$_metaStore->scope[static::class] = new Scope(Relation::class, static::class, static::class);
+			if (!static::metaStore()->scope) {
+				static::metaStore()->scope = new Scope(Relation::class, static::class, static::class);
 			}
 
 		}
@@ -22,7 +22,7 @@ use Agility\Data\Relation;
 		}
 
 		protected static function getScope() {
-			return static::$_metaStore->scope[static::class];
+			return static::metaStore()->scope;
 		}
 
 		protected static function hasScope($name) {
@@ -43,9 +43,9 @@ use Agility\Data\Relation;
 
 		protected static function tryScope($name, $args = []) {
 
-			if (static::$_metaStore->scope[static::class]->has($name)) {
+			if (static::metaStore()->scope->has($name)) {
 
-				static::$_metaStore->scope[static::class]->restart();
+				static::metaStore()->scope->restart();
 				return static::getScope()->$name($args);
 
 			}

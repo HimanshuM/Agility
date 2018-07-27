@@ -25,7 +25,6 @@ use StringHelpers\Str;
 		function __construct($root, $args) {
 
 			parent::__construct($root, $args, "model");
-
 			$this->_parseOptions(["migration", "parent", "force-name", "primary-key-type"]);
 
 		}
@@ -44,9 +43,7 @@ use StringHelpers\Str;
 		protected function _generate() {
 
 			parent::_generate();
-
 			$this->_writeModel();
-
 			$this->_generateMigration();
 
 		}
@@ -64,7 +61,6 @@ use StringHelpers\Str;
 				}
 
 				$tableName = trim(strtolower($tableName), "_");
-
 				MigrationGenerator::start($this->_root, $this->_args->prepend("create_".$tableName));
 
 			}
