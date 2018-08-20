@@ -64,7 +64,7 @@ use StringHelpers\Str;
 			}
 
 			$this->getAppName();
-			NewGenerator::start($this->_appRoot, $args->prepend($this->_appName));
+			NewGenerator::start($this->_appPath, $this->_appRoot, $args->prepend($this->_appName));
 
 
 		}

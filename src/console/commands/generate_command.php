@@ -5,7 +5,9 @@ namespace Agility\Console\Commands;
 use Agility\Data\Generators\MigrationGenerator;
 use Agility\Data\Generators\ModelGenerator;
 use Agility\Generators\ControllerGenerator;
+use Agility\Generators\MailerGenerator;
 use Agility\Generators\ScaffoldGenerator;
+use Agility\Initializers\ApplicationInitializer;
 use ArrayUtils\Arrays;
 use FileSystem\Dir;
 use FileSystem\File;
@@ -13,6 +15,8 @@ use StringHelpers\Inflect;
 use StringHelpers\Str;
 
 	class GenerateCommand extends Base {
+
+		use ApplicationInitializer;
 
 		private $_quite = false;
 		private $_overwrite = false;
@@ -50,12 +54,16 @@ use StringHelpers\Str;
 
 		}
 
+		private function _mailer($args) {
+			MailerGenerator::start($this->_appPath, $this->_appRoot, $args);
+		}
+
 		private function _migration($args) {
-			MigrationGenerator::start($this->_appRoot, $args);
+			MigrationGenerator::start($this->_appPath, $this->_appRoot, $args);
 		}
 
 		private function _model($args) {
-			ModelGenerator::start($this->_appRoot, $args);
+			ModelGenerator::start($this->_appPath, $this->_appRoot, $args);
 		}
 
 		function perform($args) {
@@ -76,6 +84,8 @@ use StringHelpers\Str;
 			if (in_array($stub, ["controller", "migration", "model", "scaffold", "task"])) {
 
 				if ($this->requireArgs($args, $stub)) {
+
+					$this->instantiateApplication([]);
 
 					$stub = "_".$stub;
 					$this->$stub($args);
@@ -103,10 +113,7 @@ use StringHelpers\Str;
 		}
 
 		private function _scaffold($args) {
-
-			ControllerGenerator::start($this->_appRoot, $args, true);
-			ModelGenerator::start($this->_appRoot, $args);
-
+			ScaffoldGenerator::start($this->_appPath, $this->_appRoot, $args);
 		}
 
 		private function _task($args) {

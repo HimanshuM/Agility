@@ -14,6 +14,9 @@ use Aqua\UpdateStatement;
 use Aqua\Visitors\Sanitizer;
 use ArrayUtils\Arrays;
 use ArrayUtils\Helpers\IndexFetcher;
+use Iterator;
+use JsonSerializable;
+use Serializable;
 use StringHelpers\Inflect;
 use StringHelpers\Str;
 
@@ -177,11 +180,11 @@ use StringHelpers\Str;
 
 				$collections = $this->_connection->execute($this->_statement, [], $this->_fetchMode);
 				if ($this->_fetchMode != 0) {
-					return $collections;
+					return $this->cache = $collections;
 				}
 
 				if (is_a($this->_statement, SelectStatement::class)) {
-					return $this->_tryBuildingObjects($collections);
+					return $this->cache = $this->_tryBuildingObjects($collections);
 				}
 
 				$this->cache = $collections;
@@ -295,6 +298,8 @@ use StringHelpers\Str;
 		function pluck() {
 
 			$this->_fetchMode = Connection\Base::FetchIndexedColumns;
+			$this->_statement->unproject();
+
 			return call_user_func_array([$this, "select"], func_get_args());
 
 		}

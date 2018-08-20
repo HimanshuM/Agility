@@ -88,8 +88,16 @@ use JsonSerializable;
 			return $this->format("c");
 		}
 
+		function tomorrow() {
+			return (clone $this)->add1Day();
+		}
+
 		function __toString() {
 			return $this->toIso8601();
+		}
+
+		function yesterday() {
+			return (clone $this)->sub1Day();
 		}
 
 	}

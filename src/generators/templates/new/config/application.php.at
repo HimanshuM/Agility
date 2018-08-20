@@ -6,8 +6,10 @@ use Agility;
 
 	class Application extends Agility\Application {
 
-		protected function configure() {
-
+		function __construct() {
+<?= $this->apiOnly ? "\n" : ""; ?>
+			parent::__construct();
+<?= $this->apiOnly ? "			Agility\Configuration::apiOnly(true);\n\n" : ""; ?>
 		}
 
 	}

@@ -79,10 +79,14 @@ use ArrayUtils\Arrays;
 
 		static function staticInitialize() {
 
+			if (!empty(static::$abstract)) {
+				return;
+			}
+
 			static::metaStore();
 
-			static::tableName();
 			static::connection();
+			static::tableName();
 			static::aquaTable();
 
 			static::generateAttributes();
@@ -103,9 +107,12 @@ use ArrayUtils\Arrays;
 
 			if (!static::metaStore()->tableName) {
 
-				$tableName = NameHelper::tablize(static::class);
+				$tableName;
 				if (!empty(static::$tableName)) {
 					$tableName = static::$tableName;
+				}
+				else {
+					$tableName = (static::metaStore()->connection->tablePrefix).NameHelper::tablize(static::class).(static::metaStore()->connection->tableSuffix);
 				}
 
 				static::metaStore()->tableName = $tableName;

@@ -19,7 +19,7 @@ use StringHelpers\Str;
 
 					$appPath = $cwd->cwd."/bin/agility";
 					// Swoole\Event::defer(function() use ($appPath, $argv) {
-						passthru("exec $appPath ".$argv->implode(" "));
+					passthru("exec $appPath ".$argv->implode(" "));
 					// });
 					die;
 

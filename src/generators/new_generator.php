@@ -2,15 +2,21 @@
 
 namespace Agility\Generators;
 
+use FileSystem\File;
+use StringHelpers\Str;
+
 	class NewGenerator extends Base {
 
-		protected $_appName;
+		public $apiOnly;
+		public $appPublicName;
+		protected $composer = true;
 
-		protected function __construct($root, $args) {
+		protected function __construct($appPath, $root, $args) {
 
-			parent::__construct($root, $args, "new");
+			parent::__construct($appPath, $root, $args, "new");
 			$this->_appName = $this->_args->shift;
-			$this->_parseOptions();
+			$this->appPublicName = Str::humanize($this->_appName);
+			$this->_parseOptions(["api-only", "composer"]);
 
 		}
 
@@ -21,19 +27,65 @@ namespace Agility\Generators;
 		protected function _generate() {
 
 			parent::_generate();
+
+			$this->_installComposer();
+			$this->_initGit();
+
 			$this->echo("All done! Happy coding :)\n");
+
+		}
+
+		protected function _initGit() {
+
+			$this->echo("Initializing a new git repository...\n");
+			passthru("cd ".$this->_appRoot." && git init");
+
+		}
+
+		protected function _installComposer() {
+
+			if (!$this->composer) {
+				return;
+			}
+
+			$this->echo("Installing composer locally...\n");
+
+			$downloadPath = $this->_appRoot->touch("tmp/composer-setup.php");
+			$installPath = $this->_appRoot."/bin";
+
+			$signature = trim(file_get_contents("https://composer.github.io/installer.sig"));
+			$this->echo("Downloading composer setup...\n");
+			copy("https://getcomposer.org/installer", $downloadPath->path);
+
+			if (hash_file("SHA384", $downloadPath->path) != $signature) {
+
+				$this->echo("#Red##B#Failed to download composer:#N# could not verify setup signature.\n");
+				$this->echo("Please install manually from https://getcomposer.org\n");
+
+			}
+			else {
+
+				passthru("php ".$downloadPath." --quite --install-dir=".$installPath." --filename=composer");
+				$this->echo("Composer installed succesfully!\n");
+
+			}
+
+			$downloadPath->delete();
 
 		}
 
 		protected function _publish($template, $name, $data) {
 
 			$name = $this->_sanitizeFileExtension($name);
-			$this->echo("\t#B#create  #N#$name\n");
 
 			$templateName = "";
 			if ($template->isFile()) {
 
-				$file = $this->_root->touch($name);
+				if ($this->apiOnly && strpos($template->path, "views")) {
+					return;
+				}
+
+				$file = $this->_appRoot->touch($name);
 				$file->write($data);
 
 				if ($name == "bin/agility") {
@@ -42,8 +94,16 @@ namespace Agility\Generators;
 
 			}
 			else {
-				$this->_root->mkdir($name);
+
+				if ($this->apiOnly && strpos($template->cwd, "layout")) {
+					return;
+				}
+
+				$this->_appRoot->mkdir($name);
+
 			}
+
+			$this->echo("\t#B#create  #N#$name\n");
 
 		}
 

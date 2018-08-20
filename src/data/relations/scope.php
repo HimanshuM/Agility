@@ -7,8 +7,9 @@ use Agility\Exceptions\InvalidArgumentTypeException;
 use ArrayUtils\Arrays;
 use AttributeHelper\Accessor;
 use Closure;
+use JsonSerializable;
 
-	class Scope {
+	class Scope implements JsonSerializable {
 
 		use Accessor;
 
@@ -47,6 +48,10 @@ use Closure;
 			return $this->execute($name, $args);
 		}
 
+		function __debugInfo() {
+			return $this->_externalObject->all->array;
+		}
+
 		protected function execute($name, $args = []) {
 
 			$this->getExternalObject();
@@ -63,7 +68,7 @@ use Closure;
 					$args = [$this];
 				}
 				else {
-					$callback = $callback->bindTo($this);
+					$callback = $callback->bindTo($this, $this);
 				}
 				call_user_func_array($callback, $args);
 
@@ -97,6 +102,10 @@ use Closure;
 
 		function has($name) {
 			return isset($this->_scopes[$name]);
+		}
+
+		function jsonSerialize() {
+			return $this->_externalObject->all->array;
 		}
 
 		function restart() {

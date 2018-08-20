@@ -117,6 +117,14 @@ use StringHelpers\Inflect;
 
 		}
 
+		protected function prepareConnection() {
+
+			if (empty($this->connection)) {
+				$this->connection = Pool::getConnection($this->connectionName);
+			}
+
+		}
+
 		private function processIndices() {
 
 			foreach ($this->indices as $table => $indices) {
@@ -151,7 +159,7 @@ use StringHelpers\Inflect;
 
 			$this->change();
 
-			$this->connection = Pool::getConnection($this->connectionName);
+			$this->prepareConnection();
 
 			$this->processTable();
 			$this->processNewColumns();

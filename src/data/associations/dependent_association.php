@@ -70,7 +70,14 @@ use StringHelpers\Str;
 				return new Relation($this->_associatedClass);
 			}
 			else {
-				return $this->_through->prepare($fromTable);
+
+				$farRelation = $this->_through->prepare($fromTable);
+				if (is_a($farRelation, "Agility\\Data\\Relations\\Scope")) {
+					$farRelation = $farRelation->getExternalObject();
+				}
+
+				return $farRelation;
+
 			}
 
 		}
@@ -140,7 +147,7 @@ use StringHelpers\Str;
 			}
 
 			if (!empty($this->_callback)) {
-				($this->_callback->bindTo($relation))();
+				($this->_callback->bindTo($relation, $relation))();
 			}
 
 			if ($isScope) {

@@ -2,10 +2,10 @@
 
 namespace Agility\Console\Commands;
 
-use ActionTriggers\Trigger;
 use Agility\Console\Helpers\EchoHelper;
 use AttributeHelper\Accessor;
 use FileSystem;
+use MethodTriggers\Trigger;
 use StringHelpers\Str;
 
 	abstract class Base {

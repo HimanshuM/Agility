@@ -19,11 +19,7 @@ namespace Agility\Data\Relations;
 		}
 
 		protected function initializeCache() {
-
-			if (empty($this->cache)) {
-				$this->_executeQuery();
-			}
-
+			$this->_executeQuery();
 		}
 
 		function jsonSerialize() {
@@ -52,6 +48,10 @@ namespace Agility\Data\Relations;
 
 			$this->initializeCache();
 			return serialize($this->cache);
+
+		}
+
+		function unserialize($serialized) {
 
 		}
 

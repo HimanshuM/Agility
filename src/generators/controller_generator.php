@@ -2,6 +2,7 @@
 
 namespace Agility\Generators;
 
+use Agility\Configuration;
 use ArrayUtils\Arrays;
 use FileSystem\Dir;
 use FileSystem\File;
@@ -23,9 +24,16 @@ use StringHelpers\Str;
 		protected $views = true;
 		protected $skipRoutes = false;
 
-		protected function __construct($root, $args, $scaffold) {
+		public $apiOnly = false;
 
-			parent::__construct($root, $args, "controller");
+		protected function __construct($appPath, $root, $args, $scaffold) {
+
+			$template = "controller";
+			if ($this->apiOnly = Configuration::apiOnly()) {
+				$template = "api_controller";
+			}
+
+			parent::__construct($appPath, $root, $args, $template);
 			$this->scaffold = $scaffold;
 			$this->_parseOptions();
 
@@ -166,13 +174,13 @@ use StringHelpers\Str;
 
 		}
 
-		static function start($root, $args, $scaffold = false) {
-			(new static($root, $args, $scaffold))->_generate();
+		static function start($appPath, $root, $args, $scaffold = false) {
+			(new static($appPath, $root, $args, $scaffold))->_generate();
 		}
 
 		private function _writeController() {
 
-			$filePath = $this->_root."/app/controllers/".$this->filePath."_controller.php";
+			$filePath = $this->_appRoot."/app/controllers/".$this->filePath."_controller.php";
 			if ($this->overwrite || !file_exists($filePath)) {
 
 				$controllerFile = File::open($filePath);
@@ -193,7 +201,7 @@ use StringHelpers\Str;
 				return;
 			}
 
-			$routesFile = File::open($this->_root."/config/routes.php");
+			$routesFile = File::open($this->_appRoot."/config/routes.php");
 			$routesContent = $routesFile->lines();
 			$routesCode = $this->_getValidRoutesCode($routesContent);
 
@@ -231,15 +239,16 @@ use StringHelpers\Str;
 
 		private function _writeViews() {
 
-			if (!$this->views) {
+			if (!$this->views || $this->apiOnly) {
 				return;
 			}
 
-			$this->_viewPath = Dir::path($this->_root."/app/views/");
+			$this->_viewPath = Dir::path($this->_appRoot."/app/views/");
 			$this->_viewPath->mkdir($this->filePath);
 			$this->_viewPath->chdir($this->filePath);
 
-			$methods = array_merge($this->_methods, ["index", "show"]);
+			$defaultRoutes = ["index", "show"];
+			$methods = array_merge($this->_methods, $defaultRoutes);
 
 			foreach ($methods as $method) {
 				$this->_writeView($method);

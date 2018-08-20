@@ -1,0 +1,9 @@
+{
+	"config": {
+		"preferred-install": {
+			"bin-dir": "bin",
+			"htaccess-protect": false,
+			"*": "dist"
+		}
+	}
+}

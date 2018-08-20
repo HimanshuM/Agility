@@ -13,7 +13,12 @@ use ArrayUtils\Arrays;
 
 		private $_dbConfiguration;
 
+		private $_dbLog;
+		private $_errorLog;
+		private $_infoLog;
+
 		private $_settings;
+		private $_listeners;
 
 		private static $_instance = null;
 
@@ -24,17 +29,12 @@ use ArrayUtils\Arrays;
 			$this->_host = $host;
 			$this->_port = $port;
 
-			$this->_settings = new Arrays;
+			$this->_dbLog = "log/db.log";
+			$this->_errorLog = "log/error.log";
+			$this->_infoLog = "log/info.log";
 
-		}
-
-		static function all() {
-
-			return static::initialized() ? new Arrays([
-				"environment" => static::$_instance->_environment,
-				"host" => static::$_instance->_host,
-				"port" => static::$_instance->_port
-			]) : new Arrays;
+			$this->_settings = new Arrays(["apiOnly" => false]);
+			$this->_listeners = new Arrays;
 
 		}
 
@@ -50,11 +50,21 @@ use ArrayUtils\Arrays;
 
 			}
 
-			if (static::$_instance->_settings->exists($setting)) {
-				return static::$_instance->_settings[$setting];
+			if (!empty($args)) {
+
+				$new = static::$_instance->_set($setting, $args[0]);
+				// $new would be true if the setting has been newly added;
+				// in which case, if the creator adds a listener,
+				// the listener has the right to modify any new value set to the setting.
+				// Hence, the listener, if added any by the creator, must return
+				// at least the same value if a change is not desired.
+				if (isset($args[1])) {
+					static::$_instance->_addListener($setting, $args[1], $new);
+				}
+
 			}
-			else if (!empty($args)) {
-				static::$_instance->_settings[$setting] = $args[0];
+			else if (static::$_instance->_settings->exists($setting)) {
+				return static::$_instance->_settings[$setting];
 			}
 			else {
 				return null;
@@ -62,12 +72,55 @@ use ArrayUtils\Arrays;
 
 		}
 
+		private function _addListener($setting, $listener, $creator = false) {
+
+			if (!isset($this->_listeners[$setting])) {
+				$this->_listeners[$setting] = new Arrays;
+			}
+
+			$this->_listeners[$setting][] = [$listener, $creator];
+
+		}
+
+		static function all() {
+
+			return static::initialized() ? new Arrays([
+				"environment" => static::$_instance->_environment,
+				"host" => static::$_instance->_host,
+				"port" => static::$_instance->_port
+			]) : new Arrays;
+
+		}
+
+		private function _broadcast($setting, $value) {
+
+			if ($this->_listeners->exists($setting)) {
+
+				foreach ($this->_listeners[$setting] as $listener) {
+
+					$value = call_user_func_array($listener, [$setting, $value]);
+
+					// If listener is the creator, we allow the listener to modify the new value
+					if ($listener[1]) {
+						$this->_settings[$setting] = $value;
+					}
+
+				}
+
+			}
+
+		}
+
 		static function documentRoot() {
-			return static::initialized() ? static::$_instance->_documentRoot : null;
+			return static::initialized() ? clone static::$_instance->_documentRoot : null;
 		}
 
 		static function environment() {
 			return static::initialized() ? static::$_instance->_environment : null;
+		}
+
+		static function host() {
+			return static::initialized() ? static::$_instance->_host : null;
 		}
 
 		static function initialize($documentRoot = "public", $environment = "development", $host = "localhost", $port = "8000") {
@@ -84,12 +137,22 @@ use ArrayUtils\Arrays;
 			return !is_null(static::$_instance);
 		}
 
-		static function host() {
-			return static::initialized() ? static::$_instance->_host : null;
-		}
-
 		static function port() {
 			return static::initialized() ? static::$_instance->_port : null;
+		}
+
+		private function _set($setting, $value) {
+
+			$new = false;
+			if (!$this->_settings->exists($setting)) {
+				$new = true;
+			}
+
+			$this->_settings[$setting] = $value;
+			$this->_broadcast($setting, $value);
+
+			return $new;
+
 		}
 
 	}

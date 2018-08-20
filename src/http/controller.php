@@ -2,12 +2,14 @@
 
 namespace Agility\Http;
 
-use ActionTriggers\Trigger;
+use Agility\Data\Model;
+use Agility\Routing\Routes;
+use Agility\Templating\Render;
 use Closure;
 
-	class Controller {
+	class Controller extends ApiController {
 
-		use Trigger;
+		use Render;
 
 		protected $request;
 		protected $response;
@@ -16,54 +18,66 @@ use Closure;
 
 		function __construct() {
 
+			parent::__construct();
+			$this->initializeTemplating();
+
 		}
 
-		function execute($method, $request, $response) {
+		protected function conclude($response) {
 
-			$this->request = $request;
-			$this->response = $response;
+			if (!$this->_responded) {
 
-			$return = null;
-			if (is_a($method, Closure::class)) {
-				$return = ($method->bindTo($this))();
+				if (empty($this->_content)) {
+
+					$response = $this->render($response);
+					$this->respond(["html" => $response]);
+
+				}
+				else {
+					$this->respond(["html" => $this->_content]);
+				}
+
+			}
+
+		}
+
+		function redirectTo($location, $status = 302) {
+
+			if (is_string($location)) {
+				$this->redirectToLocation($location, $status);
+			}
+			else if (is_a($location, Model::class)) {
+
+				$location = Routes::findRouteForModel($location);
+				$this->redirectToLocation($location, $status);
+
 			}
 			else {
-				$return = $this->$method();
+				throw new Exceptions\InvalidHttpLocationException($location, true);
 			}
-
-			$this->render(["html" => $return]);
 
 		}
 
-		function html($template, $data) {
+		function redirectToLocation($location, $status = 302) {
+
+			if (!is_string($location)) {
+				throw new Exceptions\InvalidHttpLocationException($location);
+			}
+
+			$location = "/".trim($location, "/ ");
+
+			$this->_responded = true;
+
+			if (!is_int($status)) {
+				throw new Exceptions\InvalidHttpStatusException($status);
+			}
+
+			$this->response->redirect($location, $status);
 
 		}
 
-		function json($data) {
-			return $this->render(["json" => json_encode($data)]);
-		}
-
-		function render($options = []) {
-
-			if ($this->_invoked) {
-				return;
-			}
-
-			$this->_invoked = true;
-			if (isset($options["html"])) {
-
-				$this->response->header("Content-Type", "text/html");
-				$this->response->write($options["html"]);
-
-			}
-			else if (isset($options["json"])) {
-
-				$this->response->header("Content-Type", "application/json");
-				$this->response->write($options["json"]);
-
-			}
-			$this->response->end();
-
+		function render() {
+			return "Himanshu!!";
 		}
 
 	}

@@ -6,6 +6,12 @@ namespace Agility\Commands;
 
 		function perform($args) {
 
+			if (!$this->requireApp()) {
+				return;
+			}
+
+			$this->initializeApplication($args);
+
 		}
 
 	}

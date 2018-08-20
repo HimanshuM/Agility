@@ -3,13 +3,20 @@
 namespace Agility;
 
 use Agility\Data\Connection\Pool;
+use Agility\Routing\Dispatch;
+use Agility\Routing\Routes;
+use Agility\Server\StaticContent;
 use ArrayUtils\Arrays;
+use AttributeHelper\Accessor;
 use Exception;
 use StringHelpers\Str;
 
-	class Application {
+	abstract class Application {
+
+		use Accessor;
 
 		protected $_swoole = null;
+		protected static $_instance;
 
 		function __construct() {
 
@@ -20,9 +27,8 @@ use StringHelpers\Str;
 				$this->initialize();
 			}
 
-		}
-
-		protected function configure() {
+			$this->readonly(["swoole", "_swoole"]);
+			static::$_instance = $this;
 
 		}
 
@@ -41,8 +47,43 @@ use StringHelpers\Str;
 
 		}
 
+		protected function determine404Response() {
+
+			if (Configuration::apiOnly()) {
+				Configuration::document404(false);
+			}
+			else {
+				StaticContent::initialize();
+			}
+
+		}
+
 		protected function executePreInitializers() {
 			Initializers\PreInitializer::execute();
+		}
+
+		protected function executePostInitializers() {
+			Initializers\PostInitializer::execute();
+		}
+
+		function firstStageInitialization() {
+
+			try {
+				$this->executePreInitializers();
+			}
+			catch (Exception $e) {
+				die($e->getMessage()."\n");
+			}
+
+			$this->determine404Response();
+
+			try {
+				$this->initializeComponents();
+			}
+			catch (Exception $e) {
+				die($e."\n");
+			}
+
 		}
 
 		protected function initialize() {
@@ -57,7 +98,7 @@ use StringHelpers\Str;
 
 		}
 
-		function initializeComponents() {
+		protected function initializeComponents() {
 
 			$this->initializeLogging();
 			$this->initializeDatabase();
@@ -72,14 +113,30 @@ use StringHelpers\Str;
 
 		protected function initializeLogging() {
 
+			if (empty(Configuration::logPath())) {
+
+				if (!Configuration::documentRoot()->has("log") && !Configuration::documentRoot()->mkdir("log")) {
+					die("Failed to create log directory. Make sure the document root is writable.\n");
+				}
+
+				Configuration::logPath(Configuration::documentRoot()->chdir("log"));
+
+			}
+
+			Logger\Log::initialize();
+
 		}
 
 		protected function initializeRouting() {
-
+			Routes::initialize();
 		}
 
 		protected function initializeSwoole() {
 			$this->_swoole = new \swoole_http_server(Configuration::host(), Configuration::port());
+		}
+
+		static function instance() {
+			return static::$_instance;
 		}
 
 		protected function prepareApplication() {
@@ -96,11 +153,15 @@ use StringHelpers\Str;
 
 		function run() {
 
+			$this->firstStageInitialization();
 			$this->printBootupSequence();
 
-			$this->executePreInitializers();
-			$this->initializeComponents();
-			$this->prepareApplication();
+			try {
+				$this->prepareApplication();
+			}
+			catch (Exception $e) {
+				die($e."\n");
+			}
 
 			$this->initializeSwoole();
 			if (empty($this->_swoole)) {
@@ -110,13 +171,18 @@ use StringHelpers\Str;
 
 			}
 
-			$this->configureSwoole();
-			$this->setupListner();
-
-			$this->configure();
+			$this->secondStageInitialization();
 
 			echo "Listening on http://".Configuration::host().":".Configuration::port()."\n";
 			$this->_swoole->start();
+
+		}
+
+		function secondStageInitialization() {
+
+			$this->configureSwoole();
+			$this->setupListner();
+			$this->executePostInitializers();
 
 		}
 
@@ -142,22 +208,7 @@ use StringHelpers\Str;
 		}
 
 		function listner($request, $response) {
-
-			echo "Started ".$request->server["request_method"]." \"".$request->server["path_info"]."\" for ".$request->server["remote_addr"]." at ".date("Y-m-d H:i:s")."\n";
-
-			gc_disable();
-
-			$controller = new \App\Controllers\ApplicationController;
-			try {
-				$controller->execute("index", $request, $response);
-			}
-			catch (Exception $e) {
-				error_log($e->getMessage());
-			}
-
-			$controller = null;
-			gc_collect_cycles();
-
+			(new Dispatch($request, $response))->serve();
 		}
 
 	}

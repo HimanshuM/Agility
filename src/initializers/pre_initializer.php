@@ -3,24 +3,21 @@
 namespace Agility\Initializers;
 
 use Agility\Configuration;
-use StringHelpers\Str;
 
-	class PreInitializer {
-
-		static $initializers = [
-			"data_initializer",
-		];
+	final class PreInitializer {
 
 		static function execute() {
 
-			foreach (PreInitializer::$initializers as $initializer) {
+			$configDir = Configuration::documentRoot()->chdir("config");
+			if (($envFile = $configDir->has("environment.php"))) {
+				require_once $envFile;
+			}
 
-				if (Configuration::documentRoot()->has("/config/initializers/$initializer.php")) {
+			if ($configDir->has("environments")) {
 
-					require_once(Configuration::documentRoot()->has("/config/initializers/$initializer.php"));
-					$className = Str::camelCase($initializer);
-					(new $className)->configure();
-
+				$envDir = $configDir->chdir("environments");
+				if (($envFile = $envDir->has(Configuration::environment().".php"))) {
+					require_once $envFile;
 				}
 
 			}

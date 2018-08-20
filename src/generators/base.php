@@ -15,7 +15,9 @@ use StringHelpers\Str;
 		protected $_args;
 		protected $_options;
 
-		protected $_root;
+		protected $_appPath;
+		protected $_appRoot;
+		protected $_appName;
 		protected $_templateRoot;
 
 		protected $_templating;
@@ -23,10 +25,12 @@ use StringHelpers\Str;
 		protected $overwrite = false;
 		protected $quite = false;
 
-		function __construct($root, $args, $template) {
+		function __construct($appPath, $root, $args, $template) {
 
 			$this->_args = $args;
-			$this->_root = $root;
+			$this->_appPath = $appPath;
+			$this->_appRoot = $root;
+			$this->_getAppName();
 
 			$this->_setTemplateRoot($template);
 			$this->_initializeTemplatingEngine();
@@ -37,13 +41,35 @@ use StringHelpers\Str;
 			$this->_iterateThrough($this->_templateRoot);
 		}
 
+		protected function _getAppName() {
+
+			if (!empty($this->_appPath)) {
+
+				if ($this->_appPath->isDir()) {
+
+					$this->_appRoot = $this->_appPath;
+					$this->_appName = Str::camelCase($this->_appPath->basename);
+
+				}
+				else {
+
+					$this->_appRoot = $this->_appPath->parent;
+					$appName = $this->_appRoot->chdir("..")->basename;
+					$this->_appName = Str::camelCase($appName);
+
+				}
+
+			}
+
+		}
+
 		protected function _initializeTemplatingEngine() {
 			$this->_templating = new Template($this->_templateRoot, $this);
 		}
 
 		private function _iterateThrough($dir) {
 
-			$children = $dir->children();
+			$children = $dir->children(false, true);
 			foreach ($children as $child) {
 
 				$data = "";
@@ -89,7 +115,7 @@ use StringHelpers\Str;
 				foreach ($args as $arg) {
 
 					$attr = Str::pascalCase($arg);
-					if ($this->_options->exists($arg)) {
+					if ($this->_options->exists("--".$arg)) {
 						$this->$attr = true;
 					}
 					if ($this->_options->exists("--no-".$arg)) {
@@ -122,8 +148,8 @@ use StringHelpers\Str;
 			$this->_templateRoot = FileSystem::open(__DIR__."/templates/".$template);
 		}
 
-		static function start($root, $args) {
-			(new static($root, $args))->_generate();
+		static function start($appPath, $root, $args) {
+			(new static($appPath, $root, $args, static::class))->_generate();
 		}
 
 		protected function _unsetOptionsFromArgs() {

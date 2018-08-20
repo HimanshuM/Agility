@@ -2,11 +2,11 @@
 
 namespace Agility\Templating;
 
+use ArrayUtils\Arrays;
 use Closure;
 use Exception;
-
-use ArrayUtils\Arrays;
 use FileSystem\FileSystem;
+use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 
 	class Template {
 
@@ -44,17 +44,44 @@ use FileSystem\FileSystem;
 			$this->_exposedObject->$attr = $value;
 		}
 
-		function load($template) {
+		private function getTemplateName($template) {
 
-			ob_start();
-			require_once($this->getTemplateName($template));
-			$content = ob_get_clean();
+			if (($templateName = $this->templateExists($template)) === false) {
+				return $template;
+			}
 
-			return $content;
+			return $templateName;
 
 		}
 
-		private function getTemplateName($template) {
+		function load($template, $data = []) {
+
+			if (!is_array($data)) {
+				throw new InvalidArgumentTypeException("Agility\\Templating\\Template::load()", 1, "Array", gettype($data));
+			}
+
+			return $this->render($this->getTemplateName($template), $data, function($template, $data) {
+
+				ob_start();
+
+				if (!empty($data)) {
+					extract($data);
+				}
+
+				require $template;
+				$content = ob_get_clean();
+
+				return $content;
+
+			});
+
+		}
+
+		protected function render($template, $data, $callback) {
+			return ($callback->bindTo($this->_exposedObject, $this->_exposedObject))($template, $data);
+		}
+
+		function templateExists($template) {
 
 			if (($templatePath = $this->_basePath->has($template)) !== false) {
 				return $templatePath;
@@ -69,7 +96,7 @@ use FileSystem\FileSystem;
 				return $templatePath;
 			}
 
-			return $template;
+			return false;
 
 		}
 

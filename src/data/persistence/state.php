@@ -7,17 +7,22 @@ namespace Agility\Data\Persistence;
 		private $_fresh;
 		private $_dirty = false;
 		private $_destroyed = false;
+		private $_persisted = false;
 
-		function fresh() {
-			return $this->_fresh;
+		function destroyed() {
+			return $this->_destroyed;
 		}
 
 		function dirty() {
 			return $this->_dirty;
 		}
 
-		function destroyed() {
-			return $this->_destroyed;
+		function fresh() {
+			return $this->_fresh;
+		}
+
+		function persisted() {
+			return $this->_persisted;
 		}
 
 	}

@@ -7,11 +7,13 @@ use Agility\Data\Connection\Base;
 use Agility\Data\Connection\InvalidFetchTypeException;
 use Aqua;
 use Aqua\Visitors\MysqlVisitor;
+use AttributeHelper\Accessor;
 use Exception;
-use Ds\Queue;
 use PDO;
 
 	class MysqlConnector extends Base {
+
+		use Accessor;
 
 		protected $_instanceType;
 
@@ -24,6 +26,7 @@ use PDO;
 		protected $_password;
 		protected $_extraConfig;
 		protected $_tablePrefix;
+		protected $_tableSuffix;
 
 		function __construct($connectionArray, $instanceType) {
 
@@ -32,14 +35,37 @@ use PDO;
 			$this->_instanceType = $instanceType;
 			$this->_configure($connectionArray);
 
+			$this->attemptConnection();
+
+			$this->readonly(
+				["tablePrefix", "_tablePrefix"],
+				["tableSuffix", "_tableSuffix"]
+			);
+
 			return true;
+
+		}
+
+		protected function attemptConnection() {
+
+			try {
+				$c = $this->_connect();
+			}
+			catch (Exception $e) {
+				throw $e;
+			}
+
+			$c = null;
 
 		}
 
 		protected function _configure($config) {
 
 			$this->_host = $this->_setHost($config);
-			$this->_port = $this->_setPort($config);
+			$port = $this->_setPort($config);
+			if ($port != "DEFAULT") {
+				$this->_port = $port;
+			}
 			$this->_unixSocket = $this->_setUnixSocket($config);
 
 			$this->_charSet = $this->_setCharacterSet($config);
@@ -47,6 +73,9 @@ use PDO;
 			$this->_dbName = $this->_setDBName($config);
 			$this->_username = $this->_setUsername($config);
 			$this->_password = $this->_setPassword($config);
+
+			$this->_tablePrefix = $this->_setTablePrefix($config);
+			$this->_tableSuffix = $this->_setTableSuffix($config);
 
 			$this->_extraConfig = $this->_setExtraConfig($config);
 
@@ -147,7 +176,10 @@ use PDO;
 					$connection->exec($sql);
 				}
 				catch (Exception $e) {
-					die($e->getMessage());
+
+					echo $e->getMessage()."\n";
+					die;
+
 				}
 
 				return;
@@ -183,7 +215,7 @@ use PDO;
 					$stmt->execute();
 				}
 				catch(Exception $e) {
-					die($e->getMessage());
+					throw MysqlException::parseException($e);
 				}
 
 			}
@@ -228,7 +260,7 @@ use PDO;
 				$stmt->execute($paramsSet);
 			}
 			catch(Exception $e) {
-				die($e->getMessage());
+				throw MysqlException::parseException($e);
 			}
 
 		}
@@ -248,6 +280,10 @@ use PDO;
 
 			return $config[$key];
 
+		}
+
+		function getExceptionClass() {
+			return MysqlException::class;
 		}
 
 		function getTypeMapper() {
@@ -313,38 +349,23 @@ use PDO;
 
 		}
 
-		private function _setHost($connectionConfig) {
-
-			if (!isset($connectionConfig["host"])) {
-				return "127.0.0.1";
-			}
-
-			return $connectionConfig["host"];
-
-		}
-
-		private function _setPort($config) {
-			return $config["port"] ?? null;
-		}
-
-		private function _setUnixSocket($config) {
-			return $config["unix_socket"] ?? null;
+		private function _setCharacterSet($config) {
+			return $config["charset"] ?? null;
 		}
 
 		private function _setDBName($config) {
 			return $this->_getConfiguration($config, "database", "Database name not specified.");
 		}
 
-		private function _setUsername($config) {
-			return $this->_getConfiguration($config, "username", "Username not specified.");
-		}
+		// If both hostname and Unix socket are specified, precedence will be given to the Unix socket
+		private function _setDsn($db, $host = null, $port = null, $unixSocket = null, $charSet = null) {
 
-		private function _setPassword($config) {
-			return $this->_getConfiguration($config, "password", "Password not specified. Using empty password", false);
-		}
+			if (empty($unixSocket) && empty($host)) {
+				throw new MysqlConnectionException("Cannot connect to Mysql database, neither host nor unix socket is specified.");
+			}
 
-		private function _setCharacterSet($config) {
-			return $config["charset"] ?? null;
+			return "mysql:dbname=".$db.(!empty($unixSocket) ? ";unix_socket=".$unixSocket : "").(empty($unixSocket) && !empty($host) ? ";host=".$host.(!empty($port) ? ";port=".$port : "") : "").(!empty($charSet) ? ";charset=".$charSet : "");
+
 		}
 
 		private function _setExtraConfig($config) {
@@ -367,15 +388,38 @@ use PDO;
 
 		}
 
-		// If both hostname and Unix socket are specified, precedence will be given to the Unix socket
-		private function _setDsn($db, $host = null, $port = null, $unixSocket = null, $charSet = null) {
+		private function _setHost($connectionConfig) {
 
-			if (empty($unixSocket) && empty($host)) {
-				throw new MysqlConnectionException("Cannot connect to Mysql database, neither host nor unix socket is specified.");
+			if (!isset($connectionConfig["host"])) {
+				return "127.0.0.1";
 			}
 
-			return "mysql:dbname=".$db.(!empty($unixSocket) ? ";unix_socket=".$unixSocket : "").(empty($unixSocket) && !empty($host) ? ";host=".$host.(!empty($port) ? ";port=".$port : "") : "").(!empty($charSet) ? ";charset=".$charSet : "");
+			return $connectionConfig["host"];
 
+		}
+
+		private function _setPassword($config) {
+			return $this->_getConfiguration($config, "password", "Password not specified. Using empty password", false);
+		}
+
+		private function _setPort($config) {
+			return $config["port"] ?? null;
+		}
+
+		private function _setTablePrefix($config) {
+			return $config["prefix"] ?? "";
+		}
+
+		private function _setTableSuffix($config) {
+			return $config["suffix"] ?? "";
+		}
+
+		private function _setUnixSocket($config) {
+			return $config["unix_socket"] ?? null;
+		}
+
+		private function _setUsername($config) {
+			return $this->_getConfiguration($config, "username", "Username not specified.");
 		}
 
 		function toSql($query, $params = []) {

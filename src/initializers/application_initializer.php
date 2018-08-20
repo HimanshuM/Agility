@@ -29,6 +29,20 @@ use Agility\Configuration;
 
 		}
 
+		private function initializeApplication($args) {
+
+			$app = $this->instantiateApplication($args);
+			$app->firstStageInitialization();
+
+		}
+
+		private function instantiateApplication($args) {
+
+			$className = $this->loadApplication($args);
+			return new $className;
+
+		}
+
 		private function loadApplication($args) {
 
 			$this->parseOptions($args);

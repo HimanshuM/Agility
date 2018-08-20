@@ -24,9 +24,9 @@ use StringHelpers\Str;
 
 		protected $_overwriting = false;
 
-		function __construct($root, $args) {
+		function __construct($appPath, $root, $args) {
 
-			parent::__construct($root, $args, "migration");
+			parent::__construct($appPath, $root, $args, "migration");
 
 			$this->_parseOptions(["timestamps", "primary-key-type"]);
 
@@ -58,10 +58,6 @@ use StringHelpers\Str;
 
 			return $attributes;
 
-		}
-
-		protected function _setMigrationFileName() {
-			$this->_migrationFileName = "db/migrate/".date("YmdHis_").$this->_migrationName.".php";
 		}
 
 		protected function _parseOptions($arr = []) {
@@ -145,11 +141,15 @@ use StringHelpers\Str;
 			$this->_code = $data;
 		}
 
+		protected function _setMigrationFileName() {
+			$this->_migrationFileName = "db/migrate/".date("YmdHis_").$this->_migrationName.".php";
+		}
+
 		protected function _validateMigration() {
 
-			$this->_root->mkdir("db/migrate");
-			$this->_root->chdir("db/migrate");
-			$migrations = $this->_root->children;
+			$this->_appRoot->mkdir("db/migrate");
+			$this->_appRoot->chdir("db/migrate");
+			$migrations = $this->_appRoot->children;
 			$overwrite = false;
 			foreach ($migrations as $migrationFile) {
 

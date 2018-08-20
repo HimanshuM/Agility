@@ -11,6 +11,10 @@ use Agility\Data\Helpers\NameHelper;
 	 */
 	trait FinderMethods {
 
+		static function all() {
+			return (static::initializeRelation())->all;
+		}
+
 		static function find($id) {
 
 			$relation = static::initializeRelation();

@@ -3,6 +3,7 @@
 namespace Agility\Console\Commands;
 
 use Agility\Data\Connection\Pool;
+use Agility\Data\Migration\Runner;
 use Agility\Initializers\ApplicationInitializer;
 use ArrayUtils\Arrays;
 use StringHelpers\Str;
@@ -10,6 +11,15 @@ use StringHelpers\Str;
 	class DbCommand extends Base {
 
 		use ApplicationInitializer;
+
+		protected $migrationRunner;
+
+		function __construct() {
+
+			parent::__construct();
+			$this->migrationRunner = new Runner($this->appPath->parent->chdir("../db/migrate"));
+
+		}
 
 		function drop($args) {
 
@@ -21,15 +31,6 @@ use StringHelpers\Str;
 
 		}
 
-		protected function initializeApplication($args) {
-
-			$className = $this->loadApplication($args);
-
-			$app = new $className;
-			$app->initializeComponents();
-
-		}
-
 		function migrate($args) {
 
 			if (!$this->requireApp()) {
@@ -37,20 +38,7 @@ use StringHelpers\Str;
 			}
 
 			$this->initializeApplication($args);
-
-			Pool::initialize();
-
-			$cwd = $this->appPath->parent->chdir("../db/migrate");
-			$file = $cwd->children->last;
-			require_once $file->path;
-			$fileName = Arrays::split("_", $file->name);
-			$className = "\\Db\\Migrate\\".Str::camelCase($fileName->skip(1)->join);
-			if (class_exists($className)) {
-
-				$migration = new $className;
-				$migration->processMigration();
-
-			}
+			$this->migrationRunner->executePendingMigrations();
 
 		}
 
@@ -60,7 +48,7 @@ use StringHelpers\Str;
 				return;
 			}
 
-			$this->initializeApplication($args);
+			$this->initializeApplication($this->_appPath, $this->_appName, $args);
 
 			$this->drop($args);
 			$this->migrate($args);

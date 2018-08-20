@@ -26,13 +26,16 @@ use PDO;
 
 		}
 
+		abstract function getExceptionClass();
+
 		protected function getPdoConnection($dsn, $username, $password, $config = []) {
 
 			try {
 				return new PDO($dsn, $username, $password, $config);
 			}
 			catch (Exception $e) {
-				throw new SqlConnectionFailedException($e->getMessage());
+				throw $this->getExceptionClass()::parseException($e);
+				// throw new SqlConnectionFailedException($e->getMessage());
 			}
 
 		}
