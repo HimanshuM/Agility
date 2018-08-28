@@ -23,9 +23,7 @@ use AttributeHelper\Accessor;
 
 		}
 
-		function validatesWith($validator, $args) {
-
-			list($attributes, $options) = $this->compileArgs($args);
+		function addValidation($attribute, $validator, $options) {
 
 			$on = strtolower($options["on"] ?? "save");
 			if ($on == "create") {
@@ -40,8 +38,11 @@ use AttributeHelper\Accessor;
 
 			$validationType = "validationsOn".$on;
 
-			foreach ($attributes as $attribute) {
+			if (Base::isAvailable($validator)) {
 				$this->$validationType[] = new $validator($attributes, $options);
+			}
+			else {
+				$this->$validationType[] = new Base($attributes, $options, $validator);
 			}
 
 		}
@@ -53,6 +54,12 @@ use AttributeHelper\Accessor;
 			foreach ($args as $arg) {
 
 				if (is_array($arg)) {
+
+					$arg = new Arrays($arg);
+					$options = $arg;
+
+				}
+				else if (is_a($arg, Arrays::class)) {
 					$options = $arg;
 				}
 				else {
@@ -62,6 +69,27 @@ use AttributeHelper\Accessor;
 			}
 
 			return [$attributes, $options];
+
+		}
+
+		function runOnCreateValidations($object) {
+			return $this->runValidationsOn("create", $object);
+		}
+
+		function runOnSaveValidations($object) {
+			return $this->runValidationsOn("save", $object);
+		}
+
+		function runOnUpdateValidations($object) {
+			return $this->runValidationsOn("update", $object);
+		}
+
+		function runValidationsOn($on, $object) {
+
+			$validationType = "validationsOn".$on;
+			foreach ($this->$validationType as $validation) {
+				$validation->validate($object);
+			}
 
 		}
 

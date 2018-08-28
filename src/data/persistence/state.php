@@ -25,6 +25,10 @@ namespace Agility\Data\Persistence;
 			return $this->_persisted;
 		}
 
+		function valid() {
+			return $this->errors->empty;
+		}
+
 	}
 
 ?>

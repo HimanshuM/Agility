@@ -44,8 +44,21 @@ use ArrayUtils\Arrays;
 			$this->_runCallbacks("beforeValidationOnCreate");
 
 			// Do validations
+			static::_getValidations()->runOnCreateValidations($this);
+			$this->_performValidationsOnSave();
 
 			$this->_runCallbacks("afterValidationOnCreate");
+
+		}
+
+		protected function _performValidationsOnSave() {
+
+			$this->_runCallbacks("beforeValidationOnSave");
+
+			// Do validations
+			static::_getValidations()->runOnSaveValidations($this);
+
+			$this->_runCallbacks("afterValidationOnSave");
 
 		}
 
@@ -54,22 +67,18 @@ use ArrayUtils\Arrays;
 			$this->_runCallbacks("beforeValidationOnUpdate");
 
 			// Do validations
+			static::_getValidations()->runOnUpdateValidations($this);
+			$this->_performValidationsOnSave();
 
 			$this->_runCallbacks("afterValidationOnUpdate");
 
 		}
 
 		static function validates($column, $with, $options = []) {
-
+			static::_getValidations()->addValidation($column, $with, $options);
 		}
 
 		static function validatesWith($name, $args) {
-
-			if (empty($args)) {
-				return;
-			}
-
-			static::_getValidations($name, $args);
 
 		}
 

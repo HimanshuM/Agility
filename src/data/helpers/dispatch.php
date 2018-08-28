@@ -60,7 +60,11 @@ use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 				return static::tryScope($name, $args);
 			}
 			else if (($validator = Validations\Base::isAvailable($name)) !== false) {
-				return static::validatesWith($validator, $args);
+
+				foreach ($args as $attr) {
+					static::validate($arg, $validator);
+				}
+
 			}
 
 		}
