@@ -16,6 +16,7 @@ use StringHelpers\Str;
 		public $filePath;
 		protected $_methods = [/*"index", "show", "update", "delete"*/];
 		public $namespace = "";
+		public $parentClass;
 		protected $_viewPath;
 
 		public $scaffold = false;
@@ -37,6 +38,10 @@ use StringHelpers\Str;
 			$this->scaffold = $scaffold;
 			$this->_parseOptions();
 
+		}
+
+		protected function _appHasApplicationControllerClass() {
+			return $this->_appRoot->has("app/controllers/application_controller.php");
 		}
 
 		private function _classify($controller) {
@@ -145,10 +150,23 @@ use StringHelpers\Str;
 
 		}
 
+		protected function _identifyParent() {
+
+			if ($this->_appHasApplicationControllerClass()) {
+				$this->parentClass = "ApplicationController";
+			}
+			else {
+				$this->parentClass = "Http\\".($this->apiOnly ? "ApiController" : "Controller");
+			}
+
+		}
+
 		protected function _parseOptions($args = []) {
 
 			parent::_parseOptions(["views", "skip-routes"]);
 			$controllerName = $this->_getFilePathAndControllerClassName($this->_args->shift);
+
+			$this->_identifyParent();
 
 			$this->_getMethods($args);
 
@@ -176,6 +194,19 @@ use StringHelpers\Str;
 
 		static function start($appPath, $root, $args, $scaffold = false) {
 			(new static($appPath, $root, $args, $scaffold))->_generate();
+		}
+
+		function useNamespace() {
+
+			if ($this->parentClass == "ApplicationController" && !empty($this->namespace)) {
+				return "use App\\Controllers\\ApplicationController\n";
+			}
+			else if ($this->parentClass != "ApplicationController") {
+				return "use Agility\\Http\n";
+			}
+
+			return "";
+
 		}
 
 		private function _writeController() {

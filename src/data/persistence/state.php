@@ -6,11 +6,11 @@ namespace Agility\Data\Persistence;
 
 		private $_fresh;
 		private $_dirty = false;
-		private $_destroyed = false;
+		private $_deleted = false;
 		private $_persisted = false;
 
-		function destroyed() {
-			return $this->_destroyed;
+		function deleted() {
+			return $this->_deleted;
 		}
 
 		function dirty() {

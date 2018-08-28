@@ -5,6 +5,8 @@ namespace Agility\Data\Connection\Mysql;
 use Agility\Configuration;
 use Agility\Data\Connection\Base;
 use Agility\Data\Connection\InvalidFetchTypeException;
+use Agility\Logger\Log;
+use Agility\Logger\Psr\LogLevel;
 use Aqua;
 use Aqua\Visitors\MysqlVisitor;
 use AttributeHelper\Accessor;
@@ -314,7 +316,7 @@ use PDO;
 				return $sql;
 			}
 
-			echo $sql."\n";
+			Log::log(LogLevel::DB, $sql);
 
 		}
 

@@ -3,7 +3,7 @@
 namespace Agility\Data\Helpers;
 
 use Agility\Data\Validations;
-use Agility\Exceptions\PropertyNotFoundException;
+use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 
 	trait Dispatch {
 
@@ -62,6 +62,13 @@ use Agility\Exceptions\PropertyNotFoundException;
 			else if (($validator = Validations\Base::isAvailable($name)) !== false) {
 				return static::validatesWith($validator, $args);
 			}
+
+		}
+
+		function valueOfPrimaryKey() {
+
+			$primaryKey = static::$primaryKey;
+			return $this->$primaryKey;
 
 		}
 

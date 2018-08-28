@@ -13,6 +13,19 @@ namespace Agility\Console\Helpers;
 
 		}
 
+		protected function die($str, $formatted = false) {
+
+			$this->quite = false;
+
+			if (!$formatted) {
+				$str = "#B##Red#".$str."#N#";
+			}
+
+			$this->echo($str);
+			die;
+
+		}
+
 	}
 
 ?>

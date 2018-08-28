@@ -2,6 +2,7 @@
 
 namespace Agility;
 
+use Agility\Console\Helpers\EchoHelper;
 use Agility\Data\Connection\Pool;
 use Agility\Routing\Dispatch;
 use Agility\Routing\Routes;
@@ -14,9 +15,11 @@ use StringHelpers\Str;
 	abstract class Application {
 
 		use Accessor;
+		use EchoHelper;
 
 		protected $_swoole = null;
 		protected static $_instance;
+		protected $quite;
 
 		function __construct() {
 
@@ -36,8 +39,17 @@ use StringHelpers\Str;
 
 			$swooleConfig = [
 				"document_root" => Configuration::documentRoot()->cwd."/public",
-				"enable_static_handler" => true
+				"enable_static_handler" => true,
+				"buffer_output_size" => 32 * 1024 * 1024/* Set output buffer size to 32 MB */
 			];
+
+			if (Configuration::environment() == "production") {
+
+				$swooleConfig["daemonize"] = 2;
+				$swooleConfig["log_file"] = Configuration::documentRoot()."/log/swoole.log";
+				$swooleConfig["log_level"] = 1;
+
+			}
 
 			if (!empty(Configuration::uploadDir())) {
 				$swooleConfig["upload_tmp_dir"] = Configuration::uploadDir();
@@ -72,7 +84,7 @@ use StringHelpers\Str;
 				$this->executePreInitializers();
 			}
 			catch (Exception $e) {
-				die($e->getMessage()."\n");
+				$this->die($e->getMessage());
 			}
 
 			$this->determine404Response();
@@ -81,7 +93,7 @@ use StringHelpers\Str;
 				$this->initializeComponents();
 			}
 			catch (Exception $e) {
-				die($e."\n");
+				$this->die($e);
 			}
 
 		}
@@ -100,10 +112,12 @@ use StringHelpers\Str;
 
 		protected function initializeComponents() {
 
+			$this->setupApplicationAutoloader();
+			$this->setupComposerAutoloader();
 			$this->initializeLogging();
 			$this->initializeDatabase();
 			$this->initializeRouting();
-			$this->setupApplicationAutoloader();
+			$this->initializeMailer();
 
 		}
 
@@ -112,19 +126,11 @@ use StringHelpers\Str;
 		}
 
 		protected function initializeLogging() {
-
-			if (empty(Configuration::logPath())) {
-
-				if (!Configuration::documentRoot()->has("log") && !Configuration::documentRoot()->mkdir("log")) {
-					die("Failed to create log directory. Make sure the document root is writable.\n");
-				}
-
-				Configuration::logPath(Configuration::documentRoot()->chdir("log"));
-
-			}
-
 			Logger\Log::initialize();
+		}
 
+		protected function initializeMailer() {
+			Mailer\Base::initialize();
 		}
 
 		protected function initializeRouting() {
@@ -145,9 +151,9 @@ use StringHelpers\Str;
 
 		protected function printBootupSequence() {
 
-			echo "Agility application starting in ".Configuration::environment()." environment\n";
-			echo "Use Ctrl+C to stop the server\n";
-			echo "Booting Swoole HTTP server\n";
+			$this->echo("Agility application starting in ".Configuration::environment()." environment");
+			$this->echo("Use Ctrl+C to stop the server");
+			$this->echo("Booting Swoole HTTP server");
 
 		}
 
@@ -160,20 +166,17 @@ use StringHelpers\Str;
 				$this->prepareApplication();
 			}
 			catch (Exception $e) {
-				die($e."\n");
+				$this->die($e);
 			}
 
 			$this->initializeSwoole();
 			if (empty($this->_swoole)) {
-
-				echo "Failed to initialize Swoole HTTP server. Something went wrong...";
-				return;
-
+				$this->die("Failed to initialize Swoole HTTP server. Something went wrong...");
 			}
 
 			$this->secondStageInitialization();
 
-			echo "Listening on http://".Configuration::host().":".Configuration::port()."\n";
+			$this->echo("Listening on http://".Configuration::host().":".Configuration::port());
 			$this->_swoole->start();
 
 		}
@@ -200,6 +203,14 @@ use StringHelpers\Str;
 				}
 
 			});
+
+		}
+
+		protected function setupComposerAutoloader() {
+
+			if (($composerAutoLoader = Configuration::documentRoot()->has("vendor/autoload.php")) !== false) {
+				require_once $composerAutoLoader;
+			}
 
 		}
 

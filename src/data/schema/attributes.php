@@ -4,6 +4,7 @@ namespace Agility\Data\Schema;
 
 use Agility\Data\Collection;
 use Agility\Exceptions;
+use ArrayUtils\Arrays;
 use InvalidArgumentException;
 
 	trait Attributes {
@@ -20,15 +21,39 @@ use InvalidArgumentException;
 				return $this->attributes->toArray;
 			}
 
-			$collection = $this->attributes->toArray;
 			$return = [];
+
+			// OLD LOGIC
+			// FLAW: If a random attribute was added to the object which does not exist in the table,
+			// save() would still try to write it to the table, which would fail
+			/*$collection = $this->attributes->toArray;
 			foreach ($collection as $name => $value) {
 
 				if (isset(static::attributeObjects()[$name])) {
 					$value = static::attributeObjects()[$name]->dataType->serialize($value);
 				}
-				else {
+				else if (static::generatedAttributes()->exists($name)) {
 					$value = static::generatedAttributes()[$name]->dataType->serialize($value);
+				}
+				else {
+					// We do not return a key which does not exist in the table
+				}
+
+				$return[$name] = $value;
+
+			}*/
+
+			// NEW LOGIC
+			// Works through generatedAttributes()
+			$collection = static::generatedAttributes();
+			foreach ($collection as $name => $attribute) {
+
+				$value = $this->attributes->$name;
+				if (isset(static::attributeObjects()[$name])) {
+					$value = static::attributeObjects()[$name]->dataType->serialize($value);
+				}
+				else {
+					$value = $attribute->dataType->serialize($value);
 				}
 
 				$return[$name] = $value;
@@ -44,7 +69,7 @@ use InvalidArgumentException;
 			if (is_a($collection, Collection::class)) {
 				$collection = $collection->toArray;
 			}
-			else if (!is_array($collection)) {
+			else if (!is_array($collection) && !is_a($collection, Arrays::class)) {
 				throw new InvalidArgumentException("Array or an object of type Agility\\Data\\Collection is expected", 1);
 			}
 
@@ -64,8 +89,11 @@ use InvalidArgumentException;
 				if (isset(static::attributeObjects()[$name])) {
 					$value = static::attributeObjects()[$name]->dataType->unserialize($value);
 				}
-				else {
+				else if (static::generatedAttributes()->exists($name)) {
 					$value = static::generatedAttributes()[$name]->dataType->unserialize($value);
+				}
+				else {
+					throw new AttributeDoesNotExistException($name, static::class);
 				}
 
 				$this->attributes->$name = $value;
@@ -80,9 +108,11 @@ use InvalidArgumentException;
 
 		private function _getAttribute($name) {
 
-			if (!$this->_hasAttribute($name)) {
-				return null;
-			}
+			// We do not need the below check, because, if an attribute was added which does not exist in the table,
+			// we still need to return that attribute
+			// if (!$this->_hasAttribute($name)) {
+			// 	return null;
+			// }
 
 			return $this->attributes->$name;
 

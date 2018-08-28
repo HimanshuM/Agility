@@ -11,9 +11,9 @@ use Agility\Configuration;
 
 			$options = ArgumentsHelper::parseOptions($args);
 
-			$environment = getenv("AGILITY_ENV") ?: $options["e"] ?? $options["environment"] ?? "development";
-			$host = $options["h"] ?? $options["host"] ?? "localhost";
-			$port = $options["p"] ?? $options["port"] ?? "8000";
+			$environment = getenv("AGILITY_ENV") ?: $options["-e"] ?? $options["--environment"] ?? "development";
+			$host = $options["-h"] ?? $options["--host"] ?? "localhost";
+			$port = $options["-p"] ?? $options["--port"] ?? "8000";
 
 			$this->_environment = $environment;
 

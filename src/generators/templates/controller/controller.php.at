@@ -2,12 +2,12 @@
 
 namespace App\Controllers<?= $this->namespace; ?>;
 
-use Agility\Http;
+<?= $this->useNamespace(); ?>
 <?php if ($this->scaffold) { ?>
 use App\Models\<?= $this->scaffold; ?>;
 <?php } ?>
 
-	class <?= $this->controller; ?>Controller extends Http\Controller {
+	class <?= $this->controller; ?>Controller extends <?= $this->parentClass ?> {
 
 <?php if ($this->scaffold) { ?>
 		protected $<?= $this->scaffoldObject; ?>;

@@ -49,7 +49,7 @@ use Agility\Data\Relation;
 
 		}
 
-		private function delete() {
+		function delete() {
 
 			$this->_runCallbacks("beforeDelete");
 
@@ -57,6 +57,8 @@ use Agility\Data\Relation;
 			if ($relation->delete([static::$primaryKey => $this->_getAttribute(static::$primaryKey)])->execute == 0) {
 				return false;
 			}
+
+			$this->_deleted = true;
 
 			$this->_runCallbacks("afterDelete");
 			return true;
@@ -71,7 +73,7 @@ use Agility\Data\Relation;
 			if (count($args) > 0) {
 
 				if (is_array($args[0])) {
-					$obj->fillAttributes($args);
+					$obj->fillAttributes($args[0]);
 				}
 				else if (is_callable($args[0])) {
 					$args[0]($obj);
@@ -102,6 +104,19 @@ use Agility\Data\Relation;
 
 			$this->_runCallbacks("afterUpdate");
 			return true;
+
+		}
+
+		function update($collection = []) {
+
+			if (!empty($collection)) {
+
+				$this->fillAttributes($collection);
+				return $this->save();
+
+			}
+
+			return false;
 
 		}
 

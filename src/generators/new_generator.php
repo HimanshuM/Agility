@@ -28,7 +28,19 @@ use StringHelpers\Str;
 
 			parent::_generate();
 
-			$this->_installComposer();
+			if (($composer = $this->_installComposer()) < 1) {
+
+				if ($composer == 0) {
+					$this->echo("You have chosen to skip composer installation.\n");
+				}
+
+				$this->echo("Agility\\Mailer requires PhpMailer to be installed. Please install it manually from https://github.com/PHPMailer/PHPMailer to use the mailer feature.\n");
+
+			}
+			else {
+				$this->_runComposerInstall();
+			}
+
 			$this->_initGit();
 
 			$this->echo("All done! Happy coding :)\n");
@@ -45,8 +57,10 @@ use StringHelpers\Str;
 		protected function _installComposer() {
 
 			if (!$this->composer) {
-				return;
+				return 0;
 			}
+
+			$return = 1;
 
 			$this->echo("Installing composer locally...\n");
 
@@ -61,6 +75,7 @@ use StringHelpers\Str;
 
 				$this->echo("#Red##B#Failed to download composer:#N# could not verify setup signature.\n");
 				$this->echo("Please install manually from https://getcomposer.org\n");
+				$return = -1;
 
 			}
 			else {
@@ -71,6 +86,8 @@ use StringHelpers\Str;
 			}
 
 			$downloadPath->delete();
+
+			return $return;
 
 		}
 
@@ -104,6 +121,13 @@ use StringHelpers\Str;
 			}
 
 			$this->echo("\t#B#create  #N#$name\n");
+
+		}
+
+		private function _runComposerInstall() {
+
+			$this->echo("Installing dependencies...\n");
+			passthru("cd ".$this->_appRoot." && bin/composer install");
 
 		}
 

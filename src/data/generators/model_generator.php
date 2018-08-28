@@ -102,9 +102,8 @@ use StringHelpers\Str;
 			if ($this->_useParent && $this->_tableName !== false) {
 				return "\n\t\t".$this->model."::\$tableName = \"".($this->_tableName === true ? $this->_model : $this->_tableName)."\";";
 			}
-			else {
-				return "\n";
-			}
+
+			return "";
 
 		}
 
@@ -169,9 +168,12 @@ use StringHelpers\Str;
 
 		function useParent() {
 
-			if (!$this->_useParent || !empty($this->namespace)) {
-				return "\nuse ".$this->parent.";\n";
+			$use = "";
+			if ($this->_useParent || !empty($this->namespace)) {
+				$use = "\nuse ".$this->parent.";\n";
 			}
+
+			return $use."\n";
 
 		}
 

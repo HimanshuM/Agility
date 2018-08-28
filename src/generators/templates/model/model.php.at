@@ -2,7 +2,6 @@
 
 namespace App\Models<?= $this->namespace; ?>;
 <?= $this->useParent(); ?>
-
 	class <?= $this->model; ?> <?= $this->parentClass(); ?>{
 <?= $this->hasTableName(); ?>
 <?= $this->primaryKeyType(); ?>

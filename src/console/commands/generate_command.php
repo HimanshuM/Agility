@@ -29,7 +29,7 @@ use StringHelpers\Str;
 		];
 
 		private function _controller($args) {
-			ControllerGenerator::start($this->_appRoot, $args);
+			ControllerGenerator::start($this->_appPath, $this->_appRoot, $args);
 		}
 
 		private function _echo($str) {

@@ -76,10 +76,6 @@ use Closure;
 
 		}
 
-		function render() {
-			return "Himanshu!!";
-		}
-
 	}
 
 ?>

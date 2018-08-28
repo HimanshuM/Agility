@@ -2,9 +2,11 @@
 
 namespace Agility\Mailer;
 
+use Agility\Configuration AS Config;
 use Agility\Server\AbstractController;
 use Agility\Templating\Render;
 use ArrayUtils\Arrays;
+use PHPMailer\PHPMailer\PHPMailer;
 
 	class Base extends AbstractController {
 
@@ -59,7 +61,13 @@ use ArrayUtils\Arrays;
 
 		}
 
+		static function initialize() {
+			Config::mailer(new Configuration);
+		}
+
 		protected function mail() {
+
+			$phpMailerObj = new PhpMailer(true);
 
 			$template = false;
 			$data = [];
@@ -84,7 +92,7 @@ use ArrayUtils\Arrays;
 
 			$content = $this->renderEmail($template, $data);
 			// $this->conclude($response);
-			$this->_content = $content;
+			$this->_content = $phpMailerObj;
 
 		}
 
@@ -110,15 +118,20 @@ use ArrayUtils\Arrays;
 			$this->options["cc"] = $data["cc"] ?? $this->defaults["cc"] ?? false;
 			$this->options["bcc"] = $data["bcc"] ?? $this->defaults["bcc"] ?? false;
 
+			$this->options["attachments"] = $data["attachments"] ?? $this->defaults ?? [];
+
 			if (!empty($invalid)) {
 				throw new Exceptions\InsufficientMailerDataException($invalid);
 			}
 
 		}
 
-		private function renderEmail($template, $data) {
+		private function renderEmail($phpMailerObj, $template, $data) {
 
 			$html = $this->renderHtml($template, $data);
+			if (!empty($html)) {
+				$phpMailerObj->;
+			}
 			$text = $this->renderText($template, $data);
 
 		}

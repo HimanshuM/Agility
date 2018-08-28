@@ -5,5 +5,9 @@
 			"htaccess-protect": false,
 			"*": "dist"
 		}
+	},
+	"require": {
+		"psr/log": "1.0.2",
+		"phpmailer/phpmailer": "~6.0"
 	}
 }

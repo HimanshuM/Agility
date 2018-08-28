@@ -10,6 +10,7 @@ use Agility\Server\AbstractController;
 		protected $response;
 
 		private $_invoked = false;
+		protected $_status = 200;
 
 		function __construct() {
 			parent::__construct();

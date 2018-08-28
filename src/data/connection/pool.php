@@ -32,6 +32,10 @@ use FileSystem\File;
 
 		static function initialize() {
 
+			if (empty(Configuration::logDbQueries())) {
+				Configuration::logDbQueries(true);
+			}
+
 			Pool::$pool = new Arrays;
 			Pool::$instanceType = Collection::class;
 

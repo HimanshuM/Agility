@@ -16,6 +16,7 @@ use ArrayUtils\Arrays;
 use ArrayUtils\Helpers\IndexFetcher;
 use Iterator;
 use JsonSerializable;
+use Phpm\Exceptions\ClassNotFoundException;
 use Serializable;
 use StringHelpers\Inflect;
 use StringHelpers\Str;
@@ -340,6 +341,32 @@ use StringHelpers\Str;
 
 		}
 
+		// If the value being searched is an Agility Model, gets the value of the primary key;
+		// or returns the value as it is.
+		static function resolveSearchValue($value) {
+
+			if (is_array($value)) {
+
+				$return = [];
+				foreach ($value as $each) {
+					$return[] = static::resolveSearchValue($each);
+				}
+
+				return $return;
+
+			}
+			else {
+
+				if (is_a($value, Model::class)) {
+					$value = $value->valueOfPrimaryKey();
+				}
+
+				return $value;
+
+			}
+
+		}
+
 		function select() {
 
 			$projections = func_get_args();
@@ -409,12 +436,16 @@ use StringHelpers\Str;
 				foreach ($clause as $col => $value) {
 
 					if (is_numeric($col)) {
+
+						$params = Relation::resolveSearchValue($params);
 						$this->_statement->where($value, $params);
+
 					}
 					else {
 
 						$col = Str::snakeCase($col);
 
+						$value = Relation::resolveSearchValue($value);
 						if (is_array($value)) {
 							$this->_statement->where($this->_aquaTable->$col->in($value));
 						}
@@ -428,7 +459,10 @@ use StringHelpers\Str;
 
 			}
 			else {
+
+				$params = Relation::resolveSearchValue($params);
 				$this->_statement->where($clause, $params);
+
 			}
 
 			return $this;

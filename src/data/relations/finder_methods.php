@@ -3,6 +3,7 @@
 namespace Agility\Data\Relations;
 
 use Agility\Data\Helpers\NameHelper;
+use Agility\Data\Relation;
 
 	/** FinderMethods
 	 * Finder methods look for records in the given table base upon the criteria.
@@ -29,6 +30,7 @@ use Agility\Data\Helpers\NameHelper;
 
 		static function findBy($column, $value) {
 
+			$value = Relation::resolveSearchValue($value);
 			if (!is_array($value)) {
 				$resultSet = static::where(static::aquaTable()->$column->eq($value))->all;
 			}

@@ -87,7 +87,10 @@ use ArrayUtils\Arrays;
 
 			$data = $this->template->load($template, $data);
 			if (!$partial) {
+
 				$this->_content = $this->renderBase($data);
+				$this->_status = $options["status"] ?? $this->_status;
+
 			}
 
 			return $data;

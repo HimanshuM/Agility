@@ -13,10 +13,6 @@ use ArrayUtils\Arrays;
 
 		private $_dbConfiguration;
 
-		private $_dbLog;
-		private $_errorLog;
-		private $_infoLog;
-
 		private $_settings;
 		private $_listeners;
 
@@ -28,10 +24,6 @@ use ArrayUtils\Arrays;
 			$this->_environment = $environment;
 			$this->_host = $host;
 			$this->_port = $port;
-
-			$this->_dbLog = "log/db.log";
-			$this->_errorLog = "log/error.log";
-			$this->_infoLog = "log/info.log";
 
 			$this->_settings = new Arrays(["apiOnly" => false]);
 			$this->_listeners = new Arrays;

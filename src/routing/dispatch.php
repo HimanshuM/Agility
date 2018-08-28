@@ -3,6 +3,7 @@
 namespace Agility\Routing;
 
 use Agility\Configuration;
+use Agility\Logger\Log;
 use Agility\Server\Request;
 use Agility\Server\Response;
 use Agility\Server\StaticContent;
@@ -50,7 +51,7 @@ use StringHelpers\Str;
 				// $controller->execute($action, $this->request, $this->response);
 			}
 			catch (Exception $e) {
-				error_log($e->getMessage());
+				Log::error($e->getMessage());
 			}
 
 			$controller = null;
@@ -98,11 +99,11 @@ use StringHelpers\Str;
 		}
 
 		protected function printHandler($controller, $action) {
-			echo "Invoking ".$controller."::".$action."()\n";
+			Log::info("Invoking ".$controller."::".$action."()");
 		}
 
 		protected function printRequest() {
-			echo "Started ".strtoupper($this->request->method)." \"".$this->request->uri."\" for ".$this->request->ip." at ".date("Y-m-d H:i:s")."\n";
+			Log::info("Started ".strtoupper($this->request->method)." \"".$this->request->uri."\" for ".$this->request->ip." at ".date("Y-m-d H:i:s"));
 		}
 
 		protected function process404($route) {
@@ -112,13 +113,13 @@ use StringHelpers\Str;
 
 				if (!empty($file404 = Configuration::document404())) {
 
-					echo "Redirecting to 404.html\n";
+					Log::info("Redirecting to 404.html");
 					$this->response->redirect("/".$file404);
 
 				}
 				else {
 
-					echo "Responding with HTTP/1.1 404\n";
+					Log::info("Responding with HTTP/1.1 404");
 					$this->response->status(404);
 					$this->response->respond();
 
