@@ -38,8 +38,8 @@ use AttributeHelper\Accessor;
 
 			$validationType = "validationsOn".$on;
 
-			if (Base::isAvailable($validator)) {
-				$this->$validationType[] = new $validator($attributes, $options);
+			if (($validatorClass = Base::isAvailable($validator)) !== false) {
+				$this->$validationType[] = new $validatorClass($attributes, $options);
 			}
 			else {
 				$this->$validationType[] = new Base($attributes, $options, $validator);

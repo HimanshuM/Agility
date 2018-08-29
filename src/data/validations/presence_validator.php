@@ -2,7 +2,7 @@
 
 namespace Agility\Data\Validations;
 
-	class PresenceValidator {
+	class PresenceValidator extends Base {
 
 		function validate($object) {
 

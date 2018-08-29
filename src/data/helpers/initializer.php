@@ -49,6 +49,8 @@ use ArrayUtils\Arrays;
 			$this->_fresh = true;
 			$this->_dirty = false;
 
+			$this->errors = new Arrays;
+
 			$this->methodsAsProperties();
 			$this->notFoundResponse(ACCESSOR_NOT_FOUND_CALLBACK, "defaultCallback");
 

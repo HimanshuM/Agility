@@ -45,7 +45,7 @@ use StringHelpers\Str;
 			$name = static::getStorableName($name);
 
 			if (in_array($name, static::$_validators)) {
-				return $name;
+				return $name."Validator";
 			}
 
 			return false;

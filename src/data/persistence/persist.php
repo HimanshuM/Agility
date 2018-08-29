@@ -35,6 +35,10 @@ use Agility\Data\Relation;
 		private function createOrUpdate() {
 
 			$this->_performValidations($this->_fresh);
+			if ($this->invalid) {
+				return false;
+			}
+
 			$this->_runCallbacks("beforeSave");
 
 			if ($this->_fresh) {
