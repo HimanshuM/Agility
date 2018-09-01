@@ -81,10 +81,6 @@ use ArrayUtils\Arrays;
 
 		static function staticInitialize() {
 
-			if (!empty(static::$abstract)) {
-				return;
-			}
-
 			static::metaStore();
 
 			static::connection();
@@ -109,16 +105,19 @@ use ArrayUtils\Arrays;
 
 			if (!static::metaStore()->tableName) {
 
+				static::connection();
+
 				$tableName;
 				if (!empty(static::$tableName)) {
 					$tableName = static::$tableName;
 				}
 				else {
-					$tableName = (static::metaStore()->connection->tablePrefix).NameHelper::tablize(static::class).(static::metaStore()->connection->tableSuffix);
+					$tableName = NameHelper::tablize(static::class);
 				}
 
+				$tableName = (static::metaStore()->connection->tablePrefix).$tableName.(static::metaStore()->connection->tableSuffix);
+
 				static::metaStore()->tableName = $tableName;
-				static::connection();
 				static::aquaTable();
 
 			}

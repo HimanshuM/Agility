@@ -7,6 +7,7 @@ use ArrayUtils\Arrays;
 	trait Validate {
 
 		public $errors;
+		protected static $_validations;
 
 		protected static function _getValidations() {
 

@@ -23,8 +23,8 @@ use Agility\Data\Schema\ForeignKeyRelation;
 		const NativeTypes = [
 			"binary"	=> 	["name" => "blob", 			"limit" => "",	 	"regex" => '/blob(\(\d+\))?/'],
 			"boolean"	=> 	["name" => "tinyint", 		"limit" => 1, 		"regex" => '/tinyint/'],
-			"date"		=> 	["name" => "date", 			"limit" => "",	 	"regex" => '/date/'],
 			"datetime"	=> 	["name" => "datetime", 		"precision" => 0, 	"regex" => '/datetime(\(\d+\))?/'],
+			"date"		=> 	["name" => "date", 			"limit" => "",	 	"regex" => '/date/'],
 			"double"	=> 	["name" => "double", 		"precision" => 10, 	"regex" => '/double(\(\d+(,\d+)?\))?/',		"scale" => 0],
 			"enum"		=> 	["name" => "enum", 			"limit" => "",	 	"regex" => '/enum(\([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(,[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)*\))?/'],
 			"float"		=> 	["name" => "float", 		"precision" => 10, 	"regex" => '/float(\(\d+(,\d+)?\))?/',		"scale" => 2],
@@ -110,7 +110,7 @@ use Agility\Data\Schema\ForeignKeyRelation;
 				throw new SqlTypeLengthException("text", $limit);
 			}
 
-			return $text."($limit)";
+			return $text.(empty($limit) ? "" : "($limit)");
 
 		}
 

@@ -121,7 +121,7 @@ use PDO;
 
 			}
 
-			return $this->_executeQuery($query, $params, 1);
+			return $this->_executeQuery($sql, $params, 1);
 
 		}
 
@@ -302,7 +302,7 @@ use PDO;
 
 			}
 
-			return $this->_executeQuery($query, $params, 2);
+			return $this->_executeQuery($sql, $params, 2);
 
 		}
 

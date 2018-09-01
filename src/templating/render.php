@@ -11,9 +11,10 @@ use ArrayUtils\Arrays;
 		protected $layout = "layout/base";
 		protected $templateBase;
 		protected $template;
+		protected $subContent = "";
 
 		function content() {
-			return $this->_content;
+			return $this->subContent;
 		}
 
 		protected function initializeTemplating() {
@@ -35,6 +36,7 @@ use ArrayUtils\Arrays;
 			$templateTried = "NA";
 			$options = [];
 			$data = null;
+			$status = 200;
 
 			$args = func_get_args();
 			foreach ($args as $arg) {
@@ -102,6 +104,8 @@ use ArrayUtils\Arrays;
 			if (empty($this->layout)) {
 				return $data;
 			}
+
+			$this->subContent = $data;
 
 			return $this->template->load($this->layout);
 

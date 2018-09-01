@@ -17,7 +17,7 @@ namespace Agility\Data\Migration;
 		}
 
 		function tableName() {
-			return ($this->connection->tablePrefix)."schema_migrations".($this->connection->tablesuffix);
+			return ($this->connection->tablePrefix)."schema_migrations".($this->connection->tableSuffix);
 		}
 
 	}

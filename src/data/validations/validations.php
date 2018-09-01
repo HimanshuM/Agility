@@ -86,6 +86,7 @@ use AttributeHelper\Accessor;
 
 		function runValidationsOn($on, $object) {
 
+			$on = ucfirst($on);
 			$validationType = "validationsOn".$on;
 			foreach ($this->$validationType as $validation) {
 				$validation->validate($object);

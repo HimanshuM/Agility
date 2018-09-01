@@ -1,6 +1,6 @@
 <?php
 
-namespace Agility\Commands;
+namespace Agility\Console\Commands;
 
 	class ConsoleCommand extends Base {
 

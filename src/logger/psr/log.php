@@ -7,6 +7,8 @@ use Psr\Log\LoggerInterface;
 
 	class Log implements LoggerInterface {
 
+		protected $quite;
+
 		use PsrImplementor;
 
 	}

@@ -20,6 +20,9 @@ use Agility\Data\Relation;
 
 			$relation = static::initializeRelation();
 			$resultSet = static::findBy(static::$primaryKey, $id);
+			if (empty($resultSet)) {
+				return false;
+			}
 			if (!is_array($id)) {
 				return $resultSet->first;
 			}

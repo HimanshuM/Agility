@@ -4,8 +4,18 @@ namespace Agility\Data\Relations;
 
 	trait QueryMethods {
 
-		static function includes($table) {
-			return static::initializeRelation()->includes($table);
+		static function execute() {
+
+			$args = func_get_args();
+			if (count($args) == 0) {
+				return false;
+			}
+
+			$sql = $args[0];
+			$params = array_slice($args, 1);
+
+			return static::connection()->exec($sql, $params);
+
 		}
 
 		static function fullJoin($table) {
@@ -14,6 +24,10 @@ namespace Agility\Data\Relations;
 
 		static function groupBy() {
 			return call_user_func_array([static::initializeRelation(), "groupBy"], func_get_args());
+		}
+
+		static function includes($table) {
+			return static::initializeRelation()->includes($table);
 		}
 
 		static function innerJoin($table) {
@@ -34,6 +48,20 @@ namespace Agility\Data\Relations;
 
 		static function pluck() {
 			return call_user_func_array([static::initializeRelation(), "pluck"], func_get_args());
+		}
+
+		static function query() {
+
+			$args = func_get_args();
+			if (count($args) == 0) {
+				return false;
+			}
+
+			$sql = $args[0];
+			$params = array_slice($args, 1);
+
+			return static::connection()->query($sql, $params);
+
 		}
 
 		static function select() {

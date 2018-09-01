@@ -2,7 +2,7 @@
 
 namespace Agility\Data\Types;
 
-use Agility\Extensions\Chrono;
+use Agility\Chrono;
 
 	class Date extends Base {
 

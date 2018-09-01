@@ -130,7 +130,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 			$html = $this->renderHtml($template, $data);
 			if (!empty($html)) {
-				$phpMailerObj->;
+				// $phpMailerObj->;
 			}
 			$text = $this->renderText($template, $data);
 

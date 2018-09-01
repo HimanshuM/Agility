@@ -23,7 +23,7 @@ namespace Agility\Data\Types;
 		}
 
 		function __toString() {
-			return "json";
+			return "text";
 		}
 
 	}

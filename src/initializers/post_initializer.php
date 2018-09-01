@@ -13,16 +13,21 @@ use StringHelpers\Str;
 
 		static function execute() {
 
-			foreach (PostInitializer::$initializers as $initializer) {
+			// foreach (PostInitializer::$initializers as $initializer) {
 
-				if (Configuration::documentRoot()->has("/config/initializers/$initializer.php")) {
+			// 	if (Configuration::documentRoot()->has("/config/initializers/$initializer.php")) {
 
-					require_once(Configuration::documentRoot()->has("/config/initializers/$initializer.php"));
-					$className = Str::camelCase($initializer);
-					(new $className)->configure();
+			// 		require_once(Configuration::documentRoot()->has("/config/initializers/$initializer.php"));
+			// 		$className = Str::camelCase($initializer);
+			// 		if (class_exists($className)) {
+			// 			(new $className)->configure();
+			// 		}
 
-				}
+			// 	}
 
+			// }
+			foreach (Configuration::documentRoot()->children("config/initializers/") as $initializer) {
+				require_once $initializer;
 			}
 
 		}

@@ -2,7 +2,7 @@
 
 namespace Agility\Data\Types;
 
-use Agility\Extensions\Chrono\Chronometer;
+use Agility\Chrono\Chronometer;
 
 	class Timestamp extends Base {
 

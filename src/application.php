@@ -23,12 +23,7 @@ use StringHelpers\Str;
 
 		function __construct() {
 
-			// if (!defined("APP_PATH") || !Configuration::initialized()) {
-			// 	$this->initialize();
-			// }
-			if (Configuration::environment() == "production") {
-				$this->initialize();
-			}
+			$this->initialize();
 
 			$this->readonly(["swoole", "_swoole"]);
 			static::$_instance = $this;
@@ -99,15 +94,7 @@ use StringHelpers\Str;
 		}
 
 		protected function initialize() {
-
-			// $environment = getenv("AGILITY_ENV") ?: "development";
-			// $host = getenv("AGILITY_HOST") ?: "localhost";
-			// $port = getenv("AGILITY_PORT") ?: "8000";
-
-			// Configuration::initialize($environment, $host, $port);
-
 			Configuration::uploadDir("storage");
-
 		}
 
 		protected function initializeComponents() {
@@ -117,12 +104,18 @@ use StringHelpers\Str;
 			$this->initializeLogging();
 			$this->initializeDatabase();
 			$this->initializeRouting();
+			$this->initializeHttp();
+			$this->initializeSecurity();
 			$this->initializeMailer();
 
 		}
 
 		protected function initializeDatabase() {
 			Pool::initialize();
+		}
+
+		protected function initializeHttp() {
+			Http\Configuration::initialize();
 		}
 
 		protected function initializeLogging() {
@@ -135,6 +128,10 @@ use StringHelpers\Str;
 
 		protected function initializeRouting() {
 			Routes::initialize();
+		}
+
+		protected function initializeSecurity() {
+			Http\Security::initialize();
 		}
 
 		protected function initializeSwoole() {

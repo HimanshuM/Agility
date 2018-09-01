@@ -3,7 +3,7 @@
 namespace Agility\Mailer;
 
 use Agility\Application;
-use Agility\Extensions\Chrono\Chronometer;
+use Agility\Chrono\Chronometer;
 use ArrayUtils\Arrays;
 use Swoole;
 

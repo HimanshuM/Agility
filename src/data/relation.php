@@ -41,6 +41,7 @@ use StringHelpers\Str;
 		protected $_transformToModel = true;
 		protected $_includes = false;
 
+		// Used for pluck()
 		protected $_fetchMode = 0;
 
 		const Ones = [
@@ -245,7 +246,8 @@ use StringHelpers\Str;
 			}
 
 			foreach ($values as $name => $value) {
-				$this->_statement->insert($this->_aquaTable->$name->eq($value));
+				// $this->_statement->insert($this->_aquaTable->$name->eq($value));
+				$this->_statement->insert([$this->_aquaTable->$name, $value]);
 			}
 
 			return $this;

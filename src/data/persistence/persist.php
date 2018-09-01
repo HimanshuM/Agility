@@ -3,6 +3,7 @@
 namespace Agility\Data\Persistence;
 
 use Agility\Data\Relation;
+use StringHelpers\Str;
 
 	trait Persist {
 
@@ -58,7 +59,8 @@ use Agility\Data\Relation;
 			$this->_runCallbacks("beforeDelete");
 
 			$relation = new Relation(static::class, Relation::Delete);
-			if ($relation->delete([static::$primaryKey => $this->_getAttribute(static::$primaryKey)])->execute == 0) {
+			$primaryKey = Str::pascalCase(static::$primaryKey);
+			if ($relation->delete([static::$primaryKey => $this->_getAttribute($primaryKey)])->execute == 0) {
 				return false;
 			}
 

@@ -13,8 +13,8 @@ namespace Agility\Data\Types;
 		const ValidTypes = [
 			"binary" => '/binary(\[\d+\])?/',
 			"boolean" => '/bool/',
-			"date" => '/date/',
 			"datetime" => '/datetime(\[\d+\])/',
+			"date" => '/date/',
 			"double" => '/double(\[\d+(,\s*\d+)?\])?/',
 			"enum" => '/enum(\[[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(,[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)*\])?/',
 			"float" => '/float(\[\d+(,\d+)?\])?/',

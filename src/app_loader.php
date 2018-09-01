@@ -2,9 +2,10 @@
 
 namespace Agility;
 
-use Swoole;
 use FileSystem\FileSystem;
+use ReflectionClass;
 use StringHelpers\Str;
+use Swoole;
 
 	class AppLoader {
 
@@ -60,7 +61,8 @@ use StringHelpers\Str;
 			$modelClass = "App\\Models\\".Str::camelCase($modelFile->name);
 			if (class_exists($modelClass)) {
 
-				if (method_exists($modelClass, "staticInitialize")) {
+				$classInfo = new ReflectionClass($modelClass);
+				if (!$classInfo->isAbstract() && method_exists($modelClass, "staticInitialize")) {
 					$modelClass::staticInitialize();
 				}
 

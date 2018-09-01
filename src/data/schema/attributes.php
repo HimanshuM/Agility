@@ -26,7 +26,7 @@ use InvalidArgumentException;
 			// OLD LOGIC
 			// FLAW: If a random attribute was added to the object which does not exist in the table,
 			// save() would still try to write it to the table, which would fail
-			/*$collection = $this->attributes->toArray;
+			$collection = $this->attributes->toArray;
 			foreach ($collection as $name => $value) {
 
 				if (isset(static::attributeObjects()[$name])) {
@@ -37,24 +37,10 @@ use InvalidArgumentException;
 				}
 				else {
 					// We do not return a key which does not exist in the table
+					continue;
 				}
 
-				$return[$name] = $value;
-
-			}*/
-
-			// NEW LOGIC
-			// Works through generatedAttributes()
-			$collection = static::generatedAttributes();
-			foreach ($collection as $name => $attribute) {
-
-				$value = $this->attributes->$name;
-				if (isset(static::attributeObjects()[$name])) {
-					$value = static::attributeObjects()[$name]->dataType->serialize($value);
-				}
-				else {
-					$value = $attribute->dataType->serialize($value);
-				}
+				$name = static::generatedAttributes()[$name]->name;
 
 				$return[$name] = $value;
 

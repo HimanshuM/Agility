@@ -38,7 +38,13 @@ use StringHelpers\Str;
 			}
 
 			$this->initializeApplication($args);
-			$this->migrationRunner->executePendingMigrations();
+			$count = $this->migrationRunner->executePendingMigrations();
+			if ($count == 0) {
+				echo "Nothing to migrate.";
+			}
+			else {
+				echo "$count migrations processed.";
+			}
 
 		}
 

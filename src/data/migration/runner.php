@@ -19,7 +19,7 @@ use Exception;
 		}
 
 		protected function diffMigrations($previousMigrations) {
-			return $this->allMigrations->map(":version")->diff($previousMigrations);
+			return $this->allMigrations->map(":version")->diff($previousMigrations->map(":version"));
 		}
 
 		protected function executeMigration($migration) {
@@ -30,8 +30,10 @@ use Exception;
 
 				try {
 
-					$migration = new $class;
-					$migration->processMigration();
+					$migrationObject = new $class;
+					$migrationObject->processMigration();
+
+					$migration->save();
 
 				}
 				catch (SqlException $e) {
@@ -50,6 +52,8 @@ use Exception;
 			foreach ($versions as $version) {
 				$this->executeMigration($this->allMigrations[$version]);
 			}
+
+			return $versions->count;
 
 		}
 
@@ -81,8 +85,6 @@ use Exception;
 
 		protected function needsMigration() {
 
-			$this->listMigrations();
-
 			try {
 				$previousMigrations = SchemaMigration::all();
 			}
@@ -92,6 +94,8 @@ use Exception;
 				$previousMigrations = new Arrays;
 
 			}
+
+			$this->listMigrations();
 
 			return $this->diffMigrations($previousMigrations);
 

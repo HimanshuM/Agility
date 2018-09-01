@@ -149,4 +149,6 @@ use ArrayUtils\Arrays;
 
 	}
 
+	class_alias("Agility\Configuration", "Agility\Config");
+
 ?>

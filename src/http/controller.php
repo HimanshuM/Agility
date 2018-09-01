@@ -29,8 +29,8 @@ use Closure;
 
 				if (empty($this->_content)) {
 
-					$response = $this->render($response);
-					$this->respond(["html" => $response]);
+					$this->render($response);
+					$this->respond(["html" => $this->_content]);
 
 				}
 				else {

@@ -9,6 +9,8 @@ use Agility\Server\AbstractController;
 		protected $request;
 		protected $response;
 
+		protected $session;
+
 		private $_invoked = false;
 		protected $_status = 200;
 
@@ -31,6 +33,7 @@ use Agility\Server\AbstractController;
 
 			$this->request = $args[0];
 			$this->response = $args[1];
+			$this->session = $this->request->identifySession();
 
 			$this->params->merge($this->request->params);
 			$this->params->merge($this->request->get);
@@ -50,6 +53,10 @@ use Agility\Server\AbstractController;
 				throw new Exceptions\InvalidHttpStatusException($status);
 			}
 			$this->response->status($status);
+
+			if (!$this->session->empty) {
+				$this->session->persist($this->response);
+			}
 
 			if (isset($response["html"])) {
 

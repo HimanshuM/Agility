@@ -2,9 +2,11 @@
 
 namespace Agility\Data\Types;
 
-use Agility\Extensions\Chrono\Chronometer;
+use Agility\Chrono\Chronometer;
 
 	class DatetimeDb extends Base {
+
+		const CurrentTimestamp = "CURRENT_TIMESTAMP";
 
 		function cast($value) {
 

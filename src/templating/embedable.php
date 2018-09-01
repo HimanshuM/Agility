@@ -79,6 +79,10 @@ use ArrayUtils\Arrays;
 			return "<script src=\"".$this->getEmbedablePath($js, false)."\">";
 		}
 
+		function title() {
+			return "";
+		}
+
 	}
 
 ?>

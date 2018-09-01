@@ -1,6 +1,6 @@
 <?= $this->phpTagOpen(); ?>
 
-	Agility\Routes::draw(function($r) {
+	Agility\Routing\Routes::draw(function() {
 
 	});
 
