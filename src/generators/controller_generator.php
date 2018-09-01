@@ -14,6 +14,7 @@ use StringHelpers\Str;
 		protected $_code;
 		public $controller;
 		public $filePath;
+		protected $parentDir = "";
 		protected $_methods = [/*"index", "show", "update", "delete"*/];
 		public $namespace = "";
 		public $parentClass;
@@ -92,7 +93,11 @@ use StringHelpers\Str;
 
 			}
 
+			if ($filePath->length > 0) {
+				$this->parentDir = $filePath->firstFew(-1)->implode("/");
+			}
 			$this->filePath = $filePath->implode("/");
+
 			return $this->_classify($controllerName);
 
 		}
@@ -210,6 +215,10 @@ use StringHelpers\Str;
 		}
 
 		private function _writeController() {
+
+			if (!empty($this->parentDir)) {
+				$this->_appRoot->mkdir("app/controllers/".$this->parentDir);
+			}
 
 			$filePath = $this->_appRoot."/app/controllers/".$this->filePath."_controller.php";
 			if ($this->overwrite || !file_exists($filePath)) {

@@ -11,8 +11,8 @@ use App\Models\<?= $this->scaffold; ?>;
 
 <?php if ($this->scaffold) { ?>
 		protected $<?= $this->scaffoldObject; ?>;
+		<?= "\n"; ?>
 <?php } ?>
-
 		function __construct() {
 			parent::__construct();
 <?php if ($this->scaffold) { ?>
@@ -78,8 +78,8 @@ use App\Models\<?= $this->scaffold; ?>;
 		protected function <?= $this->scaffoldObject; ?>Params() {
 			return $this->params->fetch("<?= $this->scaffoldObject; ?>", []);
 		}
+		<?= "\n"; ?>
 <?php } ?>
-
 	}
 
 <?= $this->phpTagClose(); ?>

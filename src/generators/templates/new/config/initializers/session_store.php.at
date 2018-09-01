@@ -9,8 +9,8 @@ Agility\Config::sessionStore()->cookieName = "agility_sess";
 // Agility\Config::sessionStore()->sessionSource = ["header" => "authorization", "authorization" => "bearer"];
 
 // Default session store is file, just like the default PHP way.
-// Enable the line below to use cookies as session store:
 
+// Enable the line below to use cookies as session store:
 // Agility\Config::sessionStore()->storage = "CookieStore";
 // Cookie store is encrypted with AES GCM encryption, which requires a private encryption key to read the data.
 // Make sure to generate config/security.json file for the encryption keys. Safest way to do so is by running
