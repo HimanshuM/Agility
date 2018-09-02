@@ -3,9 +3,12 @@
 namespace Agility\Data\Helpers;
 
 use Agility\Data\Validations;
+use ArrayUtils\Arrays;
 use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 
 	trait Dispatch {
+
+		protected static $_registeredFallbackCallable;
 
 		protected function defaultCallback($name, $value = nil) {
 
@@ -39,11 +42,21 @@ use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 
 		function __call($name, $args = []) {
 
-			if (empty($args)) {
-				return $this->_getAttribute($name);
+			if ($this->_hasAttribute($name)) {
+
+				if (empty($args)) {
+					return $this->_getAttribute($name);
+				}
+				else {
+					return $this->_setAttribute($name, $args[0]);
+				}
+
 			}
-			else {
-				return $this->_setAttribute($name, $args[0]);
+			else if (static::$_registeredFallbackCallable->exists(static::class)) {
+
+				$callable = static::$_registeredFallbackCallable[static::class];
+				return $this->callable($name, $args);
+
 			}
 
 		}
@@ -66,6 +79,16 @@ use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 				}
 
 			}
+
+		}
+
+		protected static function registerFallbackCallable($name) {
+
+			if (empty(static::$_registeredFallbackCallable)) {
+				static::$_registeredFallbackCallable = new Arrays;
+			}
+
+			static::$_registeredFallbackCallable[static::class] = $name;
 
 		}
 

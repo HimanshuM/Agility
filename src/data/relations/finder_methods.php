@@ -18,7 +18,6 @@ use Agility\Data\Relation;
 
 		static function find($id) {
 
-			$relation = static::initializeRelation();
 			$resultSet = static::findBy(static::$primaryKey, $id);
 			if (empty($resultSet)) {
 				return false;

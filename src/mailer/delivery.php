@@ -24,24 +24,28 @@ use Swoole;
 
 		}
 
-		function deliverAt($when = "now") {
-
-		}
-
-		function deliverLater($after = 0) {
-			Swoole\Timer::after($after, [$this, "sendMail"]);
-		}
-
-		function deliverNow() {
-			Swoole\Event::defer([$this, "sendMail"]);
-		}
-
 		private function applicationInstance() {
 			$this->applicationInstance = Application::instance();
 		}
 
 		function sendMail() {
 
+		}
+
+		function sendAt($when = "now") {
+
+			if ($when == "now") {
+				$this->sendNow();
+			}
+
+		}
+
+		function sendLater($after = 0) {
+			Swoole\Timer::after($after, [$this, "sendMail"]);
+		}
+
+		function sendNow() {
+			Swoole\Event::defer([$this, "sendMail"]);
 		}
 
 	}

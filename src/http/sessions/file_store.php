@@ -4,7 +4,7 @@ namespace Agility\Http\Sessions;
 
 use Agility\Config;
 
-	class FileStore {
+	class FileStore extends BackendStore {
 
 		protected $storageLocation;
 
@@ -13,6 +13,11 @@ use Agility\Config;
 			Config::documentRoot()->mkdir("tmp/session");
 			$this->storageLocation = Config::documentRoot()->chdir("tmp/session");
 
+		}
+
+		function cleanup () {
+			// Because, we do not have the file creation time, we use the last access time
+			$this->storageLocation->scan(["atime" => (mktime() - Config::sessionStore()->expiry), false])->walk(":delete");
 		}
 
 		function readSession($sessionId) {
@@ -37,17 +42,6 @@ use Agility\Config;
 
 		}
 
-		function writeSession($session) {
-
-			$sessionFile = $this->sessionFile($session->id, true);
-
-			$serializedSession = serialize($session);
-			$content = $session->ctime.PHP_EOL.$serializedSession;
-
-			$sessionFile->write($content);
-
-		}
-
 		protected function sessionFile($sessionId, $create = false) {
 
 			if (!$create) {
@@ -64,6 +58,17 @@ use Agility\Config;
 			else {
 				return $this->storageLocation->touch("sess_".$sessionId);
 			}
+
+		}
+
+		function writeSession($session) {
+
+			$sessionFile = $this->sessionFile($session->id, true);
+
+			$serializedSession = serialize($session);
+			$content = $session->ctime.PHP_EOL.$serializedSession;
+
+			$sessionFile->write($content);
 
 		}
 

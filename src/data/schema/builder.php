@@ -32,7 +32,7 @@ use StringHelpers\Str;
 
 			foreach (func_get_args() as $attribute) {
 
-				if (in_array($attribute, static::protectedAttributes())) {
+				if (in_array($attribute, static::protectedAttributes()->array)) {
 					throw new Exception("'$attribute' has already been marked protected", 1);
 				}
 
@@ -46,7 +46,7 @@ use StringHelpers\Str;
 
 			foreach (func_get_args() as $attribute) {
 
-				if (in_array($attribute, static::accessibleAttributes())) {
+				if (in_array($attribute, static::accessibleAttributes()->array)) {
 					throw new Exception("'$attribute' has already been marked mass accessible", 1);
 				}
 
@@ -118,7 +118,7 @@ use StringHelpers\Str;
 		protected static function serialize() {
 
 			foreach (func_get_args() as $attribute) {
-				static::attribute($attribute, "Serialized");
+				static::attribute($attribute, "serialized");
 			}
 
 		}

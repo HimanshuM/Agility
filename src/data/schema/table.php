@@ -5,7 +5,7 @@ namespace Agility\Data\Schema;
 use Agility\Data\Types\AutoIncrementOnNonIntTypeException;
 use Agility\Data\Types\Base;
 use Agility\Data\Types\UInt;
-use Agility\Data\Types\DateTimeDb;
+use Agility\Data\Types\DatetimeDb;
 use Agility\Exceptions\InvalidArgumentTypeException;
 use ArrayUtils\Arrays;
 use AttributeHelper\Accessor;
@@ -251,8 +251,8 @@ use AttributeHelper\Accessor;
 
 		function timestamps() {
 
-			$this->attributes["created_at"] = Attribute::buildFromOptions("created_at", new DateTimeDb, ["default" => DateTimeDb::CurrentTimestamp])->index();
-			$this->attributes["updated_at"] = Attribute::buildFromOptions("updated_at", new DateTimeDb, ["default" => DateTimeDb::CurrentTimestamp, "onUpdate" => DateTimeDb::CurrentTimestamp])->index();
+			$this->attributes["created_at"] = Attribute::buildFromOptions("created_at", new DatetimeDb, ["default" => DatetimeDb::CurrentTimestamp])->index();
+			$this->attributes["updated_at"] = Attribute::buildFromOptions("updated_at", new DatetimeDb, ["default" => DatetimeDb::CurrentTimestamp, "onUpdate" => DatetimeDb::CurrentTimestamp])->index();
 
 		}
 

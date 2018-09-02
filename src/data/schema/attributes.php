@@ -63,8 +63,9 @@ use InvalidArgumentException;
 
 				if ($forcible !== false) {
 
-					if (!in_array($name, $this->_accessibleAttributes)) {
-						throw new BatchUpdateException($name, static::class);
+					if (!in_array($name, static::accessibleAttributes()->array)) {
+						// throw new BatchUpdateException($name, static::class);
+						$this->errors[$name] = "'$name' cannot be batch updated";
 					}
 
 				}
@@ -83,6 +84,14 @@ use InvalidArgumentException;
 				}
 
 				$this->attributes->$name = $value;
+
+			}
+
+			foreach (static::attributeObjects() as $key => $value) {
+
+				if (!$this->attributes->has($key)) {
+					$this->attributes->$key = $value->dataType->unserialize($value->defaultValue);
+				}
 
 			}
 

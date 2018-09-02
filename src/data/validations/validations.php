@@ -36,13 +36,15 @@ use AttributeHelper\Accessor;
 				$on = "Save";
 			}
 
+			$options = new Arrays($options);
+
 			$validationType = "validationsOn".$on;
 
 			if (($validatorClass = Base::isAvailable($validator)) !== false) {
-				$this->$validationType[] = new $validatorClass($attributes, $options);
+				$this->$validationType[] = new $validatorClass($attribute, $options);
 			}
 			else {
-				$this->$validationType[] = new Base($attributes, $options, $validator);
+				$this->$validationType[] = new Base($attribute, $options, $validator);
 			}
 
 		}

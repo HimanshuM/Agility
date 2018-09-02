@@ -2,6 +2,7 @@
 
 namespace Agility\Data\Validations;
 
+use ArrayUtils\Arrays;
 use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 use StringHelpers\Inflect;
 

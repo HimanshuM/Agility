@@ -2,6 +2,8 @@
 
 namespace Agility\Data\Types;
 
+use StringHelpers\Str;
+
 	abstract class Base {
 
 		protected $limit = null;
@@ -9,6 +11,12 @@ namespace Agility\Data\Types;
 		protected $scale = null;
 
 		protected static $registeredTypes = [];
+
+		const DeferredTypes = [
+			"string" => "str",
+			"uint" => "u_int",
+			"datetime" => "datetime_db"
+		];
 
 		const ValidTypes = [
 			"binary" => '/binary(\[\d+\])?/',
@@ -35,20 +43,17 @@ namespace Agility\Data\Types;
 
 		static function getType($name, $size = null) {
 
-			$name = $name == "string" ? "str" : $name;
+			if (isset(Base::DeferredTypes[$name])) {
+				$name = Base::DeferredTypes[$name];
+			}
 
 			if (in_array($name, Base::$registeredTypes)) {
 				return new $name($size);
 			}
 			else if (file_exists(__DIR__."/$name.php")) {
 
-				$name = "\\Agility\\Data\\Types\\".ucfirst(strtolower($name));
-				return new $name($size);
-
-			}
-			else if (file_exists(__DIR__."/".$name."_db.php")) {
-
-				$name = "\\Agility\\Data\\Types\\".ucfirst(strtolower($name))."Db";
+				$name = Str::camelCase($name);
+				$name = "\\Agility\\Data\\Types\\".$name;
 				return new $name($size);
 
 			}

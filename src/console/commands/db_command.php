@@ -43,7 +43,7 @@ use StringHelpers\Str;
 				echo "Nothing to migrate.";
 			}
 			else {
-				echo "$count migrations processed.";
+				echo "$count migration".($count > 1 ? "s" : "")." processed.";
 			}
 
 		}

@@ -145,7 +145,13 @@ use StringHelpers\Str;
 		protected function identifyHandler($handler, $action) {
 
 			$controller = $handler;
-			if (strpos($handler, "#") !== false) {
+			if (is_a($handler, Closure::class)) {
+
+				$controller = "";
+				$action = $handler;
+
+			}
+			else if (is_string($handler) && strpos($handler, "#") !== false) {
 				list($controller, $action) = explode("#", $handler);
 			}
 			else if (!empty($this->controller)) {
@@ -243,7 +249,7 @@ use StringHelpers\Str;
 			$components = explode("/", $route);
 			foreach ($components as $component) {
 
-				if ($component[0] == ":") {
+				if (!empty($component) && $component[0] == ":") {
 
 					$parameters[] = substr($component, 1);
 					$component = ":param";

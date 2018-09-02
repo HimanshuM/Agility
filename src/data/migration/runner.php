@@ -53,7 +53,7 @@ use Exception;
 				$this->executeMigration($this->allMigrations[$version]);
 			}
 
-			return $versions->count;
+			return $versions->length;
 
 		}
 

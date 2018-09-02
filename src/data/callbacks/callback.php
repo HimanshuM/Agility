@@ -3,6 +3,7 @@
 namespace Agility\Data\Callbacks;
 
 use ArrayUtils\Arrays;
+use Swoole;
 
 	trait Callback {
 
@@ -23,6 +24,7 @@ use ArrayUtils\Arrays;
 				return;
 			}
 
+			$args = $args[0];
 			$args = new CallbackDefinition($args, is_array($args));
 
 			if (is_null(static::_theseCallbacks()[$callback])) {
@@ -48,15 +50,19 @@ use ArrayUtils\Arrays;
 						else {
 
 							$t = $this;
+							$callback = $callback->callback;
 							Swoole\Event::defer(function() use($callback, $t) {
-								$callback->callback($t);
+								$callback($t);
 							});
 
 						}
 
 					}
 					else {
+
+						$callback = $callback->callback;
 						$this->$callback();
+
 					}
 
 				}

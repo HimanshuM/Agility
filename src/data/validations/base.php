@@ -2,6 +2,7 @@
 
 namespace Agility\Data\Validations;
 
+use ArrayUtils\Arrays;
 use AttributeHelper\Accessor;
 use StringHelpers\Str;
 
@@ -42,10 +43,12 @@ use StringHelpers\Str;
 		static function isAvailable($name) {
 
 			$name = str_replace("validates", "", $name);
-			$name = static::getStorableName($name);
+			$name = str_replace("Of", "", $name);
+			// $name = static::getStorableName($name);
+			$name = Str::snakeCase($name);
 
 			if (in_array($name, static::$_validators)) {
-				return $name."Validator";
+				return "Agility\\Data\\Validations\\".Str::camelCase($name."_validator");
 			}
 
 			return false;
@@ -60,7 +63,9 @@ use StringHelpers\Str;
 
 		}
 
-		abstract function validate($object);
+		function validate($object) {
+
+		}
 
 	}
 

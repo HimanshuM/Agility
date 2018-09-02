@@ -13,6 +13,7 @@ use AttributeHelper\Accessor;
 
 		protected $request;
 
+		protected $host;
 		protected $headers;
 		protected $ip;
 		protected $method;
@@ -30,7 +31,7 @@ use AttributeHelper\Accessor;
 			$this->params = new Arrays;
 			$this->compileParameters();
 
-			$this->readonly("headers", "ip", "method", "params", "uri", "get", "post", "cookie");
+			$this->readonly("host", "headers", "ip", "method", "params", "uri", "get", "post", "cookie");
 
 		}
 
@@ -44,6 +45,7 @@ use AttributeHelper\Accessor;
 
 		protected function compileParameters() {
 
+			$this->host = parse_url($this->request->header["host"]);
 			$this->ip = $this->request->server["remote_addr"];
 			$this->method = strtolower($this->request->server["request_method"]);
 			$this->uri = $this->request->server["path_info"];

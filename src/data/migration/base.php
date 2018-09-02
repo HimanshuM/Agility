@@ -4,6 +4,7 @@ namespace Agility\Data\Migration;
 
 use Agility\Data\Connection;
 use Agility\Data\Connection\Pool;
+use Agility\Data\Schema\ForeignKeyRelation;
 use Agility\Data\Schema\Table;
 use ArrayUtils\Arrays;
 use Exception;

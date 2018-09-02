@@ -4,13 +4,25 @@ namespace Agility\Http\Sessions;
 
 use Agility\Chrono\Chronometer;
 use Agility\Config;
+use Agility\Data\Connection\Mysql\MysqlConnector;
 
-	class DatabaseStore {
+	class DatabaseStore extends BackendStore {
 
 		protected $model;
 
 		function __construct($model) {
 			$this->model = $model;
+		}
+
+		function cleanup () {
+
+			$sessionClass = $this->model;
+			$query;
+			if (is_a($sessionClass::connection(), MysqlConnector::class)) {
+				$query = "DELETE FROM ".$sessionClass::tableName()." WHERE TIMESTAMPDIFF(SECOND, created_at, CUREENT_TIMESTAMP) > ?";
+			}
+			$oldSessions = $sessionClass::exec($query, Config::sessionStore()->expiry);
+
 		}
 
 		function readSession($sessionId) {

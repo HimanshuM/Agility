@@ -91,6 +91,10 @@ use StringHelpers\Str;
 
 		}
 
+		function refresh() {
+
+		}
+
 		function save() {
 			return $this->createOrUpdate();
 		}

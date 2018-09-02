@@ -159,19 +159,21 @@ use StringHelpers\Str;
 			$this->firstStageInitialization();
 			$this->printBootupSequence();
 
-			try {
-				$this->prepareApplication();
-			}
-			catch (Exception $e) {
-				$this->die($e);
-			}
-
 			$this->initializeSwoole();
 			if (empty($this->_swoole)) {
 				$this->die("Failed to initialize Swoole HTTP server. Something went wrong...");
 			}
 
 			$this->secondStageInitialization();
+
+			// This has been moved below second stage initialization because, one of the post initializers
+			// defines the default DB connection, which could be used by any of the models.
+			try {
+				$this->prepareApplication();
+			}
+			catch (Exception $e) {
+				$this->die($e);
+			}
 
 			$this->echo("Listening on http://".Configuration::host().":".Configuration::port());
 			$this->_swoole->start();
@@ -183,6 +185,7 @@ use StringHelpers\Str;
 			$this->configureSwoole();
 			$this->setupListner();
 			$this->executePostInitializers();
+			$this->setupSessionStoreCleanupRoutine();
 
 		}
 
@@ -213,6 +216,14 @@ use StringHelpers\Str;
 
 		protected function setupListner() {
 			$this->_swoole->on("request", [$this, "listner"]);
+		}
+
+		protected function setupSessionStoreCleanupRoutine() {
+
+			if (Configuration::sessionStore()->cookieStore == false) {
+				Configuration::sessionStore()->storage->setupCleanup();
+			}
+
 		}
 
 		function listner($request, $response) {

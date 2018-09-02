@@ -85,6 +85,10 @@ use StringHelpers\Str;
 		protected function prepareHandler($route) {
 
 			$controller = "\\Agility\\Http\\Controller";
+			if (Configuration::apiOnly()) {
+				$controller = "\\Agility\\Http\\ApiController";
+			}
+
 			if (!empty($route->controller)) {
 				$controller = $route->namespace.$this->prepareControllerName($route->controller);
 			}
@@ -121,7 +125,7 @@ use StringHelpers\Str;
 
 					Log::info("Responding with HTTP/1.1 404");
 					$this->response->status(404);
-					$this->response->respond();
+					$this->response->respond("");
 
 				}
 

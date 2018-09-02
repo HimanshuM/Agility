@@ -46,7 +46,7 @@ use Agility\Configuration;
 
 			Routes::ast();
 			$builder = new Builder($rootNamespace, Routes::$ast);
-			($callback->bindTo($builder))();
+			($callback->bindTo($builder, $builder))();
 
 		}
 

@@ -57,7 +57,16 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 		function storage($value = nil) {
 
 			if ($value == nil) {
-				return $this->storage;
+
+				if ($this->storage == "CookieStore") {
+					return $this->cookieStore;
+				}
+				else if ($this->storage == "FileStore") {
+					return $this->fileStore;
+				}
+
+				return $this->databaseStore;
+
 			}
 
 			if ($value != "CookieStore" && $value != "FileStore") {
