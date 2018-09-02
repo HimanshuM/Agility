@@ -40,7 +40,7 @@ use StringHelpers\Str;
 			return Str::pascalCase((new Arrays(explode("_", Str::snakeCase($name))))->firstFew(-1)->implode("_"));
 		}
 
-		static function isAvailable($name) {
+		static function isAvailable($name, $onlyName = false) {
 
 			$name = str_replace("validates", "", $name);
 			$name = str_replace("Of", "", $name);
@@ -48,7 +48,13 @@ use StringHelpers\Str;
 			$name = Str::snakeCase($name);
 
 			if (in_array($name, static::$_validators)) {
-				return "Agility\\Data\\Validations\\".Str::camelCase($name."_validator");
+
+				if (!$onlyName) {
+					return "Agility\\Data\\Validations\\".Str::camelCase($name."_validator");
+				}
+
+				return $name;
+
 			}
 
 			return false;

@@ -17,8 +17,8 @@ namespace Agility\Data\Validations;
 		function validate($object) {
 
 			$attribute = $this->attribute;
-			if (isset($object->$attribute) && strlen($object->$attribute) < $this->options["length"]) {
-				$object->errors[$attribute][] = $this->message ?? "$attribute should have a length of at least ".$this->options["length"];
+			if ($object->isSet($attribute)) && strlen($object->$attribute) < $this->options["length"]) {
+				$object->errors->add($attribute, $this->message ?? "$attribute should have a length of at least ".$this->options["length"]);
 			}
 
 		}

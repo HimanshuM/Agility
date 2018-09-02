@@ -6,6 +6,7 @@ use Agility\Data\Metadata\MetaStore;
 use Agility\Data\Relation;
 use Agility\Data\Collection;
 use Agility\Data\Connection;
+use Agility\Data\Validations\ValidationErrors;
 use Agility\Data\Validations\Validations;
 use Aqua\Table;
 use ArrayUtils\Arrays;
@@ -49,7 +50,7 @@ use ArrayUtils\Arrays;
 			$this->_fresh = true;
 			$this->_dirty = false;
 
-			$this->errors = new Arrays;
+			$this->errors = new ValidationErrors;
 
 			$this->methodsAsProperties();
 			$this->notFoundResponse(ACCESSOR_NOT_FOUND_CALLBACK, "defaultCallback");

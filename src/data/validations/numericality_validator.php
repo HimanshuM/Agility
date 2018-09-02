@@ -7,8 +7,8 @@ namespace Agility\Data\Validations;
 		function validate($object) {
 
 			$attribute = $this->attribute;
-			if (isset($object->$attribute) && !is_numeric($object->$attribute)) {
-				$object->errors[$attribute][] = $this->message ?? "$attribute should be numeric";
+			if ($object->isSet($attribute) && !is_numeric($object->$attribute)) {
+				$object->errors->add($attribute, $this->message ?? "$attribute should be numeric");
 			}
 
 		}

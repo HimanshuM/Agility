@@ -117,6 +117,10 @@ use InvalidArgumentException;
 			return static::generatedAttributes()->exists($name);
 		}
 
+		function isSet($attribute) {
+			return isset($this->attributes->$attribute);
+		}
+
 		private function _setAttribute($name, $value) {
 
 			if (isset(static::attributeObjects()[$name])) {

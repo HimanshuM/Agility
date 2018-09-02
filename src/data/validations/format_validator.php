@@ -17,8 +17,8 @@ namespace Agility\Data\Validations;
 		function validate($object) {
 
 			$attribute = $this->attribute;
-			if (isset($object->$attribute) && preg_match($this->options["format"], $object->$attribute) == false) {
-				$object->errors[$attribute][] = $this->message ?? "$attribute must follow '".$this->options["format"]."' format";
+			if ($object->isSet($attribute)) && preg_match($this->options["format"], $object->$attribute) == false) {
+				$object->errors->add($attribute, $this->message ?? "$attribute must follow '".$this->options["format"]."' format");
 			}
 
 		}

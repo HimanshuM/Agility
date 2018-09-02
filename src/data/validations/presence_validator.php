@@ -7,11 +7,11 @@ namespace Agility\Data\Validations;
 		function validate($object) {
 
 			$attribute = $this->attribute;
-			if (!isset($object->$attribute)) {
-				$object->errors[$attribute][] = $this->message ?? "$attribute is not present";
+			if (!$object->isSet($attribute)) {
+				$object->errors->add($attribute, $this->message ?? "$attribute is not present");
 			}
 			else if (empty(trim($object->$attribute))) {
-				$object->errors[$attribute][] = $this->message ?? "$attribute cannot be empty";
+				$object->errors->add($attribute, $this->message ?? "$attribute cannot be empty");
 			}
 
 		}

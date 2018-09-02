@@ -11,7 +11,7 @@ namespace Agility\Data\Types;
 		function cast($value) {
 
 			if (is_string($value)) {
-				return unserialize($value, true);
+				return unserialize($value);
 			}
 
 			return $value;

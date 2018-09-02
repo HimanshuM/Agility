@@ -3,6 +3,7 @@
 namespace Agility\Data\Persistence;
 
 use Agility\Data\Relation;
+use Exception;
 use StringHelpers\Str;
 
 	trait Persist {
@@ -55,6 +56,10 @@ use StringHelpers\Str;
 		}
 
 		function delete() {
+
+			if ($this->_fresh) {
+				throw new Exception("Cannot delete a fresh object of class ".static::class);
+			}
 
 			$this->_runCallbacks("beforeDelete");
 

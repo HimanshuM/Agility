@@ -55,7 +55,7 @@ use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 			else if (static::$_registeredFallbackCallable->exists(static::class)) {
 
 				$callable = static::$_registeredFallbackCallable[static::class];
-				return $this->callable($name, $args);
+				return $this->$callable($name, $args);
 
 			}
 
@@ -69,15 +69,15 @@ use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 			else if (in_array($name, static::$CALLBACKS)) {
 				return static::_addToCallbacks($name, $args);
 			}
-			else if (static::hasScope($name)) {
-				return static::tryScope($name, $args);
-			}
-			else if (($validator = Validations\Base::isAvailable($name)) !== false) {
+			else if (($validator = Validations\Base::isAvailable($name, true)) !== false) {
 
 				foreach ($args as $attr) {
-					static::validate($arg, $validator);
+					static::validates($attr, $validator);
 				}
 
+			}
+			else if (static::hasScope($name)) {
+				return static::tryScope($name, $args);
 			}
 
 		}
