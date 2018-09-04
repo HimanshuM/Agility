@@ -34,11 +34,13 @@ use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 				}
 
 				$route = $this->constructRoute(Resource::ActionToMethod[$action], $path, $resource->controller, $options, $action);
-				if ($action == "show") {
-					$this->processSubRoutes($resource, $callback);
-				}
+				// if ($action == "show") {
+				// 	$this->processSubRoutes($resource, $callback);
+				// }
 
 			}
+
+			$this->processSubRoutes($resource, $callback);
 
 		}
 
@@ -69,6 +71,16 @@ use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 			foreach ($resources as $resource) {
 				$this->constructResource($resource, $options, $callback, $singleton);
 			}
+
+		}
+
+		function member($callback) {
+
+			if (empty($this->parentResource)) {
+				throw new MemberNotPartOfResourceException();
+			}
+
+			$this->processSubRoutes($this->parentResource, $callback, true);
 
 		}
 

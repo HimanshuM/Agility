@@ -242,7 +242,7 @@ use StringHelpers\Str;
 		function insert($values = []) {
 
 			if (empty($values)) {
-				return;
+				return $this;
 			}
 
 			foreach ($values as $name => $value) {
@@ -429,6 +429,21 @@ use StringHelpers\Str;
 
 		function toSql() {
 			return $this->_connection->toSql($this->_statement);
+		}
+
+		function update($attributes = []) {
+
+			if (empty($attributes)) {
+				return $this;
+			}
+
+			foreach ($attributes as $name => $value) {
+				// $this->_statement->insert($this->_aquaTable->$name->eq($value));
+				$this->_statement->set([$this->_aquaTable->$name, $value]);
+			}
+
+			return $this;
+
 		}
 
 		function where($clause, $params = []) {

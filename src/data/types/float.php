@@ -35,11 +35,23 @@ namespace Agility\Data\Types;
 		}
 
 		function cast($value) {
+
+			if (is_null($value)) {
+				return $value;
+			}
+
 			return floatval($value);
+
 		}
 
 		function serialize($value) {
+
+			if (is_null($value)) {
+				return $value;
+			}
+
 			return floatval($value);
+
 		}
 
 		function __toString() {

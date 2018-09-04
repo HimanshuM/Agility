@@ -55,6 +55,10 @@ use StringHelpers\Inflect;
 				$this->indices[$tableName] = [];
 			}
 
+			if (is_array($attrName)) {
+				$attrName = implode("#", $attrName);
+			}
+
 			$this->indices[$tableName][$attrName] = $unique ? "unique" : "index";
 
 		}
@@ -131,6 +135,18 @@ use StringHelpers\Inflect;
 			foreach ($this->indices as $table => $indices) {
 
 				foreach ($indices as $column => $index) {
+
+					if (strpos($column, "#") !== false) {
+
+						$column = explode("#", $column);
+						$column = array_map(function($e) {
+							return "`".$e."`";
+						}, $column);
+						$column = implode(", ", $column);
+
+						$column = trim($column, "`");
+
+					}
 
 					$sql = "ALTER TABLE `".$table."` ADD ".strtoupper($index)." (`".$column."`);";
 					$this->connection->execute($sql, [], Connection\Base::DDLStatement);

@@ -22,7 +22,19 @@ namespace Agility\Data\Helpers;
 		}
 
 		function jsonSerialize() {
+
+			if (defined("static::ExportableAttributes")) {
+
+				$exportableAttributes = static::ExportableAttributes;
+
+				return $this->attributes->filter(function($name) use ($exportableAttributes) {
+					return in_array($name, $exportableAttributes);
+				}, ARRAY_FILTER_USE_KEY);
+
+			}
+
 			return $this->attributes;
+
 		}
 
 	}

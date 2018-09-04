@@ -23,9 +23,9 @@ use Agility\Configuration;
 
 		private function exportOptions() {
 
-			putenv("AGILITY_ENV", Configuration::environment());
-			putenv("AGILITY_HOST", Configuration::host());
-			putenv("AGILITY_PORT", Configuration::port());
+			putenv("AGILITY_ENV=".Configuration::environment());
+			putenv("AGILITY_HOST=".Configuration::host());
+			putenv("AGILITY_PORT=".Configuration::port());
 
 		}
 

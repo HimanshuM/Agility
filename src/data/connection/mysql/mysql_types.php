@@ -29,7 +29,7 @@ use Agility\Data\Schema\ForeignKeyRelation;
 			"enum"		=> 	["name" => "enum", 			"limit" => "",	 	"regex" => '/enum(\([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(,[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)*\))?/'],
 			"float"		=> 	["name" => "float", 		"precision" => 10, 	"regex" => '/float(\(\d+(,\d+)?\))?/',		"scale" => 2],
 			"integer"	=> 	["name" => "int", 			"limit" => 11, 		"regex" => '/int(\(\d+\))/'],
-			"json"		=>	["name" => "json",			"limit" => 255,		"regex" => '/json/'],
+			"json"		=>	["name" => "text",			"limit" => 255,		"regex" => '/json/'],
 			"string"	=> 	["name" => "varchar", 		"limit" => 255, 	"regex" => '/varchar(\(\d+\))/'],
 			"text"		=> 	["name" => "text", 			"limit" => 65535, 	"regex" => '/text(\(\d+\))?/'],
 			"timestamp"	=> 	["name" => "timestamp",		"precision" => 0, 	"regex" => '/timestamp(\(\d+\))?/'],

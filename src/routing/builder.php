@@ -26,6 +26,7 @@ use StringHelpers\Str;
 		protected $routeNamePrefix = "";
 		protected $apiOnly;
 		protected $ast;
+		protected $parentResource = false;
 
 		function __construct($rootNamespace, $ast) {
 
@@ -85,6 +86,9 @@ use StringHelpers\Str;
 				$this->parameters = $options["parameters"];
 
 			}
+			if (!empty($options["parentResource"])) {
+				$this->parentResource = $options["parentResource"];
+			}
 
 		}
 
@@ -106,18 +110,28 @@ use StringHelpers\Str;
 
 		}
 
-		protected function constructSubRouteBuilder($resource) {
+		protected function constructSubRouteBuilder($resource, $resourceMembers = false) {
 
 			$options = [];
 			if (is_a($resource, Helpers\Resource::class)) {
 
-				$options["path"] = $resource->nestedParam();
+				if ($resourceMembers) {
+
+					$options["controller"] = $resource->controller;
+					$options["path"] = $resource->memberScope();
+
+				}
+				else {
+					$options["path"] = $resource->nestedParam();
+				}
+
 				$options["parameters"] = $resource->param;
 				$options["constraints"] = $resource->constraints;
 				$options["defaults"] = $resource->defaults;
 				if ($resource->namespace != "\\App\\Controllers\\") {
 					$options["namespace"] = $resource->namespace;
 				}
+				$options["parentResource"] = $resource;
 
 			}
 			else if (is_a($resource, Route::class)) {
@@ -270,7 +284,7 @@ use StringHelpers\Str;
 			return $this->pathPrefix.(Builder::cleanPath($path));
 		}
 
-		protected function processSubRoutes($resource, $callback = null) {
+		protected function processSubRoutes($resource, $callback = null, $resourceMembers = false) {
 
 			if (empty($callback)) {
 				return;
@@ -280,7 +294,7 @@ use StringHelpers\Str;
 				throw new InvalidSubRouteCallbackException($path);
 			}
 
-			$builder = $this->constructSubRouteBuilder($resource);
+			$builder = $this->constructSubRouteBuilder($resource, $resourceMembers);
 			($callback->bindTo($builder))();
 
 			// $route = false;

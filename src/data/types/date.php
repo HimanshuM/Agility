@@ -8,6 +8,10 @@ use Agility\Chrono;
 
 		function cast($value) {
 
+			if (is_null($value)) {
+				return $value;
+			}
+
 			if (!is_a($value, Chrono\Date::class)) {
 				return new Chrono\Date($value);
 			}
@@ -17,7 +21,13 @@ use Agility\Chrono;
 		}
 
 		function serialize($value) {
+
+			if (is_null($value)) {
+				return $value;
+			}
+
 			return $value->date;
+
 		}
 
 		function __toString() {

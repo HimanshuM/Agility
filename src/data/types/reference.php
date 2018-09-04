@@ -31,7 +31,13 @@ use StringHelpers\Inflect;
 		}
 
 		function cast($value) {
+
+			if (is_null($value)) {
+				return $value;
+			}
+
 			return $value;
+
 		}
 
 		function nativeType($typeMapper) {
@@ -64,7 +70,13 @@ use StringHelpers\Inflect;
 		}
 
 		function serialize($value) {
+
+			if (is_null($value)) {
+				return $value;
+			}
+
 			return $value;
+
 		}
 
 		function setParameters($params = []) {

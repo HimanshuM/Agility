@@ -312,11 +312,14 @@ use PDO;
 				$sql = preg_replace("/\?/", $connection->quote($param), $sql, 1);
 			}
 
+			// Not used anymore
 			if ($return) {
 				return $sql;
 			}
 
-			Log::log(LogLevel::DB, $sql);
+			if (!getenv("AGILITY_NO_ECHO")) {
+				Log::log(LogLevel::DB, $sql);
+			}
 
 		}
 
@@ -451,7 +454,7 @@ use PDO;
 
 			}
 
-			return $this->_executeQuery($query, $params, 1);
+			return $this->_executeQuery($sql, $params, 1);
 
 		}
 

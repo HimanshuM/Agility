@@ -9,11 +9,23 @@ namespace Agility\Data\Types;
 		}
 
 		function cast($value) {
+
+			if (is_null($value)) {
+				return $value;
+			}
+
 			return boolval($value);
+
 		}
 
 		function serialize($value) {
+
+			if (is_null($value)) {
+				return $value;
+			}
+
 			return boolval($value);
+
 		}
 
 		function __toString() {

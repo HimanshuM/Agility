@@ -82,6 +82,12 @@ use ArrayUtils\Arrays;
 
 		static function staticInitialize() {
 
+			if (static::metaStore()->modelInitialized) {
+				return;
+			}
+
+			static::metaStore()->modelInitialized = true;
+
 			static::metaStore();
 
 			static::connection();
@@ -91,14 +97,14 @@ use ArrayUtils\Arrays;
 			static::generateAttributes();
 			static::initializeAssociations();
 
-			if (!static::metaStore()->modelInitialized) {
+			// if (!static::metaStore()->modelInitialized) {
 
 				if (method_exists(static::class, "initialize")) {
 					static::initialize();
 				}
-				static::metaStore()->modelInitialized = true;
+				// static::metaStore()->modelInitialized = true;
 
-			}
+			// }
 
 		}
 

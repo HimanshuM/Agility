@@ -10,6 +10,10 @@ namespace Agility\Data\Types;
 
 		function cast($value) {
 
+			if (is_null($value)) {
+				return $value;
+			}
+
 			if (is_string($value)) {
 				return json_decode($value, true);
 			}
@@ -19,7 +23,13 @@ namespace Agility\Data\Types;
 		}
 
 		function serialize($value) {
+
+			if (is_null($value)) {
+				return $value;
+			}
+
 			return json_encode($value);
+
 		}
 
 		function __toString() {

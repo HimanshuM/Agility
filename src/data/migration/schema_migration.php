@@ -15,7 +15,10 @@ use StringHelpers\Str;
 		public $className;
 
 		static function createTable() {
+
 			(new CreateSchemaMigration)->processMigration();
+			SchemaMigration::generateAttributes();
+
 		}
 
 		static function prepare($migrationFile) {

@@ -18,6 +18,7 @@ use StringHelpers\Str;
 
 			parent::__construct();
 			$this->migrationRunner = new Runner($this->appPath->parent->chdir("../db/migrate"));
+			putenv("AGILITY_NO_ECHO=1");
 
 		}
 

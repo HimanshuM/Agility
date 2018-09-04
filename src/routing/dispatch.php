@@ -51,7 +51,10 @@ use StringHelpers\Str;
 				// $controller->execute($action, $this->request, $this->response);
 			}
 			catch (Exception $e) {
+
 				Log::error($e->getMessage());
+				Log::error($e->getTraceAsString());
+
 			}
 
 			$controller = null;

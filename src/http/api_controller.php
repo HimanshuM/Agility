@@ -75,6 +75,10 @@ use Agility\Server\AbstractController;
 
 		}
 
+		function respond404() {
+			$this->respond([], 404);
+		}
+
 	}
 
 ?>
