@@ -17,34 +17,17 @@ use Agility\Data\Relation;
 		}
 
 		static function find($id) {
-
-			$resultSet = static::findBy(static::$primaryKey, $id);
-			if (empty($resultSet)) {
-				return false;
-			}
-			if (!is_array($id)) {
-				return $resultSet->first;
-			}
-
-			return $resultSet;
-
+			return static::findBy(static::$primaryKey, $id);
 		}
 
 		static function findBy($column, $value) {
 
 			$value = Relation::resolveSearchValue($value);
 			if (!is_array($value)) {
-				$resultSet = static::where(static::aquaTable()->$column->eq($value))->all;
+				return static::where(static::aquaTable()->$column->eq($value))->first;
 			}
 			else {
-				$resultSet = static::where(static::aquaTable()->$column->in($value))->all;
-			}
-
-			if ($resultSet->empty) {
-				return false;
-			}
-			else {
-				return $resultSet;
+				return static::where(static::aquaTable()->$column->in($value))->all;
 			}
 
 		}
@@ -76,7 +59,7 @@ use Agility\Data\Relation;
 				return false;
 			}
 			else {
-				return $resultSet;
+				return $resultSet->first;
 			}
 
 		}
