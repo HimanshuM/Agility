@@ -36,14 +36,14 @@ use Agility\Data\Connection\Mysql\MysqlConnector;
 			$serializedSession = $sessionObject->data;
 			$session = unserialize($serializedSession);
 
-			if (Session::invalid($sessionObject->createdAt->timestamp)) {
+			if (Session::invalid($sessionObject->createdAt)) {
 
 				$sessionObject->delete();
 				return [false, false];
 
 			}
 
-			return [$session, $sessionObject->createdAt->timestamp];
+			return [$session, $sessionObject->createdAt];
 
 		}
 
@@ -56,7 +56,7 @@ use Agility\Data\Connection\Mysql\MysqlConnector;
 
 					$s->sessionId = $session->id;
 					$s->data = serialize($session);
-					$s->createdAt = Chronometer::fromTimestamp($session->ctime);
+					$s->createdAt = $session->createdAt;
 
 				});
 

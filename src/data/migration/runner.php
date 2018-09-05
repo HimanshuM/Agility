@@ -25,7 +25,7 @@ use Exception;
 		protected function executeMigration($migration) {
 
 			$class = "\\Db\\Migrate\\".$migration->className;
-			echo "Running ".$migration->fileName."\n";
+			echo "Running ".$migration->name."\n";
 			require_once $this->migrationsDir."/".$migration->fileName.".php";
 			if (class_exists($class)) {
 

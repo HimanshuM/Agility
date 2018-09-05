@@ -3,6 +3,7 @@
 namespace Agility\Data\Schema;
 
 use Agility\Data\Collection;
+use Agility\Data\Model;
 use Agility\Exceptions;
 use ArrayUtils\Arrays;
 use InvalidArgumentException;
@@ -28,6 +29,10 @@ use InvalidArgumentException;
 			// save() would still try to write it to the table, which would fail
 			$collection = $this->attributes->toArray;
 			foreach ($collection as $name => $value) {
+
+				if (is_a($value, Model::class)) {
+					$value = $value->valueOfPrimaryKey();
+				}
 
 				if (isset(static::attributeObjects()[$name])) {
 					$value = static::attributeObjects()[$name]->dataType->serialize($value);
@@ -71,6 +76,10 @@ use InvalidArgumentException;
 				}
 				else {
 					$this->_fresh = false;
+				}
+
+				if (is_a($value, Model::class)) {
+					$value = $value->valueOfPrimaryKey();
 				}
 
 				if (isset(static::attributeObjects()[$name])) {
@@ -118,7 +127,7 @@ use InvalidArgumentException;
 		}
 
 		function isSet($attribute) {
-			return isset($this->attributes->$attribute);
+			return isset($this->attributes->$attribute) ?: property_exists($this, $attribute);
 		}
 
 		private function _setAttribute($name, $value) {

@@ -29,6 +29,11 @@ use StringHelpers\Str;
 			}
 
 			$this->initializeApplication($args);
+			echo "Droping database...\n";
+			foreach (Pool::$pool as $connection) {
+				$connection->resetDatabase();
+			}
+			echo "Database dropped.\n";
 
 		}
 
@@ -55,7 +60,7 @@ use StringHelpers\Str;
 				return;
 			}
 
-			$this->initializeApplication($this->_appPath, $this->_appName, $args);
+			// $this->initializeApplication($args);
 
 			$this->drop($args);
 			$this->migrate($args);

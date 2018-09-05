@@ -192,17 +192,7 @@ use StringHelpers\Str;
 		protected function setupApplicationAutoloader() {
 
 			$cwd = Configuration::documentRoot()->cwd;
-			spl_autoload_register(function($class) use ($cwd) {
-
-				$components = new Arrays(explode("\\", $class));
-				$class = $components->map(function($each) {
-					return Str::snakeCase(lcfirst($each));
-				})->implode("/");
-				if (file_exists($class.".php")) {
-					require_once($class.".php");
-				}
-
-			});
+			AppLoader::setupApplicationAutoloader($cwd);
 
 		}
 

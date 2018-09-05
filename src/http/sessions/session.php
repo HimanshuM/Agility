@@ -2,6 +2,7 @@
 
 namespace Agility\Http\Sessions;
 
+use Agility\Chrono\Chronometer;
 use Agility\Config;
 use Agility\Http\Cookie;
 use ArrayUtils\Arrays;
@@ -12,7 +13,7 @@ use ArrayUtils\Arrays;
 		protected $cookie;
 		// Unset when the session was created from cookie or header
 		protected $fresh = true;
-		protected $ctime;
+		protected $createdAt;
 
 		function __construct() {
 
@@ -22,11 +23,11 @@ use ArrayUtils\Arrays;
 				$this->initializeId();
 			}
 
-			$this->ctime = mktime();
+			$this->createdAt = new Chronometer;
 
 			$this->cookie = new Cookie(Config::sessionStore()->cookieName);
 
-			$this->readonly("id", "cookie", "ctime", "fresh");
+			$this->readonly("id", "cookie", "createdAt", "fresh");
 
 		}
 
@@ -70,16 +71,16 @@ use ArrayUtils\Arrays;
 
 			$session = false;
 			if (Config::sessionStore()->fileStore) {
-				list($session, $ctime) = Config::sessionStore()->fileStore->readSession($sessionId);
+				list($session, $createdAt) = Config::sessionStore()->fileStore->readSession($sessionId);
 			}
 			else {
-				list($session, $ctime) = Config::sessionStore()->databaseStore->readSession($sessionId);
+				list($session, $createdAt) = Config::sessionStore()->databaseStore->readSession($sessionId);
 			}
 
 			if ($session !== false) {
 
 				$session->id = $sessionId;
-				$session->ctime = $ctime;
+				$session->createdAt = $createdAt;
 				$session->fresh = false;
 
 			}
@@ -95,8 +96,8 @@ use ArrayUtils\Arrays;
 			$this->id = hash("sha256", microtime());
 		}
 
-		static function invalid($ctime) {
-			return mktime() - $ctime > Config::sessionStore()->expiry;
+		static function invalid($createdAt) {
+			return mktime() - $createdAt->timestamp > Config::sessionStore()->expiry;
 		}
 
 		function persist($response) {
@@ -135,7 +136,7 @@ use ArrayUtils\Arrays;
 			}
 			else {
 
-				if (!$this->fresh) {
+				if (!$this->fresh || Config::sessionStore()->sessionSource != "cookie") {
 					return;
 				}
 

@@ -17,6 +17,7 @@ use ArrayUtils\Arrays;
 			}
 
 			if (!is_array($args)) {
+				debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 				throw new Exception("Agility\\Console\\Helpers\\AsrgumentsHelper::parseOptions() expects a string, an array or an object of class ArrayUtils\\Arrays", 1);
 			}
 

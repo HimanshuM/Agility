@@ -27,7 +27,7 @@ namespace Agility\Data\Helpers;
 
 				$exportableAttributes = static::ExportableAttributes;
 
-				return $this->attributes->filter(function($name) use ($exportableAttributes) {
+				return $this->attributes->toArray->filter(function($name) use ($exportableAttributes) {
 					return in_array($name, $exportableAttributes);
 				}, ARRAY_FILTER_USE_KEY);
 

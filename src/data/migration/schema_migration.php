@@ -11,6 +11,7 @@ use StringHelpers\Str;
 		protected static $primaryKey = "version";
 		protected static $tableName = "schema_migrations";
 
+		public $name;
 		public $fileName;
 		public $className;
 
@@ -36,7 +37,8 @@ use StringHelpers\Str;
 			$fileName = Arrays::split("_", $this->fileName);
 
 			$this->version = $fileName->first;
-			$this->className = Str::camelCase($fileName->skip(1)->join);
+			$this->name = $fileName->skip(1)->join;
+			$this->className = Str::camelCase($this->name);
 
 		}
 

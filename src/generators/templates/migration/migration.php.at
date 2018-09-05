@@ -26,7 +26,7 @@ use Agility\Data\Migration;
 }
 else if ($this->type != "create") {
 foreach ($this->attributes as $c) { ?>
-			$this-><?= $this->type ?>Column("<?= $this->tableName ?>", "<?= $c->name ?>"<?= $this->type == "add" ? ", \"".$c->dataType."\"".($c->dataType->options() ? ", ".$c->dataType->options() : "") : "" ?>);
+			$this-><?= $this->type ?>Column("<?= $this->tableName ?>", "<?= $c->name ?>"<?= $this->type == "add" ? ", \"".$c->dataType."\"".($c->optionString() ? ", ".$c->optionString() : "") : "" ?>);
 <?php }
 }?>
 		}

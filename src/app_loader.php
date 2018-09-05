@@ -2,6 +2,7 @@
 
 namespace Agility;
 
+use ArrayUtils\Arrays;
 use FileSystem\FileSystem;
 use ReflectionClass;
 use StringHelpers\Str;
@@ -53,6 +54,22 @@ use Swoole;
 
 			$models = Configuration::documentRoot()->children("app/models");
 			AppLoader::iterateThroughModels($models);
+
+		}
+
+		static function setupApplicationAutoloader($cwd) {
+
+			spl_autoload_register(function($class) use ($cwd) {
+
+				$components = new Arrays(explode("\\", $class));
+				$class = $components->map(function($each) {
+					return Str::snakeCase(lcfirst($each));
+				})->implode("/");
+				if (file_exists($class.".php")) {
+					require_once($class.".php");
+				}
+
+			});
 
 		}
 

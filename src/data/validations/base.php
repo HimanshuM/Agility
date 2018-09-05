@@ -16,6 +16,7 @@ use StringHelpers\Str;
 		protected $validator;
 
 		protected static $_validators = [
+			"confirmation",
 			"exclusion",
 			"format",
 			"inclusion",

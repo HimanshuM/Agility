@@ -97,11 +97,11 @@ use PDO;
 
 		}
 
-		protected function _connect() {
+		protected function _connect($noDb = false) {
 
 			return $this->getPdoConnection(
 					$this->_setDsn(
-						$this->_dbName, $this->_host, $this->_port, $this->_unixSocket, $this->_charSet),
+						($noDb ? "" : $this->_dbName), $this->_host, $this->_port, $this->_unixSocket, $this->_charSet),
 					$this->_username, $this->_password, $this->_extraConfig
 				);
 
@@ -354,6 +354,17 @@ use PDO;
 
 		}
 
+		function resetDatabase() {
+
+			$connection = $this->_connect(true);
+			$dbName = $this->_dbName;
+
+			$connection->exec("DROP DATABASE `$dbName`;");
+			$connection->exec("CREATE DATABASE `$dbName`;");
+			$connection->exec("ALTER DATABASE `$dbName` CHARACTER SET utf8 COLLATE utf8_general_ci;");
+
+		}
+
 		private function _setCharacterSet($config) {
 			return $config["charset"] ?? null;
 		}
@@ -363,13 +374,13 @@ use PDO;
 		}
 
 		// If both hostname and Unix socket are specified, precedence will be given to the Unix socket
-		private function _setDsn($db, $host = null, $port = null, $unixSocket = null, $charSet = null) {
+		private function _setDsn($db = null, $host = null, $port = null, $unixSocket = null, $charSet = null) {
 
 			if (empty($unixSocket) && empty($host)) {
 				throw new MysqlConnectionException("Cannot connect to Mysql database, neither host nor unix socket is specified.");
 			}
 
-			return "mysql:dbname=".$db.(!empty($unixSocket) ? ";unix_socket=".$unixSocket : "").(empty($unixSocket) && !empty($host) ? ";host=".$host.(!empty($port) ? ";port=".$port : "") : "").(!empty($charSet) ? ";charset=".$charSet : "");
+			return "mysql:".(!empty($db) ? "dbname=".$db.";" : "").(!empty($unixSocket) ? "unix_socket=".$unixSocket.";" : "").(empty($unixSocket) && !empty($host) ? "host=".$host.";".(!empty($port) ? "port=".$port.";" : "") : "").(!empty($charSet) ? "charset=".$charSet : "");
 
 		}
 

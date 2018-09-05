@@ -4,8 +4,10 @@ namespace Agility\Data\Migration;
 
 use Agility\Data\Connection;
 use Agility\Data\Connection\Pool;
+use Agility\Data\Schema\Attribute;
 use Agility\Data\Schema\ForeignKeyRelation;
 use Agility\Data\Schema\Table;
+use Agility\Data\Types\Base AS TypesBase;
 use ArrayUtils\Arrays;
 use Exception;
 use Phpm\Exceptions\MethodExceptions\InsufficientParametersException;
@@ -31,7 +33,7 @@ use StringHelpers\Inflect;
 
 		protected function addColumn($tableName, $attrName, $dataType, $options = []) {
 
-			$dataType = Base::getType($dataType);
+			$dataType = TypesBase::getType($dataType);
 			// Send options to the data type for consumption of limit, precision, size, foreignKey or polymorphic, etc
 			$dataType->setParameters($options);
 
@@ -194,7 +196,7 @@ use StringHelpers\Inflect;
 				$columnsSql = [];
 
 				foreach ($columns as $column) {
-					$columnSql = "ADD ".$column->toSql($this->connection);
+					$columnsSql[] = "ADD ".$column->toSql($this->connection);
 				}
 
 				$sql .= implode(", ", $columnsSql).";";

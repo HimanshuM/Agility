@@ -42,6 +42,8 @@ use PDO;
 
 		abstract function getTypeMapper();
 
+		abstract function resetDatabase();
+
 	}
 
 ?>

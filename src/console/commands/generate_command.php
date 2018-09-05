@@ -7,6 +7,7 @@ use Agility\Data\Generators\ModelGenerator;
 use Agility\Generators\ControllerGenerator;
 use Agility\Generators\MailerGenerator;
 use Agility\Generators\ScaffoldGenerator;
+use Agility\Generators\TaskGenerator;
 use Agility\Initializers\ApplicationInitializer;
 use ArrayUtils\Arrays;
 use FileSystem\Dir;
@@ -25,7 +26,8 @@ use StringHelpers\Str;
 		const Shorthand = [
 			"c" => "controller",
 			"m" => "model",
-			"s" => "scaffold"
+			"s" => "scaffold",
+			"t" => "task"
 		];
 
 		private function _controller($args) {
@@ -117,7 +119,7 @@ use StringHelpers\Str;
 		}
 
 		private function _task($args) {
-
+			TaskGenerator::start($this->_appPath, $this->_appRoot, $args);
 		}
 
 	}

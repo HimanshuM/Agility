@@ -2,6 +2,7 @@
 
 namespace Agility\Http\Sessions;
 
+use Agility\Chrono\Chronometer;
 use Agility\Config;
 
 	class CookieStore {
@@ -36,18 +37,20 @@ use Agility\Config;
 			list($ctime, $serializedSession) = explode(PHP_EOL, $content);
 			$session = unserialize($serializedSession);
 
-			if (Session::invalid($ctime)) {
+			$createdAt = Chronometer::fromTimestamp(intval($ctime));
+
+			if (Session::invalid($createdAt)) {
 				return [false, false];
 			}
 
-			return [$session, $ctime];
+			return [$session, $createdAt];
 
 		}
 
 		function writeSession($session, $response) {
 
 			$serializedSession = serialize($session);
-			$content = $session->ctime.PHP_EOL.$serializedSession;
+			$content = $session->createdAt->timestamp.PHP_EOL.$serializedSession;
 
 			$iv = $this->iv();
 			$tag = null;

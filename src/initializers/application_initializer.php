@@ -2,10 +2,13 @@
 
 namespace Agility\Initializers;
 
+use Agility\Application;
 use Agility\Console\Helpers\ArgumentsHelper;
 use Agility\Configuration;
 
 	trait ApplicationInitializer {
+
+		protected $application;
 
 		function parseOptions($args) {
 
@@ -31,15 +34,19 @@ use Agility\Configuration;
 
 		private function initializeApplication($args) {
 
-			$app = $this->instantiateApplication($args);
-			$app->firstStageInitialization();
+			if (is_a($this->application, Application::class)) {
+				return;
+			}
+
+			$this->instantiateApplication($args);
+			$this->application->firstStageInitialization();
 
 		}
 
 		private function instantiateApplication($args) {
 
 			$className = $this->loadApplication($args);
-			return new $className;
+			return $this->application = new $className;
 
 		}
 

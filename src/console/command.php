@@ -2,6 +2,7 @@
 
 namespace Agility\Console;
 
+use Agility\AppLoader;
 use ArrayUtils\Arrays;
 use FileSystem\FileSystem;
 use StringHelpers\Str;
@@ -30,7 +31,9 @@ use StringHelpers\Str;
 				$appPath = FileSystem::path(APP_PATH);
 				$appPath = $appPath->cwd->chdir("..");
 
-				$namespaces[] = [$appPath->chdir("lib/tasks"), "Tasks"];
+				AppLoader::setupApplicationAutoloader($appPath);
+
+				$namespaces[] = [$appPath->chdir("lib/tasks"), "Lib\\Tasks"];
 
 			}
 
@@ -69,17 +72,19 @@ use StringHelpers\Str;
 
 			}
 
-			$classPath = $class;
+			$method = Str::pascalCase($method);
 
 			foreach ($namespaces as $namespace) {
 
+				$classPath = $class;
 				if ($namespace[1] == "Agility\\Console\\Commands") {
 					$classPath .= "_command";
 				}
-				$class = Str::camelCase($classPath);
 
-				if ($namespace[0]->has($classPath.".php") && method_exists($namespace[1]."\\".$class, $method)) {
-					return [$namespace[1]."\\".$class, $method];
+				$tryClass = Str::camelCase($classPath);
+
+				if ($namespace[0]->has($classPath.".php") && method_exists($namespace[1]."\\".$tryClass, $method)) {
+					return [$namespace[1]."\\".$tryClass, $method];
 				}
 
 			}

@@ -2,6 +2,7 @@
 
 namespace Agility\Http\Sessions;
 
+use Agility\Chrono\Chronometer;
 use Agility\Config;
 
 	class FileStore extends BackendStore {
@@ -28,17 +29,17 @@ use Agility\Config;
 
 			$content = $sessionFile->lines();
 
-			$ctime = intval($content[0]);
+			$createdAt = Chronometer::fromTimestamp(intval($content[0]));
 			$serializedSession = $content[1];
 
-			if (Session::invalid($ctime)) {
+			if (Session::invalid($createdAt)) {
 
 				$sessionFile->delete();
 				return [false, false];
 
 			}
 
-			return [unserialize($serializedSession), $ctime];
+			return [unserialize($serializedSession), $createdAt];
 
 		}
 
@@ -66,7 +67,7 @@ use Agility\Config;
 			$sessionFile = $this->sessionFile($session->id, true);
 
 			$serializedSession = serialize($session);
-			$content = $session->ctime.PHP_EOL.$serializedSession;
+			$content = $session->createdAt->timestamp.PHP_EOL.$serializedSession;
 
 			$sessionFile->write($content);
 

@@ -266,6 +266,31 @@ use StringHelpers\Str;
 			return $this->join($with, "LeftJoin");
 		}
 
+		// Incomplete method
+		function new($params = []) {
+
+			if (!is_a($this->_statement, SelectStatement::class)) {
+				throw new Exception("Invalid use of Agility\\Data\\Relation::create()");
+			}
+
+			if ($this->_statement->where->empty()) {
+				return null;
+			}
+
+			$boolean = $this->_statement->where->root->left;
+			if (!is_a($boolean->left, "Aqua\\Attribute")) {
+				return null;
+			}
+
+			$foreignKeyName = $boolean->left->name;
+			$value = $boolean->right;
+
+			$params[Str::pascalCase($foreignKeyName)] = $value;
+
+			return $this->_model::new($params);
+
+		}
+
 		function notExists($statement) {
 
 			$this->_statement->exists($statement, false);
