@@ -9,6 +9,7 @@ use ArrayUtils\Arrays;
 
 		protected $cssCache;
 		protected $jsCache;
+		protected $title;
 
 		function css() {
 
@@ -76,11 +77,17 @@ use ArrayUtils\Arrays;
 		}
 
 		protected function jsLink($js) {
-			return "<script src=\"".$this->getEmbedablePath($js, false)."\">";
+			return "<script src=\"".$this->getEmbedablePath($js, false)."\"></script>";
 		}
 
-		function title() {
-			return "";
+		function title($title = null) {
+
+			if (is_string($title)) {
+				$this->title = $title;
+			}
+
+			return $this->title;
+
 		}
 
 	}

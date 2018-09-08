@@ -14,6 +14,7 @@ use AttributeHelper\Accessor;
 		protected $request;
 
 		protected $host;
+		protected $port;
 		protected $headers;
 		protected $ip;
 		protected $method;
@@ -31,7 +32,7 @@ use AttributeHelper\Accessor;
 			$this->params = new Arrays;
 			$this->compileParameters();
 
-			$this->readonly("host", "headers", "ip", "method", "params", "uri", "get", "post", "cookie");
+			$this->readonly("host", "port", "headers", "ip", "method", "params", "uri", "get", "post", "cookie");
 
 		}
 

@@ -27,6 +27,7 @@ use ArrayUtils\Arrays;
 
 			$this->cookie = new Cookie(Config::sessionStore()->cookieName);
 
+			$this->methodsAsProperties("invalidate");
 			$this->readonly("id", "cookie", "createdAt", "fresh");
 
 		}
@@ -80,7 +81,13 @@ use ArrayUtils\Arrays;
 			if ($session !== false) {
 
 				$session->id = $sessionId;
-				$session->createdAt = $createdAt;
+				if (Config::sessionStore()->expiryScheme == Configuration::ConstantExpiry) {
+					$session->createdAt = $createdAt;
+				}
+				else {
+					$session->createdAt = new Chronometer;
+				}
+
 				$session->fresh = false;
 
 			}
@@ -92,12 +99,47 @@ use ArrayUtils\Arrays;
 
 		}
 
+		protected function deleteFile() {
+			Config::sessionStore()->fileStore->deleteSession($this);
+		}
+
+		protected function deleteStorage() {
+
+			if (Config::sessionStore()->fileStore) {
+				$this->deleteFile();
+			}
+			else if (Config::sessionStore()->databaseStore) {
+				$this->deleteFromDb();
+			}
+
+		}
+
 		protected function initializeId() {
 			$this->id = hash("sha256", microtime());
 		}
 
+		function initializeFromId($sessionId) {
+
+			$session = static::buildFromBackend($sessionId);
+
+			$this->id = $session->id;
+			$this->cookie = $session->cookie;
+			$this->fresh = $session->fresh;
+			$this->createdAt = $session->createdAt;
+
+			$this->copyFrom($session);
+
+		}
+
 		static function invalid($createdAt) {
 			return mktime() - $createdAt->timestamp > Config::sessionStore()->expiry;
+		}
+
+		function invalidate() {
+
+			$this->clear();
+			$this->deleteStorage();
+
 		}
 
 		function persist($response) {
@@ -141,6 +183,9 @@ use ArrayUtils\Arrays;
 				}
 
 				$this->cookie->value = $this->id;
+				if (!empty(Config::sessionStore()->secureCookie)) {
+					$this->cookie->httponly = true;
+				}
 				$this->cookie->write($response);
 
 			}

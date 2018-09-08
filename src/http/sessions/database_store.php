@@ -25,6 +25,13 @@ use Agility\Data\Connection\Mysql\MysqlConnector;
 
 		}
 
+		function deleteSession($session) {
+
+			$className = $this->model;
+			$className::execute("DELETE FROM ".$className::tableName()." WHERE ".$className::$primaryKey." = ?;", $session->id);
+
+		}
+
 		function readSession($sessionId) {
 
 			$className = $this->model;

@@ -12,6 +12,7 @@ use ArrayUtils\Arrays;
 		protected $templateBase;
 		protected $template;
 		protected $subContent = "";
+		protected $count = 0;
 
 		function content() {
 			return $this->subContent;
@@ -57,7 +58,7 @@ use ArrayUtils\Arrays;
 				return $this->json($options["json"], true);
 			}
 
-			if (is_null($template)) {
+			if (is_null($template) && empty($options["partial"]) && empty($options["view"])) {
 				$template = $this->getRelativeClassName()."/".$this->_methodInvoked;
 			}
 

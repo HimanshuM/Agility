@@ -10,10 +10,15 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 
 		use Accessor;
 
+		const ConstantExpiry = 0;
+		const IncrementalExpiry = 1;
+
 		public $cookieName = "agility_sess";
+		public $secureCookie = false;
 		protected $storage = "FileStore";
 		public $sessionSource = "cookie";
 		protected $expiry = 1200;
+		protected $expiryScheme = 1;
 
 		protected $cookieStore = false;
 		protected $databaseStore = false;
@@ -47,6 +52,23 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 			}
 
 			$this->expiry = $value;
+
+		}
+
+		function expiryScheme($value = nil) {
+
+			if ($value == nil) {
+				return $this->expiryScheme;
+			}
+
+			if (!is_int($value)) {
+				throw new InvalidTypeException("Session store expiry scheme", "integer");
+			}
+			if ($value != 0 && $value != 1) {
+				throw new Exception("Session store expiry scheme can only have 2 values, Configuration::ConstantExpiry or Configuration::IncrementalExpiry");
+			}
+
+			$this->expiryScheme = $value;
 
 		}
 

@@ -29,6 +29,10 @@ use StringHelpers\Str;
 			}
 			$this->_setAttribute(static::$primaryKey, $id);
 
+			$this->_fresh = false;
+			$this->_dirty = false;
+			$this->_persisted = true;
+
 			$this->_runCallbacks("afterCreate");
 			return true;
 
@@ -116,6 +120,9 @@ use StringHelpers\Str;
 			if ($relation->update($attributes)->where([static::$primaryKey => $primaryKey])->execute() == 0) {
 				return false;
 			}
+
+			$this->_dirty = false;
+			$this->_persisted = true;
 
 			$this->_runCallbacks("afterUpdate");
 			return true;

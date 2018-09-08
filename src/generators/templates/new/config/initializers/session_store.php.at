@@ -2,6 +2,9 @@
 
 // Rename session cookie to whatever is desired
 Agility\Config::sessionStore()->cookieName = "agility_sess";
+// Session cookie is not HttpOnly by default. Enable the below line to enable
+// secure cookie only
+// Agility\Config::sessionStore()->secureCookie = true;
 
 // Define how the session is identfied
 // Default: cookie

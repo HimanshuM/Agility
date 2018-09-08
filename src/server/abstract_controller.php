@@ -25,6 +25,8 @@ use StringHelpers\Str;
 		function __construct() {
 
 			$this->params = new Arrays;
+
+			$this->notFoundResponse(ACCESSOR_NOT_FOUND_ALLOW);
 			$this->readonly("params");
 
 		}
@@ -34,6 +36,11 @@ use StringHelpers\Str;
 		}
 
 		abstract protected function conclude($return);
+
+		// What to do if a before trigger already responded
+		protected function concludeOnRespondedByBeforeTrigger() {
+			return true;
+		}
 
 		function execute($method) {
 
@@ -45,6 +52,10 @@ use StringHelpers\Str;
 
 				$this->_methodInvoked = $method;
 				$this->invokeTriggerFor($method);
+
+				if ($this->_responded && $this->concludeOnRespondedByBeforeTrigger()) {
+					return $this->conclude([]);
+				}
 
 				$return = $this->$method();
 

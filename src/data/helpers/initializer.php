@@ -49,6 +49,7 @@ use ArrayUtils\Arrays;
 			$this->attributes = new Collection;
 			$this->_fresh = true;
 			$this->_dirty = false;
+			$this->_persisted = false;
 
 			$this->errors = new ValidationErrors;
 

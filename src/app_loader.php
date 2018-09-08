@@ -79,7 +79,7 @@ use Swoole;
 			if (class_exists($modelClass)) {
 
 				$classInfo = new ReflectionClass($modelClass);
-				if (!$classInfo->isAbstract() && method_exists($modelClass, "staticInitialize")) {
+				if (!$classInfo->isAbstract() && method_exists($modelClass, "staticInitialize") && is_subclass_of($modelClass, Data\Model::class)) {
 					$modelClass::staticInitialize();
 				}
 

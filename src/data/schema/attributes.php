@@ -4,9 +4,11 @@ namespace Agility\Data\Schema;
 
 use Agility\Data\Collection;
 use Agility\Data\Model;
+use Agility\Data\Relation;
 use Agility\Exceptions;
 use ArrayUtils\Arrays;
 use InvalidArgumentException;
+use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 
 	trait Attributes {
 
@@ -32,6 +34,20 @@ use InvalidArgumentException;
 
 				if (is_a($value, Model::class)) {
 					$value = $value->valueOfPrimaryKey();
+				}
+				else if (is_a($value, Relation::class)) {
+
+					$value = $value->first;
+					if (empty($value)) {
+						$value = null;
+					}
+					else if (is_a($value, Model::class)) {
+						$value = $value->valueOfPrimaryKey();
+					}
+					else {
+						throw new InvalidTypeException(static::class."::$name", static::generatedAttributes()[$name]->dataType);
+					}
+
 				}
 
 				if (isset(static::attributeObjects()[$name])) {

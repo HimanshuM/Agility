@@ -64,7 +64,9 @@ use Closure;
 				throw new Exceptions\InvalidHttpLocationException($location);
 			}
 
-			$location = "/".trim($location, "/ ");
+			if (strpos($location, "http") !== 0) {
+				$location = "/".trim($location, "/ ");
+			}
 
 			$this->_responded = true;
 

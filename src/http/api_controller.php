@@ -2,6 +2,7 @@
 
 namespace Agility\Http;
 
+use Agility\Config;
 use Agility\Server\AbstractController;
 
 	class ApiController extends AbstractController {
@@ -22,7 +23,15 @@ use Agility\Server\AbstractController;
 			$this->json($response);
 		}
 
+		protected function concludeOnRespondedByBeforeTrigger() {
+			return Config::http()->concludeOnRespondedByBeforeTrigger;
+		}
+
 		function json($data, $status = 200) {
+
+			if (is_null($data)) {
+				$data = [];
+			}
 
 			$data = is_string($data) ? $data : json_encode($data);
 			$this->respond(["json" => $data], $status);

@@ -29,11 +29,11 @@ use StringHelpers\Str;
 			}
 
 			$this->initializeApplication($args);
-			echo "Droping database...\n";
+			echo "Resetting database...\n";
 			foreach (Pool::$pool as $connection) {
-				$connection->resetDatabase();
+				// $connection->resetDatabase();
 			}
-			echo "Database dropped.\n";
+			echo "Database reset.\n";
 
 		}
 

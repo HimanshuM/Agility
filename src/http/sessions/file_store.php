@@ -21,6 +21,10 @@ use Agility\Config;
 			$this->storageLocation->scan(["atime" => (mktime() - Config::sessionStore()->expiry), false])->walk(":delete");
 		}
 
+		function deleteSession($session) {
+			$this->storageLocation->find("sess_".$session->id)->first->delete();
+		}
+
 		function readSession($sessionId) {
 
 			if (($sessionFile = $this->sessionFile($sessionId)) === false) {

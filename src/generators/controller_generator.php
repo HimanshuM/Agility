@@ -22,6 +22,7 @@ use StringHelpers\Str;
 
 		public $scaffold = false;
 		public $scaffoldObject = false;
+		public $scaffoldObjects = false;
 
 		protected $views = true;
 		protected $skipRoutes = false;
@@ -58,6 +59,7 @@ use StringHelpers\Str;
 				$controllerName = Inflect::pluralize($controllerName);
 				$this->scaffold = Inflect::singularize($controllerName);
 				$this->scaffoldObject = lcfirst($this->scaffold);
+				$this->scaffoldObjects = Inflect::pluralize($this->scaffoldObject);
 
 			}
 

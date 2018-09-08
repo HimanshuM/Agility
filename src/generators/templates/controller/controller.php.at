@@ -23,7 +23,7 @@ use App\Models\<?= $this->scaffold; ?>;
 <?php if ($this->scaffold) { ?>
 		// GET /<?= $this->filePath."\n"; ?>
 		function index() {
-			$this-><?= $this->scaffoldObject; ?> = <?= $this->scaffold; ?>::all();
+			$this-><?= $this->scaffoldObjects; ?> = <?= $this->scaffold; ?>::all();
 		}
 
 		// POST /<?= $this->filePath."\n"; ?>

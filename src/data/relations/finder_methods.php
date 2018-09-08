@@ -22,6 +22,8 @@ use Agility\Data\Relation;
 
 		static function findBy($column, $value) {
 
+			$column = NameHelper::getStorableName($column);
+
 			$value = Relation::resolveSearchValue($value);
 			if (!is_array($value)) {
 				return static::where(static::aquaTable()->$column->eq($value))->first;
