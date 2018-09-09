@@ -146,8 +146,6 @@ use StringHelpers\Str;
 
 			$this->printRequest();
 
-			gc_disable();
-
 			list($route, $params) = $this->findHandler($this->request->method, $this->request->uri);
 			if ($route === false) {
 				return $this->process404($route);

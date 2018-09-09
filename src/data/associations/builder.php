@@ -21,7 +21,7 @@ use StringHelpers\Str;
 			if ($polymorphic === false) {
 
 				if (!empty($options["className"])) {
-					$className = $options["className"];
+					$className = "App\\Models\\".$options["className"];
 				}
 				else {
 					$className = NameHelper::classify($associationName, static::class, false);

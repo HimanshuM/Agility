@@ -29,7 +29,15 @@ use ArrayUtils\Arrays;
 		}
 
 		protected function cssLink($css) {
-			return "<link rel=\"stylesheet\" type=\"text/css\" href=\"".$this->getEmbedablePath($css)."\">";
+
+			$url = parse_url($css);
+			if (empty($url) || !isset($url["host"])) {
+				return "<link rel=\"stylesheet\" href=\"".$this->getEmbedablePath($css)."\">";
+			}
+			else {
+				return "<link rel=\"stylesheet\" href=\"".$css."\">";
+			}
+
 		}
 
 		protected function echoCss() {
@@ -77,7 +85,14 @@ use ArrayUtils\Arrays;
 		}
 
 		protected function jsLink($js) {
-			return "<script src=\"".$this->getEmbedablePath($js, false)."\"></script>";
+
+			$url = parse_url($js);
+			if (empty($url) || !isset($url["host"])) {
+				return "<script src=\"".$this->getEmbedablePath($js, false)."\"></script>";
+			}
+			else {
+				return "<script src=\"".$js."\"></script>";
+			}
 		}
 
 		function title($title = null) {

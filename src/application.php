@@ -107,6 +107,7 @@ use StringHelpers\Str;
 			$this->initializeHttp();
 			$this->initializeSecurity();
 			$this->initializeMailer();
+			$this->setupCaching();
 
 		}
 
@@ -196,6 +197,10 @@ use StringHelpers\Str;
 
 		}
 
+		protected function setupCaching() {
+			Caching\Cache::initialize();
+		}
+
 		protected function setupComposerAutoloader() {
 
 			if (($composerAutoLoader = Configuration::documentRoot()->has("vendor/autoload.php")) !== false) {
@@ -217,7 +222,14 @@ use StringHelpers\Str;
 		}
 
 		function listner($request, $response) {
+
+			gc_disable();
+
 			(new Dispatch($request, $response))->serve();
+
+			Caching\Cache::runGC();
+			gc_collect_cycles();
+
 		}
 
 	}

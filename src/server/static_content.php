@@ -23,11 +23,11 @@ use Agility\Configuration;
 
 		static function setEmbedablesPath() {
 
-			Configuration::cssPath("css/", function($setting, $value) {
+			Configuration::cssPath("/css/", function($setting, $value) {
 				trim($value, "/")."/";
 			});
 
-			Configuration::jsPath("js/", function($setting, $value) {
+			Configuration::jsPath("/js/", function($setting, $value) {
 				return trim($value, "/")."/";
 			});
 

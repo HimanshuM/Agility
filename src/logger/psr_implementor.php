@@ -37,14 +37,10 @@ use Agility\Logger\Psr\LogLevel;
 		function log($level, $message, $context = []) {
 
 			$message = "[".date("Y-m-d H:i:s")."]  ".strtoupper($level)."\t".$message."\n";
-			if (Configuration::environment() != "production") {
-
-				$this->echo($message);
-				return;
-
+			if (Configuration::environment() == "development") {
+				$this->writeLog($message, STDOUT);
 			}
-
-			if ($level == LogLevel::DB && Configuration::logDbQueries()) {
+			else if ($level == LogLevel::DB && Configuration::logDbQueries()) {
 				$this->writeLog($message, Configuration::dbLog());
 			}
 			else if (in_array($level, [LogLevel::DEBUG, LogLevel::INFO, LogLevel::NOTICE, LogLevel::WARNING]) && Log::LogLevels[$level] <= Configuration::logLevel()) {
@@ -98,8 +94,15 @@ use Agility\Logger\Psr\LogLevel;
 
 		protected function writeLog($message, $file) {
 
-			$this->prepareLogFile($file);
-			error_log($message, 3, $file);
+			if ($file == STDOUT) {
+				fwrite(STDOUT, $message);
+			}
+			else {
+
+				$this->prepareLogFile($file);
+				error_log($message, 3, $file);
+
+			}
 
 		}
 
