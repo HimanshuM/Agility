@@ -2,12 +2,12 @@
 
 namespace Agility\Console\Commands;
 
-use Agility\Http\Security;
+use Agility\Http\Security\Secure;
 
 	class SecretCommand extends Base {
 
 		function generateKey() {
-			return openssl_random_pseudo_bytes(openssl_cipher_iv_length("aes-128-gcm"));
+			return Secure::randomBytes("aes-128-gcm");
 		}
 
 		function generateKeys() {
@@ -28,7 +28,7 @@ use Agility\Http\Security;
 			}
 
 			// $this->initializeApplication($args);
-			if (!Security::appHasSecurityFile($this->_appRoot)) {
+			if (!Secure::appHasSecurityFile($this->_appRoot)) {
 
 				$securityJson = $this->_appRoot->touch("config/security.json");
 				$securityJson->write(json_encode($this->generateKeys(), JSON_PRETTY_PRINT));

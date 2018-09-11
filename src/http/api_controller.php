@@ -45,8 +45,8 @@ use Agility\Server\AbstractController;
 			$this->session = $this->request->identifySession();
 
 			$this->params->merge($this->request->params);
-			$this->params->merge($this->request->get);
-			$this->params->merge($this->request->post);
+			$this->params->merge($this->request->getParams);
+			$this->params->merge($this->request->postParams);
 
 		}
 
@@ -64,7 +64,11 @@ use Agility\Server\AbstractController;
 			$this->response->status($status);
 
 			if (!$this->session->empty) {
-				$this->session->persist($this->response);
+
+				if (!empty($cookie = $this->session->persist())) {
+					$this->response->cookies[] = $cookie;
+				}
+
 			}
 
 			if (isset($response["html"])) {

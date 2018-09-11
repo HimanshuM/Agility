@@ -29,7 +29,7 @@ use ArrayUtils\Arrays;
 			if (isset(static::$_instance->objects[$key])) {
 
 				$object = static::$_instance->objects[$key];
-				return $object->_a();
+				return $object->access();
 
 			}
 
@@ -50,7 +50,7 @@ use ArrayUtils\Arrays;
 		static function push($key, $value) {
 
 			static::touch($key);
-			static::$_instance->objects[$key]->ap($value);
+			static::$_instance->objects[$key]->push($value);
 
 		}
 
@@ -59,7 +59,7 @@ use ArrayUtils\Arrays;
 			$collectible = [];
 			foreach (static::$_instance->objects as $name => $value) {
 
-				if ($value->d(Config::cache()->ttl)) {
+				if ($value->destroy(Config::cache()->ttl)) {
 					$collectible[] = $name;
 				}
 
@@ -71,17 +71,17 @@ use ArrayUtils\Arrays;
 
 		}
 
-		static function set($key, $value, $expiry = -1) {
+		static function set($key, $value, $expiry = 0) {
 
 			static::touch($key, $expiry);
-			static::$_instance->objects[$key]->a($value);
+			static::$_instance->objects[$key]->access($value);
 
 		}
 
 		static function touch($key, $expiry = -1) {
 
 			if (static::get($key) === null) {
-				static::$_instance->objects[$key] = new Object($key, "", $expiry = -1);
+				static::$_instance->objects[$key] = new Node($key, "", $expiry = -1);
 			}
 
 		}

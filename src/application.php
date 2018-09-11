@@ -132,7 +132,7 @@ use StringHelpers\Str;
 		}
 
 		protected function initializeSecurity() {
-			Http\Security::initialize();
+			Http\Security\Secure::initialize();
 		}
 
 		protected function initializeSwoole() {

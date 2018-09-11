@@ -31,7 +31,7 @@ use StringHelpers\Str;
 			$this->initializeApplication($args);
 			echo "Resetting database...\n";
 			foreach (Pool::$pool as $connection) {
-				// $connection->resetDatabase();
+				$connection->resetDatabase();
 			}
 			echo "Database reset.\n";
 

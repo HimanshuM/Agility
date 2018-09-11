@@ -2,6 +2,7 @@
 
 namespace Agility\Http;
 
+use Agility\Config;
 use Agility\Data\Model;
 use Agility\Routing\Routes;
 use Agility\Templating\Render;
@@ -11,15 +12,23 @@ use Closure;
 
 		use Render;
 
+		const CsrfEncryptionMethod = "aes-128-gcm";
+
 		protected $request;
 		protected $response;
+
+		protected $forgeryProtection = false;
 
 		private $_invoked = false;
 
 		function __construct() {
 
 			parent::__construct();
+
+			$this->beforeAction("validateAuthenticityToken");
+
 			$this->initializeTemplating();
+			$this->forgeryProtection = Config::security()->forgeryProtection;
 
 		}
 
@@ -39,6 +48,34 @@ use Closure;
 
 			}
 
+		}
+
+		protected function cookie($key, $value = "", $expire = 0, $path = "/", $domain  = "", $secure = null, $httponly = false) {
+			$this->response->cookies[] = new Cookie($key, $value, $expire, $path, $domain, $secure, $httponly);
+		}
+
+		function csrfMetaTag() {
+
+			if (!$this->forgeryProtection) {
+				return;
+			}
+
+			$authenticityToken = $this->formAuthenticityToken();
+
+			$this->session["csrfToken"] = $authenticityToken;
+			// $this->cookie("_csrf_token_", $authenticityToken);
+
+			$this->tag("meta", ["attributes" => ["name" => "csrf-param", "content" => "authenticity-token"]]);
+			$this->tag("meta", ["attributes" => ["name" => "csrf-token", "content" => $authenticityToken]]);
+
+		}
+
+		function formAuthenticityToken() {
+			return Security\Secure::secureEncode(Security\Secure::randomBytes(Controller::CsrfEncryptionMethod), Controller::CsrfEncryptionMethod, Config::security()->encryptionKey);
+		}
+
+		protected function protectFromForgery($flag = true) {
+			$this->forgeryProtection = $flag;
 		}
 
 		function redirectTo($location, $status = 302) {
@@ -75,6 +112,30 @@ use Closure;
 			}
 
 			$this->response->redirect($location, $status);
+
+		}
+
+		protected function validateAuthenticityToken() {
+
+			if (!$this->forgeryProtection || $this->request->get || $this->request->options) {
+				return;
+			}
+
+			if ($this->session->exists("csrfToken")) {
+
+				$token = "";
+				if ($this->params->exists("_csrf_token_")) {
+					$token = $this->params["_csrf_token_"];
+				}
+				else if ($this->params->exists("authenticity_token")) {
+					$token = $this->params["authenticity_token"];
+				}
+
+				if ($token != $this->session["csrfToken"]) {
+					throw new Security\InvalidAuthenticityTokenException(static::class, $this->_methodInvoked);
+				}
+
+			}
 
 		}
 

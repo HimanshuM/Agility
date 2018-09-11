@@ -135,6 +135,7 @@ use StringHelpers\Str;
 			}
 			else {
 
+				Log::info("Invoking 404 handler");
 				$this->request->addParameter("route", $route);
 				$this->execute($route404);
 
@@ -154,6 +155,8 @@ use StringHelpers\Str;
 			if (!$this->validateRequest($route, $params)) {
 				return $this->process404($route);
 			}
+
+			$this->request->compileAcceptHeader($route->defaults["format"] ?? "text/html");
 
 			$this->execute($route);
 

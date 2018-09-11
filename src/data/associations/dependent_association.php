@@ -6,6 +6,7 @@ use Agility\Data\Cache\AssociationStore;
 use Agility\Data\Relation;
 use Agility\Data\Relations\Scope;
 use AttributeHelper\Accessor;
+use StringHelpers\Inflect;
 use StringHelpers\Str;
 
 	class DependentAssociation {
@@ -121,12 +122,13 @@ use StringHelpers\Str;
 
 				$throughClass = $this->_through->_associatedClass;
 				$throughTable = $throughClass::aquaTable();
+				$associatedThroughRelation = Inflect::singularize($this->_associatedName);
 
-				if (!$throughClass::associationsCache()->belongsToAssociations->exists($this->_associatedName)) {
-					throw new Exceptions\HasManyThroughSourceNotFoundException($this->_through->_associatedName, $this->_associatedName, $this->_ownerClass);
+				if (!$throughClass::associationsCache()->belongsToAssociations->exists($associatedThroughRelation)) {
+					throw new Exceptions\HasManyThroughSourceNotFoundException($this->_through->_associatedName, $associatedThroughRelation, $this->_ownerClass);
 				}
 
-				$throughBelongsToAssociation = $throughClass::associationsCache()->belongsToAssociations[$this->_associatedName];
+				$throughBelongsToAssociation = $throughClass::associationsCache()->belongsToAssociations[$associatedThroughRelation];
 				$throughForeignKey = Str::snakeCase($throughBelongsToAssociation->associatedForeignKey);
 				$throughOwnerPrimaryKey = $throughBelongsToAssociation->primaryKey;
 
@@ -154,6 +156,7 @@ use StringHelpers\Str;
 
 				$owner->setExternalObject($relation);
 				return $owner;
+
 			}
 			else {
 

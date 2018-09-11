@@ -142,7 +142,7 @@ use ArrayUtils\Arrays;
 
 		}
 
-		function persist($response) {
+		function persist() {
 
 			if (Config::sessionStore()->fileStore) {
 				$this->persistToFile();
@@ -151,7 +151,7 @@ use ArrayUtils\Arrays;
 				$this->persistToDb();
 			}
 
-			$this->write($response);
+			return $this->write();
 
 		}
 
@@ -171,10 +171,10 @@ use ArrayUtils\Arrays;
 			return serialize($this);
 		}
 
-		protected function write($response) {
+		protected function write() {
 
 			if (Config::sessionStore()->cookieStore) {
-				Config::sessionStore()->cookieStore->writeSession($this, $response);
+				Config::sessionStore()->cookieStore->writeSession($this);
 			}
 			else {
 
@@ -186,9 +186,11 @@ use ArrayUtils\Arrays;
 				if (!empty(Config::sessionStore()->secureCookie)) {
 					$this->cookie->httponly = true;
 				}
-				$this->cookie->write($response);
+				// $this->cookie->write($response);
 
 			}
+
+			return $this->cookie;
 
 		}
 

@@ -23,7 +23,7 @@ use StringHelpers\Str;
 		function __construct() {
 
 			$this->_attributes = new Arrays();
-			$this->methodsAsProperties();
+			$this->methodsAsProperties("toArray", "toStorableArray");
 			$this->notFoundResponse(ACCESSOR_NOT_FOUND_CALLBACK, "attributeAccessor");
 
 		}

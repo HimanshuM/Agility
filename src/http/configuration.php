@@ -26,6 +26,8 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 
 			StaticContent::setEmbedablesPath();
 
+			Mime\MimeTypes::initialize();
+
 		}
 
 		function concludeOnRespondedByBeforeTrigger($value = null) {

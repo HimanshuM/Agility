@@ -7,6 +7,7 @@ use Phpm\Exceptions\ClassExceptions\MethodNotFoundException;
 	final class Response {
 
 		protected $response;
+		public $cookies = [];
 
 		function __construct($response) {
 			$this->response = $response;
@@ -15,7 +16,13 @@ use Phpm\Exceptions\ClassExceptions\MethodNotFoundException;
 		function __call($name, $args = []) {
 
 			if (method_exists($this->response, $name)) {
+
+				if ($name == "write") {
+					$this->sendCookies();
+				}
+
 				return call_user_func_array([$this->response, $name], $args);
+
 			}
 
 			throw new MethodNotFoundException("Agility\\Server\\Response", $name);
@@ -36,7 +43,18 @@ use Phpm\Exceptions\ClassExceptions\MethodNotFoundException;
 				$this->response->status($status);
 			}
 
+			$this->sendCookies();
+
 			$this->response->end($response);
+
+		}
+
+		function sendCookies() {
+
+			var_dump($this->cookies);
+			foreach ($this->cookies as $cookie) {
+				$cookie->write($this);
+			}
 
 		}
 

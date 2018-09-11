@@ -7,9 +7,28 @@ use ArrayUtils\Arrays;
 
 	trait Embedable {
 
+		use HtmlTags;
+
 		protected $cssCache;
 		protected $jsCache;
 		protected $title;
+
+		protected $content = [];
+
+		function contentFor($name, $callback = null) {
+
+			if (!empty($callback)) {
+				return $this->content[$name] = $callback;
+			}
+
+			if (empty($this->content[$name])) {
+				return "";
+			}
+
+			$callback = $this->content[$name];
+			return $callback();
+
+		}
 
 		function css() {
 
@@ -30,12 +49,23 @@ use ArrayUtils\Arrays;
 
 		protected function cssLink($css) {
 
+			if (is_array($css)) {
+
+				if (isset($css["style"])) {
+					return $this->tag("style", ["content" => $css["style"]]);;
+				}
+				else if (isset($css["src"])) {
+					return $this->tag("link", ["attributes" => ["rel" => "stylesheet", "href" => $this->getEmbedablePath($css)]]);
+				}
+
+			}
+
 			$url = parse_url($css);
 			if (empty($url) || !isset($url["host"])) {
-				return "<link rel=\"stylesheet\" href=\"".$this->getEmbedablePath($css)."\">";
+				return $this->tag("link", ["attributes" => ["rel" => "stylesheet", "href" => $this->getEmbedablePath($css)]]);
 			}
 			else {
-				return "<link rel=\"stylesheet\" href=\"".$css."\">";
+				return $this->tag("link", ["attributes" => ["rel" => "stylesheet", "href" =>$css]]);
 			}
 
 		}
@@ -86,13 +116,28 @@ use ArrayUtils\Arrays;
 
 		protected function jsLink($js) {
 
+			if (is_array($js)) {
+
+				$attribute = [];
+				if (isset($js["src"])) {
+
+					$attribute["type"] = "text/javascript";
+					$attribute["src"] = $js["src"];
+
+				}
+
+				return $this->tag("script", ["attributes" => $attribute, "content" => $js["script"] ?? ""]);
+
+			}
+
 			$url = parse_url($js);
 			if (empty($url) || !isset($url["host"])) {
-				return "<script src=\"".$this->getEmbedablePath($js, false)."\"></script>";
+				return $this->tag("script", ["attributes" => ["src" => $this->getEmbedablePath($js, false)]]);
 			}
 			else {
-				return "<script src=\"".$js."\"></script>";
+				return $this->tag("script", ["attributes" => ["src" => $js]]);
 			}
+
 		}
 
 		function title($title = null) {

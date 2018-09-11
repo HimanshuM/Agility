@@ -21,18 +21,22 @@ use AttributeHelper\Accessor;
 		protected $params;
 		protected $uri;
 
-		protected $get;
-		protected $post;
+		protected $getParams;
+		protected $postParams;
 		protected $cookie;
+
+		protected $format;
 
 		function __construct($request) {
 
 			$this->request = $request;
 			$this->headers = new Arrays($request->header);
 			$this->params = new Arrays;
+			$this->cookie = new Arrays;
 			$this->compileParameters();
 
-			$this->readonly("host", "port", "headers", "ip", "method", "params", "uri", "get", "post", "cookie");
+			$this->methodsAsProperties("delete", "get", "options", "patch", "post", "put");
+			$this->readonly("host", "port", "headers", "ip", "method", "params", "uri", "getParams", "postParams", "cookie", "format");
 
 		}
 
@@ -44,6 +48,10 @@ use AttributeHelper\Accessor;
 			$this->params[$name] = $value;
 		}
 
+		function compileAcceptHeader($defaultAccept = "text/html") {
+			$this->format = new RequestFormat($this->request->header["accept"] ?? "", $defaultAccept);
+		}
+
 		protected function compileParameters() {
 
 			$this->host = parse_url($this->request->header["host"]);
@@ -51,13 +59,15 @@ use AttributeHelper\Accessor;
 			$this->method = strtolower($this->request->server["request_method"]);
 			$this->uri = $this->request->server["path_info"];
 
-			$this->get = new Arrays($this->request->get);
-			$this->post = new Arrays($this->request->post);
+			$this->getParams = new Arrays($this->request->get);
+			$this->postParams = new Arrays($this->request->post);
+
 			if (!empty($this->request->cookie)) {
-				$this->cookie = new Arrays($this->request->cookie);
-			}
-			else {
-				$this->cookie = new Arrays;
+
+				foreach ($this->request->cookie as $name => $value) {
+					$this->cookie[$name] = $value;
+				}
+
 			}
 
 			if ($this->method != "get") {
@@ -90,6 +100,30 @@ use AttributeHelper\Accessor;
 
 			return new Session;
 
+		}
+
+		function delete() {
+			return $this->method == "delete";
+		}
+
+		function get() {
+			return $this->method == "get";
+		}
+
+		function options() {
+			return $this->method == "options";
+		}
+
+		function patch() {
+			return $this->method == "patch";
+		}
+
+		function post() {
+			return $this->method == "post";
+		}
+
+		function put() {
+			return $this->method == "put";
 		}
 
 	}

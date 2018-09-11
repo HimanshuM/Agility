@@ -172,6 +172,10 @@ use StringHelpers\Str;
 			return $this->where($clause, $params);
 		}
 
+		function empty() {
+			return $this->_executeQuery->empty;
+		}
+
 		function execute() {
 			return $this->_executeQuery();
 		}

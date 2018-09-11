@@ -44,6 +44,10 @@ use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 			$leaf = &$this->ast;
 			foreach ($pathComponents as $component) {
 
+				if (is_numeric($component)) {
+					$component = intval($component);
+				}
+
 				if (!isset($leaf[$component])) {
 
 					if ($real) {
