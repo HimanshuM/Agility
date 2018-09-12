@@ -13,7 +13,8 @@ use StringHelpers\Str;
 
 	class Dispatch {
 
-		protected $ast;
+		// protected $ast;
+		protected $domains;
 		protected $request;
 		protected $response;
 		protected $params;
@@ -23,25 +24,42 @@ use StringHelpers\Str;
 			$this->request = new Request($request);
 			$this->response = new Response($response);
 
-			$this->ast = $this->ast();
+			// $this->ast = $this->ast();
+			$this->domains = Routes::domains();
 
 		}
 
-		protected function ast() {
-			return Routes::ast();
+		// protected function ast() {
+		// 	return Routes::ast();
+		// }
+
+		protected function astFor($domain) {
+
+			if ($this->domains->exists($domain)) {
+				return $this->domains[$domain];
+			}
+
+			return $this->domains["/"];
+
+		}
+
+		protected function findHandler($domain, $verb, $path) {
+
+			$ast = $this->astFor($domain);
+			return $ast->$verb->crawl($ast->$verb->pathComponents($path), true);
+
 		}
 
 		protected function execute($route) {
 
 			list($controller, $action, $actionName) = $this->prepareHandler($route);
+			if ($controller === false) {
+				return;
+			}
 
 			$this->printHandler($controller, $actionName);
 			$this->invokeHandler($controller, $action);
 
-		}
-
-		protected function findHandler($verb, $path) {
-			return $this->ast->$verb->crawl($this->ast->$verb->pathComponents($path), true);
 		}
 
 		protected function invokeHandler($controller, $action) {
@@ -96,6 +114,15 @@ use StringHelpers\Str;
 				$controller = $route->namespace.$this->prepareControllerName($route->controller);
 			}
 
+			if (!class_exists($controller)) {
+
+				Log::error("Controller $controller not found");
+				$this->response->respond("", 500);
+
+				return [false, false, false];
+
+			}
+
 			$actionName = $route->action;
 			if (is_a($route->action, Closure::class)) {
 				$actionName = "Closure";
@@ -113,10 +140,14 @@ use StringHelpers\Str;
 			Log::info("Started ".strtoupper($this->request->method)." \"".$this->request->uri."\" for ".$this->request->ip." at ".date("Y-m-d H:i:s"));
 		}
 
-		protected function process404($route) {
+		protected function process404($route, $domain = "/") {
 
-			list($route404, $params) = $this->findHandler("get", "404");
+			list($route404, $params) = $this->findHandler($domain, "get", "404");
 			if ($route404 === false) {
+
+				if ($domain != "/") {
+					return $this->process404($route);
+				}
 
 				if (!empty($file404 = Configuration::document404())) {
 
@@ -147,13 +178,13 @@ use StringHelpers\Str;
 
 			$this->printRequest();
 
-			list($route, $params) = $this->findHandler($this->request->method, $this->request->uri);
+			list($route, $params) = $this->findHandler($this->request->host["host"], $this->request->method, $this->request->uri);
 			if ($route === false) {
-				return $this->process404($route);
+				return $this->process404($route, $this->request->host["host"]);
 			}
 
 			if (!$this->validateRequest($route, $params)) {
-				return $this->process404($route);
+				return $this->process404($route, $this->request->host["host"]);
 			}
 
 			$this->request->compileAcceptHeader($route->defaults["format"] ?? "text/html");
@@ -164,7 +195,35 @@ use StringHelpers\Str;
 
 		}
 
+		protected function validateDomainAndIp($route) {
+
+			if (!empty($route->constraints["domain"])) {
+
+				$domain = is_array($route->constraints["domain"]) ? $route->constraints["domain"] : [$route->constraints["domain"]];
+				if (!in_array($this->request->host["domain"], $domain)) {
+					return false;
+				}
+
+			}
+
+			if (!empty($route->constraints["ip"])) {
+
+				$ip = is_array($route->constraints["ip"]) ? $route->constraints["ip"] : [$route->constraints["ip"]];
+				if (!in_array($this->request->ip, $ip)) {
+					return false;
+				}
+
+			}
+
+			return true;
+
+		}
+
 		protected function validateRequest($route, $params) {
+
+			if (!$this->validateDomainAndIp($route)) {
+				return false;
+			}
 
 			if (!$this->populateParameters($route, $params)) {
 				return false;

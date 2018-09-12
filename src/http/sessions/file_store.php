@@ -22,7 +22,12 @@ use Agility\Config;
 		}
 
 		function deleteSession($session) {
-			$this->storageLocation->find("sess_".$session->id)->first->delete();
+
+			$file = $this->storageLocation->find("sess_".$session->id)->first;
+			if (!empty($file)) {
+				$file->delete();
+			}
+
 		}
 
 		function readSession($sessionId) {

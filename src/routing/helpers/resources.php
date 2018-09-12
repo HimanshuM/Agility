@@ -15,9 +15,10 @@ use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 			$param = $options["param"] ?? "id";
 			$only = $options["only"] ?? [];
 			$except = $options["except"] ?? [];
+			$apiOnly = boolval($options["apiOnly"] ?? $this->apiOnly);
 
 			$options = $this->prepareOptions($options);
-			$resource = new Resource($this->namespace, $controller, $path, $name, $param, $shallow, $this->apiOnly, $only, $except, $options["constraints"], $options["defaults"]);
+			$resource = new Resource($this->namespace, $controller, $path, $name, $param, $shallow, $apiOnly, $only, $except, $options["constraints"], $options["defaults"]);
 			foreach ($resource->actions as $action) {
 
 				$path = $resource->path;

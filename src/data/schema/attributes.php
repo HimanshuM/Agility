@@ -5,6 +5,7 @@ namespace Agility\Data\Schema;
 use Agility\Data\Collection;
 use Agility\Data\Model;
 use Agility\Data\Relation;
+use Agility\Data\Relations\Scope;
 use Agility\Exceptions;
 use ArrayUtils\Arrays;
 use InvalidArgumentException;
@@ -35,7 +36,7 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 				if (is_a($value, Model::class)) {
 					$value = $value->valueOfPrimaryKey();
 				}
-				else if (is_a($value, Relation::class)) {
+				else if (is_a($value, Relation::class) || is_a($value, Scope::class)) {
 
 					$value = $value->first;
 					if (empty($value)) {
@@ -96,6 +97,20 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 
 				if (is_a($value, Model::class)) {
 					$value = $value->valueOfPrimaryKey();
+				}
+				else if (is_a($value, Relation::class) || is_a($value, Scope::class)) {
+
+					$value = $value->first;
+					if (empty($value)) {
+						$value = null;
+					}
+					else if (is_a($value, Model::class)) {
+						$value = $value->valueOfPrimaryKey();
+					}
+					else {
+						throw new InvalidTypeException(static::class."::$name", static::generatedAttributes()[$name]->dataType);
+					}
+
 				}
 
 				if (isset(static::attributeObjects()[$name])) {

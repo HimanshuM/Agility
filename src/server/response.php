@@ -51,7 +51,6 @@ use Phpm\Exceptions\ClassExceptions\MethodNotFoundException;
 
 		function sendCookies() {
 
-			var_dump($this->cookies);
 			foreach ($this->cookies as $cookie) {
 				$cookie->write($this);
 			}

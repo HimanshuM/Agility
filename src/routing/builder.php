@@ -34,7 +34,7 @@ use StringHelpers\Str;
 			$this->defaults = new Arrays;
 			$this->parameters = new Arrays;
 			$this->ast = $ast;
-			$this->apiOnly = /*Configuration::apiOnly()*/false;
+			$this->apiOnly = Configuration::apiOnly();
 
 			$this->readonly("ast");
 

@@ -139,6 +139,7 @@ use ArrayUtils\Arrays;
 
 			$this->clear();
 			$this->deleteStorage();
+			$this->fresh = true;
 
 		}
 

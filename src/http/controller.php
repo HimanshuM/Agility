@@ -61,17 +61,24 @@ use Closure;
 			}
 
 			$authenticityToken = $this->formAuthenticityToken();
-
-			$this->session["csrfToken"] = $authenticityToken;
 			// $this->cookie("_csrf_token_", $authenticityToken);
 
-			$this->tag("meta", ["attributes" => ["name" => "csrf-param", "content" => "authenticity-token"]]);
-			$this->tag("meta", ["attributes" => ["name" => "csrf-token", "content" => $authenticityToken]]);
+			$this->tag("meta", ["name" => "csrf-param", "content" => "authenticity-token"]);
+			$this->tag("meta", ["name" => "csrf-token", "content" => $authenticityToken]);
 
 		}
 
 		function formAuthenticityToken() {
-			return Security\Secure::secureEncode(Security\Secure::randomBytes(Controller::CsrfEncryptionMethod), Controller::CsrfEncryptionMethod, Config::security()->encryptionKey);
+
+			$this->protectFromForgery();
+
+			if ($this->session->exists("csrfToken")) {
+				return $this->session["csrfToken"];
+			}
+
+			$authenticityToken = Security\Secure::secureEncode(Security\Secure::randomBytes(Controller::CsrfEncryptionMethod), Controller::CsrfEncryptionMethod, Config::security()->encryptionKey);
+			return $this->session["csrfToken"] = $authenticityToken;
+
 		}
 
 		protected function protectFromForgery($flag = true) {

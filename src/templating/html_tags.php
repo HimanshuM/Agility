@@ -11,10 +11,8 @@ namespace Agility\Templating;
 
 		function img($src, $width = -1, $height = -1, $options = []) {
 
-			$attributes = $options["attributes"] ?? [];
-
 			if (is_string($src)) {
-				$attributes["src"] = $src;
+				$options["src"] = $src;
 			}
 			else if (isset($src["base64"])) {
 
@@ -23,31 +21,32 @@ namespace Agility\Templating;
 					$src .= "charset=".$src["charset"].";";
 				}
 
-				$attributes["src"] = "base64 ".$src["base64"];
+				$options["src"] = "base64 ".$src["base64"];
 
 			}
 
 			if ($width > -1) {
-				$attributes["width"] = $width;
+				$options["width"] = $width;
 			}
 			if ($height > -1) {
-				$attributes["height"] = $height;
+				$options["height"] = $height;
 			}
 
-			return $this->tagBuilder("img", $attributes);
+			return $this->tagBuilder("img", $options);
 
 		}
 
-		function input($type = "text", $options = []) {
+		function input($type = "text", $id = "", $value = "", $options = []) {
 
-			$attributes = $options["attributes"] ?? [];
-			$attributes["type"] = $type;
+			$options["type"] = $type;
+			$options["id"] = $id;
+			$options["value"] = $value;
 
-			return $this->tagBuilder("input", $attributes, $options["class"] ?? [], $options["data"] ?? [], true);
+			return $this->tagBuilder("input", $options, $options["class"] ?? [], $options["data"] ?? [], true);
 
 		}
 
-		function tag($name, $options = [], $open = false) {
+		function tag($name, $options = [], $open = false, $content = "") {
 
 			if ($name == "input") {
 				return $this->input($options["type"] ?? "text", $options);
@@ -56,7 +55,7 @@ namespace Agility\Templating;
 				return $this->img($options);
 			}
 
-			return $this->tagBuilder($name, $options["attributes"] ?? [], $options["class"] ?? [], $options["data"] ?? [], $open, $options["content"] ?? "");
+			return $this->tagBuilder($name, $options, $options["class"] ?? [], $options["data"] ?? [], $open, $content);
 
 		}
 
@@ -68,7 +67,11 @@ namespace Agility\Templating;
 
 				$attr = [];
 				foreach ($attributes as $key => $value) {
-					$attr[] = "$key=\"$value\"";
+
+					if (!in_array($key, ["class", "data"])) {
+						$attr[] = "$key=\"$value\"";
+					}
+
 				}
 
 				$tag .= " ".implode(" ", $attr);

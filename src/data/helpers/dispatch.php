@@ -29,7 +29,7 @@ use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 				return static::hasManyAssociations()[$name]->prepare($this);
 			}
 			else if (static::hasAndBelongsToManyAssociations()->exists($name)) {
-
+				return static::hasManyAssociations()[$name]->prepare($this)->first;
 			}
 			else if (static::hasOneAssociations()->exists($name)) {
 

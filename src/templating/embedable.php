@@ -52,20 +52,20 @@ use ArrayUtils\Arrays;
 			if (is_array($css)) {
 
 				if (isset($css["style"])) {
-					return $this->tag("style", ["content" => $css["style"]]);;
+					return $this->tag("style", [], false, $css["style"]);
 				}
 				else if (isset($css["src"])) {
-					return $this->tag("link", ["attributes" => ["rel" => "stylesheet", "href" => $this->getEmbedablePath($css)]]);
+					return $this->tag("link", ["rel" => "stylesheet", "href" => $this->getEmbedablePath($css)]);
 				}
 
 			}
 
 			$url = parse_url($css);
 			if (empty($url) || !isset($url["host"])) {
-				return $this->tag("link", ["attributes" => ["rel" => "stylesheet", "href" => $this->getEmbedablePath($css)]]);
+				return $this->tag("link", ["rel" => "stylesheet", "href" => $this->getEmbedablePath($css)]);
 			}
 			else {
-				return $this->tag("link", ["attributes" => ["rel" => "stylesheet", "href" =>$css]]);
+				return $this->tag("link", ["rel" => "stylesheet", "href" =>$css]);
 			}
 
 		}
@@ -126,16 +126,16 @@ use ArrayUtils\Arrays;
 
 				}
 
-				return $this->tag("script", ["attributes" => $attribute, "content" => $js["script"] ?? ""]);
+				return $this->tag("script", $attribute, false, $js["script"] ?? "");
 
 			}
 
 			$url = parse_url($js);
 			if (empty($url) || !isset($url["host"])) {
-				return $this->tag("script", ["attributes" => ["src" => $this->getEmbedablePath($js, false)]]);
+				return $this->tag("script", ["src" => $this->getEmbedablePath($js, false)]);
 			}
 			else {
-				return $this->tag("script", ["attributes" => ["src" => $js]]);
+				return $this->tag("script", ["src" => $js]);
 			}
 
 		}
