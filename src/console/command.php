@@ -4,6 +4,7 @@ namespace Agility\Console;
 
 use Agility\AppLoader;
 use ArrayUtils\Arrays;
+use Exception;
 use FileSystem\FileSystem;
 use StringHelpers\Str;
 
@@ -53,7 +54,17 @@ use StringHelpers\Str;
 				echo "'$command' does not exist. Please type 'agility help' to see the list of available commands.";
 			}
 			else {
-				$object->$method($args);
+
+				try {
+					$object->$method($args);
+				}
+				catch (Exception $e) {
+
+					echo $e->getMessage()."\n";
+					echo $e->getTraceAsString();
+
+				}
+
 			}
 
 			echo "\n";

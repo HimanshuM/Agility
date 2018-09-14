@@ -46,7 +46,7 @@ use ArrayUtils\Arrays;
 
 			static::staticInitialize();
 
-			$this->attributes = new Collection;
+			$this->attributes = new Collection(static::class);
 			$this->_fresh = true;
 			$this->_dirty = false;
 			$this->_persisted = false;

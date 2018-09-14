@@ -31,6 +31,10 @@ use Agility\Chrono\Chronometer;
 				return null;
 			}
 
+			if ($value == DatetimeDb::CurrentTimestamp) {
+				return $value;
+			}
+
 			$format = "Y-m-d H:i:s";
 			if (!empty($this->precision)) {
 

@@ -20,9 +20,13 @@ use StringHelpers\Str;
 
 		protected $_pointer = 0;
 
-		function __construct() {
+		protected $_className = "";
+
+		function __construct($className = "") {
 
 			$this->_attributes = new Arrays();
+			$this->_className = $className;
+
 			$this->methodsAsProperties("toArray", "toStorableArray");
 			$this->notFoundResponse(ACCESSOR_NOT_FOUND_CALLBACK, "attributeAccessor");
 
@@ -49,7 +53,7 @@ use StringHelpers\Str;
 		private function _getAttribute($attribute) {
 
 			if (empty($this->_storageMapping[$attribute])) {
-				throw new PropertyNotFoundException($attribute, Collection::class);
+				throw new PropertyNotFoundException($attribute, $this->_className ?: Collection::class);
 			}
 
 			return $this->_attributes[$attribute];

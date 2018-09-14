@@ -274,7 +274,7 @@ use StringHelpers\Str;
 		function new($params = []) {
 
 			if (!is_a($this->_statement, SelectStatement::class)) {
-				throw new Exception("Invalid use of Agility\\Data\\Relation::create()");
+				throw new Exception("Invalid use of Agility\\Data\\Relation::new()");
 			}
 
 			if ($this->_statement->where->empty()) {
