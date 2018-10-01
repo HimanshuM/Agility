@@ -88,8 +88,8 @@ use Agility\Server\AbstractController;
 
 		}
 
-		function respond404() {
-			$this->respond([], 404);
+		function respond404($msg = []) {
+			$this->respond($msg, 404);
 		}
 
 	}

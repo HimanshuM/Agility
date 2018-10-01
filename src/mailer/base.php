@@ -85,7 +85,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 			}
 
 			if (empty($template)) {
-				$template = $this->_methodInvoked;
+				$template = $this->methodInvoked;
 			}
 
 			$this->prepareOptions($data);

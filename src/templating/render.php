@@ -11,7 +11,7 @@ use ArrayUtils\Arrays;
 		protected $layout = "layout/base";
 		protected $templateBase;
 		protected $template;
-		protected $subContent = "";
+		protected $_subContent = "";
 		protected $count = 0;
 
 		function content() {
@@ -59,7 +59,7 @@ use ArrayUtils\Arrays;
 			}
 
 			if (is_null($template) && empty($options["partial"]) && empty($options["view"])) {
-				$template = $this->getRelativeClassName()."/".$this->_methodInvoked;
+				$template = $this->getRelativeClassName()."/".$this->methodInvoked;
 			}
 
 			if (!empty($template) || !empty($options["view"])) {
@@ -80,7 +80,7 @@ use ArrayUtils\Arrays;
 
 			if (empty($template)) {
 
-				if (!empty($options["no_error"])) {
+				if (!empty($options["noError"])) {
 					return "";
 				}
 

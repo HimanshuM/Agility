@@ -38,7 +38,7 @@ use Closure;
 
 				if (empty($this->_content)) {
 
-					$this->render($response);
+					$this->render(["data" => $response]);
 					$this->respond(["html" => $this->_content]);
 
 				}
@@ -139,7 +139,7 @@ use Closure;
 				}
 
 				if ($token != $this->session["csrfToken"]) {
-					throw new Security\InvalidAuthenticityTokenException(static::class, $this->_methodInvoked);
+					throw new Security\InvalidAuthenticityTokenException(static::class, $this->methodInvoked);
 				}
 
 			}

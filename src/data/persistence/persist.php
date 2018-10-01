@@ -3,6 +3,7 @@
 namespace Agility\Data\Persistence;
 
 use Agility\Data\Relation;
+use Aqua\Attribute;
 use Exception;
 use StringHelpers\Str;
 
@@ -139,6 +140,27 @@ use StringHelpers\Str;
 			}
 
 			return false;
+
+		}
+
+		static function updateAll($params = [], $where = []) {
+
+			$relation = new Relation(static::class, Relation::Update);
+			foreach ($params as $name => $value) {
+
+				if (!is_a($name, Attribute::class)) {
+					$name = static::aquaTable()->$name;
+				}
+
+				$relation->set([$name, $value]);
+
+			}
+
+			if (!empty($where)) {
+				$relation->where($where);
+			}
+
+			return $relation->execute();
 
 		}
 

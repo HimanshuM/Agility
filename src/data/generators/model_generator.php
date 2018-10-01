@@ -60,7 +60,7 @@ use StringHelpers\Str;
 				$tableName = $this->_tableName;
 				if ($tableName === false) {
 
-					$tableName = Str::snakeCase($this->namespace."_".Inflect::pluralize($this->model));
+					$tableName = Str::snakeCase($this->namespace./*"_".*/Inflect::pluralize($this->model));
 					$tableName = str_replace("\\", "_", $tableName);
 
 				}

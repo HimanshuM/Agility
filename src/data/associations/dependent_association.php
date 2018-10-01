@@ -26,12 +26,14 @@ use StringHelpers\Str;
 		protected $_through;
 
 		protected $_as = null;
+
+		protected $_source;
 		protected $_sourceType;
 
 		protected $_callback;
 		protected $_object;
 
-		function __construct($name, $ownerClass, $primaryKey, $associatedClass, $associatedName, $associatedForeignKey, $through, $as, $sourceType, $callback = null) {
+		function __construct($name, $ownerClass, $primaryKey, $associatedClass, $associatedName, $associatedForeignKey, $through, $as, $source, $sourceType, $callback = null) {
 
 			$this->_name = $name;
 
@@ -45,6 +47,8 @@ use StringHelpers\Str;
 			$this->_through = $through;
 
 			$this->_as = $as;
+
+			$this->_source = $source;
 			$this->_sourceType = $sourceType;
 
 			$this->_callback = $callback;
@@ -122,11 +126,13 @@ use StringHelpers\Str;
 
 				$throughClass = $this->_through->_associatedClass;
 				$throughTable = $throughClass::aquaTable();
-				$associatedThroughRelation = Inflect::singularize($this->_associatedName);
+				$associatedThroughRelation = $this->_source ?? Inflect::singularize($this->_associatedName);
 
 				if (!$throughClass::associationsCache()->belongsToAssociations->exists($associatedThroughRelation)) {
 					throw new Exceptions\HasManyThroughSourceNotFoundException($this->_through->_associatedName, $associatedThroughRelation, $this->_ownerClass);
 				}
+
+				var_dump($associatedThroughRelation);
 
 				$throughBelongsToAssociation = $throughClass::associationsCache()->belongsToAssociations[$associatedThroughRelation];
 				$throughForeignKey = Str::snakeCase($throughBelongsToAssociation->associatedForeignKey);
@@ -137,6 +143,10 @@ use StringHelpers\Str;
 					->select($associatedTable->_name.".*")
 					->join($throughTable->_name)
 					->on($throughTable->$throughForeignKey->eq($associatedTable->$throughOwnerPrimaryKey));
+
+				if ($throughBelongsToAssociation->polymorphic) {
+					$relation->where([$throughBelongsToAssociation->associatedForeignType() => $this->_sourceType]);
+				}
 
 				if (is_a($owner, Scope::class)) {
 

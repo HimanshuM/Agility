@@ -48,7 +48,7 @@ use StringHelpers\Inflect;
 		}
 
 		function prepareKeyName() {
-			return "fk_".$this->referencingTableName."_".$this->sourceTableName."_".$this->referencingColumnName."_id";
+			return "fk_".$this->referencingTableName."_".$this->referencingColumnName;
 		}
 
 		function toSql($connection) {

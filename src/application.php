@@ -20,6 +20,7 @@ use StringHelpers\Str;
 		protected $_swoole = null;
 		protected static $_instance;
 		protected $quite;
+		protected $noDatabase = false;
 
 		function __construct() {
 
@@ -69,7 +70,7 @@ use StringHelpers\Str;
 			Initializers\PreInitializer::execute();
 		}
 
-		protected function executePostInitializers() {
+		function executePostInitializers() {
 			Initializers\PostInitializer::execute();
 		}
 
@@ -112,7 +113,11 @@ use StringHelpers\Str;
 		}
 
 		protected function initializeDatabase() {
-			Pool::initialize();
+
+			if (!$this->noDatabase) {
+				Pool::initialize();
+			}
+
 		}
 
 		protected function initializeHttp() {

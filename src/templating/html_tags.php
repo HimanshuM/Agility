@@ -4,6 +4,8 @@ namespace Agility\Templating;
 
 	trait HtmlTags {
 
+		use Navigation;
+
 		protected $noClosing = [
 			"meta",
 			"link"
@@ -12,7 +14,12 @@ namespace Agility\Templating;
 		function img($src, $width = -1, $height = -1, $options = []) {
 
 			if (is_string($src)) {
+
 				$options["src"] = $src;
+
+				$fileName = Str::componentName($src, "/");
+				$options["alt"] = Str::humanize($fileName);
+
 			}
 			else if (isset($src["base64"])) {
 

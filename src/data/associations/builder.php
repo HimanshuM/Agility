@@ -6,6 +6,7 @@ use Agility\Data\Metadata\AssociationStore;
 use Agility\Data\Helpers\NameHelper;
 use ArrayUtils\Arrays;
 use Exception;
+use Phpm\Exceptions\ClassExceptions\ClassNotFoundException;
 use StringHelpers\Inflect;
 use StringHelpers\Str;
 
@@ -58,7 +59,8 @@ use StringHelpers\Str;
 		protected static function hasMany($associationName, $options = [], $callback = null) {
 
 			$precedent = "className";
-			$subsequent = "source";
+			// $subsequent = "source";
+			$subsequent = "className";
 
 			$through = $options["through"] ?? null;
 
@@ -78,8 +80,8 @@ use StringHelpers\Str;
 
 				$through = static::hasManyAssociations()[$through];
 
-				$precedent = "source";
-				$subsequent = "className";
+				// $precedent = "source";
+				// $subsequent = "className";
 
 			}
 
@@ -102,15 +104,16 @@ use StringHelpers\Str;
 			}
 
 			if (!class_exists($associatedClass)) {
-				throw new Exception("Could not find class '$associatedClass'.", 1);
+				throw new ClassNotFoundException($associatedClass);
 			}
 
 			$primaryKey = $options["primaryKey"] ?? static::$primaryKey;
-			$foreignKey = $options["foreignKey"] ?? Inflect::singularize(static::tableName())."_id";
+			$foreignKey = Str::snakeCase($options["foreignKey"] ?? Inflect::singularize(static::tableName())."_id");
 
-			$sourceType = $options["sourceType"] ?? str_replace("App\\Models\\", "", $associatedClass);
+			$source = $options["source"] ?? null;
+			$sourceType = str_replace("App\\Models\\", "", $options["sourceType"] ?? $associatedClass);
 
-			static::hasManyAssociations()[$associationName] = new DependentAssociation($associationName, static::class, $primaryKey, $associatedClass, $associatedName, $foreignKey, $through, $as, $sourceType, $callback);
+			static::hasManyAssociations()[$associationName] = new DependentAssociation($associationName, static::class, $primaryKey, $associatedClass, $associatedName, $foreignKey, $through, $as, $source, $sourceType, $callback);
 
 		}
 

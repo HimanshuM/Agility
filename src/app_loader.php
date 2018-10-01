@@ -75,7 +75,8 @@ use Swoole;
 
 		protected static function tryLoadingModel($modelFile) {
 
-			$modelClass = "App\\Models\\".Str::camelCase($modelFile->name);
+			$modelClass = substr($modelFile, strpos($modelFile, "app/models/") + strlen("app/models/"), -4);
+			$modelClass = "App\\Models\\".Str::normalize($modelClass);
 			if (class_exists($modelClass)) {
 
 				$classInfo = new ReflectionClass($modelClass);

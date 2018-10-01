@@ -32,7 +32,7 @@ use Agility\Configuration;
 
 		}
 
-		private function initializeApplication($args) {
+		private function initializeApplication($args, $runPostInitializers = false) {
 
 			if (is_a($this->application, Application::class)) {
 				return;
@@ -40,6 +40,9 @@ use Agility\Configuration;
 
 			$this->instantiateApplication($args);
 			$this->application->firstStageInitialization();
+			if ($runPostInitializers) {
+				$this->runPostInitializers();
+			}
 
 		}
 
@@ -65,6 +68,10 @@ use Agility\Configuration;
 
 			return $className;
 
+		}
+
+		private function runPostInitializers() {
+			$this->application->executePostInitializers();
 		}
 
 	}

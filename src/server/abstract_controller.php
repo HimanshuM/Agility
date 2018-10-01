@@ -18,7 +18,7 @@ use StringHelpers\Str;
 		protected $params;
 
 		protected $_storableName = false;
-		protected $_methodInvoked;
+		protected $methodInvoked;
 		protected $_responded = false;
 		protected $_content = false;
 
@@ -50,7 +50,7 @@ use StringHelpers\Str;
 			}
 			else {
 
-				$this->_methodInvoked = $method;
+				$this->methodInvoked = $method;
 				$this->invokeTriggerFor($method);
 
 				if ($this->_responded && $this->concludeOnRespondedByBeforeTrigger()) {

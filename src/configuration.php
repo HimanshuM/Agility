@@ -32,6 +32,10 @@ use ArrayUtils\Arrays;
 
 		static function __callStatic($setting, $args = []) {
 
+			if ($setting == "root") {
+				return Configuration::documentRoot();
+			}
+
 			if ($setting == "dbConfiguration") {
 
 				if (empty(static::$_instance->_dbConfiguration) && !empty($args)) {
@@ -109,6 +113,10 @@ use ArrayUtils\Arrays;
 
 		static function environment() {
 			return static::initialized() ? static::$_instance->_environment : null;
+		}
+
+		static function file($name) {
+			return Configuration::$_instance->_documentRoot->has("config/".$name);
 		}
 
 		static function host() {

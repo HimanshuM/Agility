@@ -40,6 +40,8 @@ use AttributeHelper\Accessor;
 
 		static function initialize() {
 
+			Configuration::security(new Secure(""));
+
 			if (($securityFile = Secure::appHasSecurityFile(Configuration::documentRoot())) !== false) {
 				Secure::parseSecurityJson($securityFile);
 			}
@@ -64,7 +66,7 @@ use AttributeHelper\Accessor;
 			$securityJson = json_decode(file_get_contents($securityJson), true);
 			$securityJson = $securityJson[Configuration::environment()];
 
-			Configuration::security(new Secure(base64_decode($securityJson["encryption_key"])));
+			Configuration::security()->encryptionKey = base64_decode($securityJson["encryption_key"]);
 
 		}
 

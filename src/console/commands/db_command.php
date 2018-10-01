@@ -28,7 +28,7 @@ use StringHelpers\Str;
 				return;
 			}
 
-			$this->initializeApplication($args);
+			$this->initializeApplication($args, true);
 			echo "Resetting database...\n";
 			foreach (Pool::$pool as $connection) {
 				$connection->resetDatabase();
@@ -43,7 +43,7 @@ use StringHelpers\Str;
 				return;
 			}
 
-			$this->initializeApplication($args);
+			$this->initializeApplication($args, true);
 			$count = $this->migrationRunner->executePendingMigrations();
 			if ($count == 0) {
 				echo "Nothing to migrate.";
@@ -73,7 +73,7 @@ use StringHelpers\Str;
 				return;
 			}
 
-			$this->initializeApplication($args);
+			$this->initializeApplication($args, true);
 
 		}
 

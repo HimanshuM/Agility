@@ -14,6 +14,7 @@ use StringHelpers\Str;
 
 		const DeferredTypes = [
 			"string" => "str",
+			"int" => "integer",
 			"uint" => "u_int",
 			"datetime" => "datetime_db"
 		];
@@ -47,8 +48,11 @@ use StringHelpers\Str;
 				$name = Base::DeferredTypes[$name];
 			}
 
-			if (in_array($name, Base::$registeredTypes)) {
-				return new $name($size);
+			if (isset(Base::$registeredTypes[$name])) {
+
+				$className = Base::$registeredTypes[$name];
+				return new $className($size);
+
 			}
 			else if (file_exists(__DIR__."/$name.php")) {
 
@@ -77,11 +81,15 @@ use StringHelpers\Str;
 
 		}
 
-		static function register($typeName) {
+		static function register($className, $typeName = false) {
 
-			if (!in_array($typeName, Base::$registeredTypes)) {
-				Base::$registeredTypes[] = $typeName;
+			if (empty($typeName)) {
+				$typeName = Str::pascalCase(Str::componentName($className));
 			}
+
+			// if (!in_array($typeName, Base::$registeredTypes)) {
+				Base::$registeredTypes[$typeName] = $className;
+			// }
 
 		}
 

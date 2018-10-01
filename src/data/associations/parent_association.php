@@ -4,6 +4,7 @@ namespace Agility\Data\Associations;
 
 use Agility\Data\Relation;
 use AttributeHelper\Accessor;
+use StringHelpers\Str;
 
 	class ParentAssociation {
 
@@ -17,7 +18,6 @@ use AttributeHelper\Accessor;
 		protected $_polymorphic;
 
 		protected $_relation;
-		protected $_object;
 
 		function __construct($associatedForeignKey, $ownerClass, $primaryKey, $polymorphic = false) {
 
@@ -34,16 +34,16 @@ use AttributeHelper\Accessor;
 
 		}
 
-		function fetch($associatedObject) {
+		function associatedForeignType() {
+			return Str::snakeCase($this->_ownerClass."Type");
+		}
 
-			if (!empty($this->_object)) {
-				return $this->_object;
-			}
+		function fetch($associatedObject) {
 
 			$this->prepare($associatedObject);
 
 			$foreignKey = $this->_associatedForeignKey;
-			return $this->_object = $this->_relation->where([$this->_primaryKey => $associatedObject->$foreignKey])->first;
+			return $this->_relation->where([$this->_primaryKey => $associatedObject->$foreignKey])->first;
 
 		}
 
@@ -55,9 +55,10 @@ use AttributeHelper\Accessor;
 			else {
 
 				$associatedForeignType = $this->_ownerClass."Type";
-				$ownerClass = $associatedObject->$associatedForeignType;
+				// $associatedForeignType = $this->associatedForeignType();
+				$ownerClass = "App\\Models\\".$associatedObject->$associatedForeignType;
 
-				$this->_relation = new Relation($associatedObject->$associatedForeignType);
+				$this->_relation = (new Relation($ownerClass))/*->where([$associatedForeignType => $ownerClass])*/;
 
 			}
 
