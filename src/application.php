@@ -9,6 +9,7 @@ use Agility\Routing\Routes;
 use Agility\Server\StaticContent;
 use ArrayUtils\Arrays;
 use AttributeHelper\Accessor;
+use Error;
 use Exception;
 use StringHelpers\Str;
 
@@ -95,7 +96,12 @@ use StringHelpers\Str;
 		}
 
 		protected function initialize() {
+
 			Configuration::uploadDir("storage");
+			if (Configuration::documentRoot()->has("tmp")) {
+				Configuration::tempDir(Configuration::documentRoot()->chdir("tmp"));
+			}
+
 		}
 
 		protected function initializeComponents() {
@@ -178,6 +184,9 @@ use StringHelpers\Str;
 				$this->prepareApplication();
 			}
 			catch (Exception $e) {
+				$this->die($e);
+			}
+			catch (Error $e) {
 				$this->die($e);
 			}
 
