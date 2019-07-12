@@ -8,10 +8,13 @@ use Agility\Server\Request;
 use Agility\Server\Response;
 use Agility\Server\StaticContent;
 use Closure;
+use Error;
 use Exception;
 use StringHelpers\Str;
 
 	class Dispatch {
+
+		use ErrorReport;
 
 		// protected $ast;
 		protected $domains;
@@ -66,13 +69,12 @@ use StringHelpers\Str;
 
 			try {
 				$controller = $controller::invoke($action, [$this->request, $this->response]);
-				// $controller->execute($action, $this->request, $this->response);
 			}
 			catch (Exception $e) {
-
-				Log::error($e->getMessage());
-				Log::error($e->getTraceAsString());
-
+				$this->reportError($e);
+			}
+			catch (Error $e) {
+				$this->reportError($e);
 			}
 
 			$controller = null;
@@ -114,11 +116,19 @@ use StringHelpers\Str;
 				$controller = $route->namespace.$this->prepareControllerName($route->controller);
 			}
 
-			if (!class_exists($controller)) {
+			try {
+				$controllerFound = class_exists($controller);
+			}
+			catch (Error $e) {
 
-				Log::error("Controller $controller not found");
-				$this->response->respond("", 500);
+				$this->reportError($e);
+				return [false, false, false];
 
+			}
+
+			if (!$controllerFound) {
+
+				$this->reportError(new Exceptions\ControllerNotFoundException($controller));
 				return [false, false, false];
 
 			}
@@ -151,8 +161,9 @@ use StringHelpers\Str;
 
 				if (!empty($file404 = Configuration::document404())) {
 
-					Log::info("Redirecting to 404.html");
-					$this->response->redirect("/".$file404);
+					Log::info("Rendering 404.html");
+					$this->response->status(404);
+					$this->response->respond(file_get_contents($file404));
 
 				}
 				else {

@@ -65,7 +65,10 @@ use StringHelpers\Inflect;
 		protected $actions;
 		protected $singleton = false;
 
-		function __construct($namespace, $controller, $path = "", $name = "", $param = "id", $shallow = false, $apiOnly = false, $only = [], $except = [], $constraints = [], $defaults = []) {
+		// Required for sub routes
+		protected $pathPrefix;
+
+		function __construct($namespace, $controller, $path = "", $name = "", $param = "id", $shallow = false, $apiOnly = false, $only = [], $except = [], $constraints = [], $defaults = [], $pathPrefix = false) {
 
 			$this->namespace = $namespace;
 			$this->controller = $controller;
@@ -87,9 +90,11 @@ use StringHelpers\Inflect;
 			$this->constraints = $constraints;
 			$this->defaults = $defaults;
 
+			$this->pathPrefix = $pathPrefix;
+
 			$this->compileActions();
 
-			$this->readonly("actions", "singleton", "namespace", "controller",  "path",  "name",  "param",  "shallow",  "only",  "except", "constraints", "defaults");
+			$this->readonly("actions", "singleton", "namespace", "controller",  "path",  "name",  "param",  "shallow",  "only",  "except", "constraints", "defaults", "pathPrefix");
 
 		}
 
@@ -122,7 +127,7 @@ use StringHelpers\Inflect;
 		}
 
 		function nestedParam() {
-			return $this->shallow ? $this->memberScope() : $this->path."/:".$this->singular()."_".$this->param;
+			return $this->shallow ? $this->memberScope() : $this->pathPrefix.($this->path."/:".$this->singular()."_".$this->param);
 		}
 
 		function plural() {

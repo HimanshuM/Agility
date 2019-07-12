@@ -9,7 +9,7 @@ use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 		protected function constructResource($resource, $options = [], $callback = null) {
 
 			$controller = $options["controller"] ?? $resource;
-			$path = $options["path"] ?? "";
+			$path = $options["path"] ?? $resource;
 			$name = $options["name"] ?? "";
 			$shallow = $options["shallow"] ?? false;
 			$param = $options["param"] ?? "id";
@@ -18,7 +18,7 @@ use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 			$apiOnly = boolval($options["apiOnly"] ?? $this->apiOnly);
 
 			$options = $this->prepareOptions($options);
-			$resource = new Resource($this->namespace, $controller, $path, $name, $param, $shallow, $apiOnly, $only, $except, $options["constraints"], $options["defaults"]);
+			$resource = new Resource($this->namespace, $controller, $path, $name, $param, $shallow, $apiOnly, $only, $except, $options["constraints"], $options["defaults"], $this->pathPrefix);
 			foreach ($resource->actions as $action) {
 
 				$path = $resource->path;

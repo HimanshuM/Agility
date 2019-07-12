@@ -74,7 +74,17 @@ use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 			}
 
 			if ($real) {
+
+				if (!isset($leaf[0])) {
+					return [false, false];
+				}
+
 				return [$leaf[0], $params];
+
+			}
+
+			if (!isset($leaf[0])) {
+				return false;
 			}
 
 			return $leaf[0];

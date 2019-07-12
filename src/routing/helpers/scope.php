@@ -14,6 +14,7 @@ use Agility\Routing\Exceptions\CallbackNotSpecifiedException;
 			}
 
 			$options["controller"] = $name;
+			$options["path"] = $this->pathPrefix;
 
 			return $this->processSubRoutes($options, $callback);
 

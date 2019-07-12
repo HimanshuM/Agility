@@ -118,7 +118,7 @@ use StringHelpers\Str;
 				if ($resourceMembers) {
 
 					$options["controller"] = $resource->controller;
-					$options["path"] = $resource->memberScope();
+					$options["path"] = $resource->pathPrefix.$resource->memberScope();
 
 				}
 				else {
@@ -171,7 +171,9 @@ use StringHelpers\Str;
 			else if (!empty($this->controller)) {
 
 				$controller = $this->controller;
-				$action = $handler;
+				if (empty($action)) {
+					$action = $handler;
+				}
 
 			}
 			else if (empty($action)) {

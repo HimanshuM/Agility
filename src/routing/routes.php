@@ -57,7 +57,7 @@ use ArrayUtils\Arrays;
 
 			$verb = $verb ? [$verb] : ["get", "post", "put", "patch", "delete"];
 			foreach ($verb as $method) {
-				var_dump(Routes::$ast->$method);
+				var_dump(Routes::$domains["/"]->$method);
 			}
 
 		}
