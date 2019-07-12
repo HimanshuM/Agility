@@ -30,6 +30,22 @@ use Swoole;
 
 		function sendMail() {
 
+			if (Config::mailer()->deliveryMethod == "none") {
+				return Log::info("Delivery#sendMail skipped sending mail because delivery method is set to 'none'");
+			}
+
+			$phpMailerObj = new PhpMailer(true);
+			$this->options->fill($phpMailerObj);
+
+			if (Config::mailer()->deliveryMethod == "sendmail") {
+				$phpMailerObj->isSendmail();
+			}
+			elseif (Config::mailer()->deliveryMethod != "mail") {
+				$phpMailerObj->isSMTP();
+			}
+
+			return $phpMailerObj->send();
+
 		}
 
 		function sendAt($when = "now") {

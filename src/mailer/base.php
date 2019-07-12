@@ -3,24 +3,36 @@
 namespace Agility\Mailer;
 
 use Agility\Configuration AS Config;
+use Agility\Mailer\Helpers\EmailOptions;
 use Agility\Server\AbstractController;
 use Agility\Templating\Render;
+use Agility\Templating\EmailTags;
 use ArrayUtils\Arrays;
 use PHPMailer\PHPMailer\PHPMailer;
+use StringHelpers\Str;
 
 	class Base extends AbstractController {
 
+		use Helper;
 		use Render;
+		use EmailTags;
 
 		protected $defaults;
 		protected $options;
+		protected $assetHost;
+		protected $urlHost;
+
+		protected static $_interceptors = [];
 
 		function __construct() {
 
 			parent::__construct();
 
+			$this->assetHost = Config::mailer()->assetHost;
+			$this->urlHost = Config::mailer()->urlHost;
+
 			$this->defaults = new Arrays;
-			$this->options = new Arrays;
+			$this->options = new EmailOptions;
 
 			$this->initializeTemplating();
 
@@ -33,11 +45,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 				if (empty($this->_content)) {
 
 					$content = $this->mail($response);
-					$this->deliver($content);
+					return $this->deliver($content);
 
 				}
 				else {
-					$this->deliver($this->_content);
+					return $this->deliver($this->_content);
 				}
 
 			}
@@ -54,20 +66,32 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 		}
 
-		protected function deliver($content) {
+		protected function deliver() {
 
 			$this->_responded = true;
-			return new Delivery($content, $this->options);
+			Base::invokeInterceptors($this);
 
+			return new Delivery($this->options);
+
+		}
+
+		protected function getRelativeClassName() {
+			return $this->_storableName = $this->_storableName ?: Str::storable(str_replace(["App\\Mailers\\"], "", get_called_class()));
 		}
 
 		static function initialize() {
 			Config::mailer(new Configuration);
 		}
 
-		protected function mail() {
+		static function invokeInterceptors($mailer) {
 
-			$phpMailerObj = new PhpMailer(true);
+			foreach (Base::$_interceptors as $interceptor) {
+				call_user_func_array($interceptor, [$mailer]);
+			}
+
+		}
+
+		protected function mail() {
 
 			$template = false;
 			$data = [];
@@ -90,9 +114,28 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 			$this->prepareOptions($data);
 
-			$content = $this->renderEmail($template, $data);
-			// $this->conclude($response);
-			$this->_content = $phpMailerObj;
+			if (!empty($data["body"])) {
+
+				if (is_string($data["body"])) {
+					$this->options->setText($data["body"]);
+				}
+				else {
+
+					if (!empty($data["body"]["html"])) {
+						$this->options->setHtml($data["body"]);
+					}
+					if (!empty($data["body"]["text"])) {
+						$this->options->setText($data["text"]);
+					}
+
+				}
+
+			}
+			else {
+				$this->renderEmail($template, $data);
+			}
+
+			return $this->_content = $this->options;
 
 		}
 
@@ -100,25 +143,22 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 			$invalid = [];
 
-			$this->options["to"] = $data["to"] ?? false;
-			if (emty($this->options["to"])) {
-				$invalid[] = "to";
+			if (!$this->setFrom($data)) {
+				$invalid[] = "'from'";
+			}
+			$this->setReplyTo($data);
+
+			$this->options->setSubject($data["subject"] ?? $this->defaults["subject"] ?? false);
+			if (empty($this->options->subject)) {
+				$invalid[] = "'subject'";
 			}
 
-			$this->options["from"] = $data["from"] ?? $this->defaults["from"] ?? false;
-			if (empty($this->options["from"])) {
-				$invalid[] = "from";
+			if (!$this->addTo($data)) {
+				$invalid[] = "'to'";
 			}
 
-			$this->options["subject"] = $data["subject"] ?? $this->defaults["subject"] ?? false;
-			if (empty($this->options["subject"])) {
-				$invalid[] = "subject";
-			}
-
-			$this->options["cc"] = $data["cc"] ?? $this->defaults["cc"] ?? false;
-			$this->options["bcc"] = $data["bcc"] ?? $this->defaults["bcc"] ?? false;
-
-			$this->options["attachments"] = $data["attachments"] ?? $this->defaults ?? [];
+			$this->addCc($data);
+			$this->addBcc($data);
 
 			if (!empty($invalid)) {
 				throw new Exceptions\InsufficientMailerDataException($invalid);
@@ -126,22 +166,27 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 		}
 
-		private function renderEmail($phpMailerObj, $template, $data) {
+		static function registerInterceptor($callback) {
+			Base::$_interceptors[] = $callback;
+		}
 
-			$html = $this->renderHtml($template, $data);
-			if (!empty($html)) {
-				// $phpMailerObj->;
-			}
-			$text = $this->renderText($template, $data);
+		private function renderEmail($template, $data) {
+
+			$this->options->setHtml($this->renderHtml($template, $data));
+			$this->options->setText($this->renderText($template, $data));
 
 		}
 
 		private function renderHtml($template, $data) {
-			return $this->render(["partial" => $template.".html", "no_error" => true, "local" => $data]);
+			return $this->render(["partial" => $template.".html", "noError" => true, "local" => $data]);
 		}
 
 		private function renderText($template, $data) {
-			return $this->render(["partial" => $template.".text", "no_error" => true, "local" => $data]);
+			return $this->render(["partial" => $template.".text", "noError" => true, "local" => $data]);
+		}
+
+		static function with($name, $args = []) {
+			return static::invoke($name, $args);
 		}
 
 	}
