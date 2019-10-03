@@ -4,7 +4,6 @@ namespace Agility\Server;
 
 use Agility\Templating\Template;
 use Agility\Templating\ViewNotFoundException;
-use ArrayUtils\Arrays;
 use AttributeHelper\Accessor;
 use Closure;
 use MethodTriggers\Trigger;
@@ -24,7 +23,7 @@ use StringHelpers\Str;
 
 		function __construct() {
 
-			$this->params = new Arrays;
+			$this->params = new Parameter;
 
 			$this->notFoundResponse(ACCESSOR_NOT_FOUND_ALLOW);
 			$this->readonly("params");
@@ -88,8 +87,8 @@ use StringHelpers\Str;
 
 		protected function prepareParams($args) {
 
-			if (!is_a($args, Arrays::class)) {
-				$args = new Arrays($args);
+			if (!is_a($args, Parameter::class)) {
+				$args = new Parameter($args);
 			}
 
 			$this->params = $args;
