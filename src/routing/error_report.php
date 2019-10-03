@@ -63,14 +63,14 @@ use FileSystem\FileSystem;
 
 			if (Configuration::environment() != "development") {
 
-				Log::error($exception);
+				Log::error($exception, ["request" => $this->request]);
 				$this->response->respond("");
 
 			}
 			else {
 
 				$template = new Template(FileSystem::path(__DIR__."/views"), $this);
-				$this->response->respond($template->load("500.php", ["e" => $exception]));
+				$this->response->respond($template->load("500.php", ["e" => $exception, "r" => $this->request]));
 
 			}
 
