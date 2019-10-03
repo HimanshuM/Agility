@@ -4,6 +4,7 @@ namespace Agility\Data\Persistence;
 
 use Agility\Data\Relation;
 use Aqua\Attribute;
+use ArrayUtils\Arrays;
 use Exception;
 use StringHelpers\Str;
 
@@ -45,6 +46,9 @@ use StringHelpers\Str;
 			if ($this->invalid) {
 				return false;
 			}
+			if (!$this->_dirty && !$this->_fresh) {
+				return false;
+			}
 
 			$this->_runCallbacks("beforeSave");
 
@@ -54,6 +58,7 @@ use StringHelpers\Str;
 			else {
 				$result = $this->_update();
 			}
+			$this->_backups = new Arrays;
 
 			$this->_runCallbacks("afterSave");
 			return $result;
@@ -81,6 +86,35 @@ use StringHelpers\Str;
 
 		}
 
+		static function insert($params = []) {
+
+			if (isset($params[0])) {
+
+				foreach ($params as $param) {
+					static::insert($param);
+				}
+
+				return;
+
+			}
+
+			$relation = new Relation(static::class, Relation::Insert);
+			foreach ($params as $name => $value) {
+
+				$name = Str::snakeCase($name);
+
+				if (!is_a($name, Attribute::class)) {
+					$name = static::aquaTable()->$name;
+				}
+
+				$relation->statement->insert([$name, $value]);
+
+			}
+
+			return $relation->execute();
+
+		}
+
 		static function new() {
 
 			$obj = new static;
@@ -88,11 +122,11 @@ use StringHelpers\Str;
 			$args = func_get_args();
 			if (count($args) > 0) {
 
-				if (is_array($args[0])) {
+				if (is_array($args[0]) || is_a($args[0], Arrays::class)) {
 					$obj->fillAttributes($args[0]);
 				}
 				else if (is_callable($args[0])) {
-					$args[0]($obj);
+					($args[0]->bindTo($obj))();
 				}
 
 			}
@@ -103,6 +137,12 @@ use StringHelpers\Str;
 
 		function refresh() {
 
+			$this->attributes = static::find($this->valueOfPrimaryKey())->attributes;
+
+			$this->_fresh = false;
+			$this->_dirty = false;
+			$this->_persisted = false;
+
 		}
 
 		function save() {
@@ -111,9 +151,9 @@ use StringHelpers\Str;
 
 		private function _update() {
 
-			$this->_runCallbacks("beforeUpdate");
+			$this->_runCallbacks("beforeUpdate", $this->_backups);
 
-			$attributes = $this->fetchAttributes(false);
+			$attributes = $this->fetchAttributes(false, true);
 			$primaryKey = $attributes[static::$primaryKey];
 			unset($attributes[static::$primaryKey]);
 
@@ -125,7 +165,7 @@ use StringHelpers\Str;
 			$this->_dirty = false;
 			$this->_persisted = true;
 
-			$this->_runCallbacks("afterUpdate");
+			$this->_runCallbacks("afterUpdate", $this->_backups);
 			return true;
 
 		}
@@ -135,6 +175,7 @@ use StringHelpers\Str;
 			if (!empty($collection)) {
 
 				$this->fillAttributes($collection);
+				$this->_dirty = true;
 				return $this->save();
 
 			}
@@ -152,7 +193,7 @@ use StringHelpers\Str;
 					$name = static::aquaTable()->$name;
 				}
 
-				$relation->set([$name, $value]);
+				$relation->statement->set([$name, $value]);
 
 			}
 
