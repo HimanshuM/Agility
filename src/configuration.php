@@ -111,8 +111,19 @@ use ArrayUtils\Arrays;
 			return static::initialized() ? clone static::$_instance->_documentRoot : null;
 		}
 
-		static function environment() {
-			return static::initialized() ? static::$_instance->_environment : null;
+		static function environment($env = false) {
+
+			if (!static::initialized()) {
+				return null;
+			}
+
+			if (empty($env)) {
+				return static::$_instance->_environment;
+			}
+			else {
+				return strtolower($env) == static::$_instance->_environment;
+			}
+
 		}
 
 		static function file($name) {
