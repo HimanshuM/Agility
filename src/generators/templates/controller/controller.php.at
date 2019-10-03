@@ -2,6 +2,7 @@
 
 namespace App\Controllers<?= $this->namespace; ?>;
 
+use Agility\Http;
 <?= $this->useNamespace(); ?>
 <?php if ($this->scaffold) { ?>
 use App\Models\<?= $this->scaffold; ?>;
@@ -16,7 +17,7 @@ use App\Models\<?= $this->scaffold; ?>;
 		function __construct() {
 			parent::__construct();
 <?php if ($this->scaffold) { ?>
-			$this->beforeAction("set<?= $this->scaffold; ?>", ["show", "edit", update", "delete"]);
+			$this->beforeAction("set<?= $this->scaffold; ?>", ["show", "edit", "update", "delete"]);
 <?php } ?>
 		}
 
@@ -72,11 +73,11 @@ use App\Models\<?= $this->scaffold; ?>;
 <?= $this->renderMethods(); ?>
 <?php if ($this->scaffold) {?>
 		protected function set<?= $this->scaffold; ?>() {
-			$this-><?= $this->scaffoldObject; ?> = <?= $this->scaffold; ?>::find($this->params["id"]);
+			$this-><?= $this->scaffoldObject; ?> = <?= $this->scaffold; ?>::fetch($this->params["id"]);
 		}
 
 		protected function <?= $this->scaffoldObject; ?>Params() {
-			return $this->params->fetch("<?= $this->scaffoldObject; ?>", []);
+			return $this->params->require("<?= $this->scaffoldObject; ?>")->permit(<?= $this->scaffold; ?>::accessibleAttributes());
 		}
 		<?= "\n"; ?>
 <?php } ?>
