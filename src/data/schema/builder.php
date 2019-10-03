@@ -9,7 +9,7 @@ use StringHelpers\Str;
 
 	trait Builder {
 
-		protected static function accessibleAttributes() {
+		static function accessibleAttributes() {
 			return static::metaStore()->accessibleAttributes;
 		}
 
