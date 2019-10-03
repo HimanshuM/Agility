@@ -3,6 +3,7 @@
 namespace Agility\Data\Schema;
 
 use Agility\Data\Collection;
+use Agility\Data\Exceptions\AttributeDoesNotExistException;
 use Agility\Data\Model;
 use Agility\Data\Relation;
 use Agility\Data\Relations\Scope;
@@ -14,12 +15,17 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 	trait Attributes {
 
 		protected $attributes;
+		private $_backups;
 
 		function addSubObject($name, $object) {
 			$this->attributes->$name = $object;
 		}
 
-		function fetchAttributes($noCasting = true) {
+		function backups() {
+			return $this->_backups;
+		}
+
+		function fetchAttributes($noCasting = true, $modifiedOnly = false) {
 
 			if ($noCasting) {
 				return $this->attributes->toArray;
@@ -33,22 +39,17 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 			$collection = $this->attributes->toArray;
 			foreach ($collection as $name => $value) {
 
-				if (is_a($value, Model::class)) {
-					$value = $value->valueOfPrimaryKey();
+				if ($modifiedOnly && !$this->_backups->exists($name) && $name != static::$primaryKey) {
+					continue;
 				}
-				else if (is_a($value, Relation::class) || is_a($value, Scope::class)) {
 
-					$value = $value->first;
-					if (empty($value)) {
-						$value = null;
-					}
-					else if (is_a($value, Model::class)) {
-						$value = $value->valueOfPrimaryKey();
-					}
-					else {
-						throw new InvalidTypeException(static::class."::$name", static::generatedAttributes()[$name]->dataType);
-					}
+				if (static::generatedAttributes()[$name]->onUpdate == "CURRENT_TIMESTAMP") {
+					continue;
+				}
 
+				list($value, $derived) = static::deriveValue($value);
+				if (!$derived) {
+					throw new InvalidTypeException(static::class."::$name", static::generatedAttributes()[$name]->dataType);
 				}
 
 				if (isset(static::attributeObjects()[$name])) {
@@ -72,7 +73,7 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 
 		}
 
-		function fillAttributes($collection, $forcible = true) {
+		function fillAttributes($collection, $forcible = true, $skipNotFound = false) {
 
 			if (is_a($collection, Collection::class)) {
 				$collection = $collection->toArray;
@@ -95,22 +96,9 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 					$this->_fresh = false;
 				}
 
-				if (is_a($value, Model::class)) {
-					$value = $value->valueOfPrimaryKey();
-				}
-				else if (is_a($value, Relation::class) || is_a($value, Scope::class)) {
-
-					$value = $value->first;
-					if (empty($value)) {
-						$value = null;
-					}
-					else if (is_a($value, Model::class)) {
-						$value = $value->valueOfPrimaryKey();
-					}
-					else {
-						throw new InvalidTypeException(static::class."::$name", static::generatedAttributes()[$name]->dataType);
-					}
-
+				list($value, $derived) = static::deriveValue($value);
+				if (!$derived) {
+					throw new InvalidTypeException(static::class."::$name", static::generatedAttributes()[$name]->dataType);
 				}
 
 				if (isset(static::attributeObjects()[$name])) {
@@ -119,18 +107,28 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 				else if (static::generatedAttributes()->exists($name)) {
 					$value = static::generatedAttributes()[$name]->dataType->unserialize($value);
 				}
+				else if ($skipNotFound) {
+					continue;
+				}
 				else {
 					throw new AttributeDoesNotExistException($name, static::class);
 				}
 
+				if ($forcible !== false) {
+					$this->_backups[$name] = $value;
+				}
 				$this->attributes->$name = $value;
 
 			}
 
-			foreach (static::attributeObjects() as $key => $value) {
+			if ($forcible !== false) {
 
-				if (!$this->attributes->has($key)) {
-					$this->attributes->$key = $value->dataType->unserialize($value->defaultValue);
+				foreach (static::attributeObjects() as $key => $value) {
+
+					if (!$this->attributes->has($key)) {
+						$this->attributes->$key = $value->dataType->unserialize($value->defaultValue);
+					}
+
 				}
 
 			}
@@ -149,6 +147,13 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 			// 	return null;
 			// }
 
+			if (!$this->attributes->has($name)) {
+
+				$attribute = static::generatedAttributes()[$name];
+				$this->attributes->$name = $attribute->defaultValue;
+
+			}
+
 			return $this->attributes->$name;
 
 		}
@@ -163,12 +168,56 @@ use Phpm\Exceptions\TypeExceptions\InvalidTypeException;
 
 		private function _setAttribute($name, $value) {
 
+			list($value, $derived) = $this->deriveValue($value);
+			if (!$derived) {
+				throw new InvalidTypeException(static::class."::$name", static::generatedAttributes()[$name]->dataType);
+			}
+
 			if (isset(static::attributeObjects()[$name])) {
 				$value = static::attributeObjects()[$name]->dataType->cast($value);
 			}
 
-			$this->attributes->$name = $value;
-			$this->_dirty = true;
+			if (!$this->attributes->has($name) || ($this->attributes->has($name) && $this->attributes->$name != $value)) {
+
+				if (static::generatedAttributes()->exists($name)) {
+
+					$this->_backups[$name] = null;
+					if ($this->attributes->has($name)) {
+						$this->_backups[$name] = $this->attributes->$name;
+					}
+
+					$this->_dirty = true;
+
+				}
+
+				$this->attributes->$name = $value;
+
+			}
+
+		}
+
+		private static function deriveValue($value) {
+
+			$derived = true;
+			if (is_a($value, Model::class)) {
+				$value = $value->valueOfPrimaryKey();
+			}
+			else if (is_a($value, Relation::class) || is_a($value, Scope::class)) {
+
+				$value = $value->first;
+				if (empty($value)) {
+					$value = null;
+				}
+				else if (is_a($value, Model::class)) {
+					$value = $value->valueOfPrimaryKey();
+				}
+				else {
+					$derived = false;
+				}
+
+			}
+
+			return [$value, $derived];
 
 		}
 
