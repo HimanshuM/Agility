@@ -170,7 +170,7 @@ use StringHelpers\Str;
 
 		protected function _parseOptions($args = []) {
 
-			parent::_parseOptions(["views", "skip-routes"]);
+			parent::_parseOptions(["views", "skip-routes", "scaffold"]);
 			$controllerName = $this->_getFilePathAndControllerClassName($this->_args->shift);
 
 			$this->_identifyParent();
@@ -207,9 +207,6 @@ use StringHelpers\Str;
 
 			if ($this->parentClass == "ApplicationController" && !empty($this->namespace)) {
 				return "use App\\Controllers\\ApplicationController\n";
-			}
-			else if ($this->parentClass != "ApplicationController") {
-				return "use Agility\\Http\n";
 			}
 
 			return "";
