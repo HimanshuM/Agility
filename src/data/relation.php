@@ -14,6 +14,7 @@ use Aqua\UpdateStatement;
 use Aqua\Visitors\Sanitizer;
 use ArrayUtils\Arrays;
 use ArrayUtils\Helpers\IndexFetcher;
+use DateTime;
 use Iterator;
 use JsonSerializable;
 use Phpm\Exceptions\ClassNotFoundException;
@@ -137,11 +138,11 @@ use StringHelpers\Str;
 
 					}
 
-					$this->_statement->join($with, $type);
+					$this->_statement->join(new Table($with), $type);
 					$this->_setDefaultOnClause(empty($source) ? $this->_statement->relation->_name : $source, $with);
 
 					if (!empty($subJoins)) {
-						$this->join($subJoins, $type, $with);
+						$this->_buildJoinSequence($subJoins, $type, $with);
 					}
 
 				}
@@ -149,21 +150,28 @@ use StringHelpers\Str;
 			}
 			else {
 
-				$this->_statement->join($table, $type);
+				$this->_statement->join(new Table($table), $type);
 				$this->_setDefaultOnClause(empty($source) ? $this->_statement->relation->_name : $source, $table);
 
 			}
 
 		}
 
+		function __call($method, $args = []) {
+			return $this->defaultCallback($method, $args);
+		}
+
 		protected function defaultCallback($name, $args = []) {
 
 			$index = static::getIndex($name);
-			if ($index !== false) {
+			if ($index !== false && $index > -1) {
 
 				$index -= 1;
 				return $this->range($index, 1)->first;
 
+			}
+			else if (strpos($name, "findBy") === 0) {
+				return $this->findByResolver(substr($name, strlen("findBy")), $args);
 			}
 
 		}
@@ -205,6 +213,56 @@ use StringHelpers\Str;
 
 			$this->_statement->exists($statement);
 			return $this;
+
+		}
+
+		function findBy($column, $value) {
+
+			$column = Helpers\NameHelper::getStorableName($column);
+
+			$value = Relation::resolveSearchValue($value);
+			if (!is_array($value)) {
+				return $this->where(static::aquaTable()->$column->eq($value))->first;
+			}
+			else {
+				return $this->where(static::aquaTable()->$column->in($value))->all;
+			}
+
+		}
+
+		function findByResolver($stub, $values) {
+
+			$matches = [];
+			$offset = 0;
+			$attributes = [];
+			if (!is_array($values)) {
+				$values = [$values];
+			}
+
+			if (preg_match_all("/[a-z0-9](And)[A-Z]/", $stub, $matches, PREG_OFFSET_CAPTURE)) {
+
+				foreach ($matches[1] as $i => $match) {
+
+					$attributeName = Helpers\NameHelper::getStorableName(substr($stub, $offset, $match[1] - $offset));
+					$attributes[$attributeName] = $values[$i];
+					$offset = $match[1] + strlen($match[0]);
+
+				}
+
+				$attributes[Helpers\NameHelper::getStorableName(substr($stub, $offset))] = $values[$i + 1];
+
+			}
+			else {
+				$attributes[Helpers\NameHelper::getStorableName($stub)] = $values[0];
+			}
+
+			$resultSet = $this->where($attributes)->all;
+			if ($resultSet->empty) {
+				return false;
+			}
+			else {
+				return $resultSet->first;
+			}
 
 		}
 
@@ -250,8 +308,14 @@ use StringHelpers\Str;
 			}
 
 			foreach ($values as $name => $value) {
+
 				// $this->_statement->insert($this->_aquaTable->$name->eq($value));
+				if (is_null($value)) {
+					$value = Types\Raw::sql("NULL");
+				}
+
 				$this->_statement->insert([$this->_aquaTable->$name, $value]);
+
 			}
 
 			return $this;
@@ -269,8 +333,6 @@ use StringHelpers\Str;
 		function leftJoin($with) {
 			return $this->join($with, "LeftJoin");
 		}
-
-		// Incomplete method
 		function new($params = []) {
 
 			if (!is_a($this->_statement, SelectStatement::class)) {
@@ -281,15 +343,28 @@ use StringHelpers\Str;
 				return null;
 			}
 
-			$boolean = $this->_statement->where->root->left;
-			if (!is_a($boolean->left, "Aqua\\Attribute")) {
+			$booleanId = $this->_statement->where->root->left;
+			if (!is_a($booleanId->left, "Aqua\\Attribute")) {
 				return null;
 			}
 
-			$foreignKeyName = $boolean->left->name;
-			$value = $boolean->right;
-
+			$foreignKeyName = $booleanId->left->name;
+			$value = $booleanId->right;
 			$params[Str::pascalCase($foreignKeyName)] = $value;
+
+			// If the root has a right and the table name matches, assume we are dealing with Polymorphic association
+			if (!empty($this->_statement->where->root->right)) {
+
+				$booleanType =  $this->_statement->where->root->right->left;
+				if ($booleanId->left->table->name == $booleanType->left->table->name) {
+
+					$foreignKeyName = $booleanType->left->name;
+					$value = $booleanType->right;
+					$params[Str::pascalCase($foreignKeyName)] = $value;
+
+				}
+
+			}
 
 			return $this->_model::new($params);
 
@@ -376,7 +451,7 @@ use StringHelpers\Str;
 		// or returns the value as it is.
 		static function resolveSearchValue($value) {
 
-			if (is_array($value)) {
+			if (is_array($value) || is_a($value, Arrays::class)) {
 
 				$return = [];
 				foreach ($value as $each) {
@@ -391,6 +466,12 @@ use StringHelpers\Str;
 				if (is_a($value, Model::class)) {
 					$value = $value->valueOfPrimaryKey();
 				}
+				elseif (is_a($value, DateTime::class)) {
+					$value = $value->format("Y-m-d H:i:s");
+				}
+				// elseif (is_null($value)) {
+				// 	$value = Types\Raw::sql("NULL");
+				// }
 
 				return $value;
 
@@ -437,15 +518,15 @@ use StringHelpers\Str;
 
 			$nativeAttributes = $collections[0]->toArray->keys;
 			$modelAttributes = $this->_model::generatedAttributes()->keys;
-			if (!$nativeAttributes->diff($modelAttributes)->empty) {
-				return $collections;
-			}
+			// if (!$nativeAttributes->diff($modelAttributes)->empty) {
+			// 	return $collections;
+			// }
 
 			$objects = new Arrays;
 			foreach ($collections as $collection) {
 
 				$object = new $this->_model;
-				$object->fillAttributes($collection, false);
+				$object->fillAttributes($collection, false, true);
 
 				$objects[] = $object;
 
@@ -467,8 +548,14 @@ use StringHelpers\Str;
 			}
 
 			foreach ($attributes as $name => $value) {
+
 				// $this->_statement->insert($this->_aquaTable->$name->eq($value));
+				if (is_null($value)) {
+					$value = Types\Raw::sql("NULL");
+				}
+
 				$this->_statement->set([$this->_aquaTable->$name, $value]);
+
 			}
 
 			return $this;
@@ -494,6 +581,9 @@ use StringHelpers\Str;
 						$value = Relation::resolveSearchValue($value);
 						if (is_array($value)) {
 							$this->_statement->where($this->_aquaTable->$col->in($value));
+						}
+						elseif (is_null($value)) {
+							$this->_statement->where($this->_aquaTable->$col->isNull());
 						}
 						else {
 							$this->_statement->where($this->_aquaTable->$col->eq($value));
