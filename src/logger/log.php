@@ -3,6 +3,7 @@
 namespace Agility\Logger;
 
 use Agility\Configuration;
+use FileSystem\File;
 use Phpm\Exceptions\ClassExceptions\ClassNotFoundException;
 use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 
@@ -114,11 +115,11 @@ use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 		static function register($className) {
 
 			if (!class_exists($className)) {
-				throw new ClassNotFoundException("Agility\\Logger\\Log::register()", $className);
+				throw new ClassNotFoundException($className);
 			}
 
 			$instance = new $className;
-			if (!is_a(Log::$instance, "Psr\\Log\\LoggerInterface") && !is_a(Log::$instance, "Agility\\Logger\\Psr\\LoggerInterface")) {
+			if (!is_a($instance, "Psr\\Log\\LoggerInterface") && !is_a($instance, "Agility\\Logger\\Psr\\LoggerInterface")) {
 				throw new InvalidArgumentTypeException("Agility\\Logger\\Log::register()", 1, ["Psr\\Log\\LoggerInterface", "Agility\\Logger\\Psr\\LoggerInterface"], get_class($instance));
 			}
 
