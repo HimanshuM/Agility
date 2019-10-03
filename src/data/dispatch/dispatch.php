@@ -75,13 +75,34 @@ use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 			if (strpos($name, "findBy") === 0) {
 				return static::findByResolver(substr($name, strlen("findBy")), $args);
 			}
+			else if (strpos($name, "fetchBy") === 0) {
+				return static::fetchByResolver(substr($name, strlen("fetchBy")), $args);
+			}
 			else if (in_array($name, static::$CALLBACKS)) {
 				return static::_addToCallbacks($name, $args);
 			}
 			else if (($validator = Validations\Base::isAvailable($name, true)) !== false) {
 
-				foreach ($args as $attr) {
-					static::validates($attr, $validator);
+				if (count($args) == 2 && is_array($args[1])) {
+
+					if (is_array($args[0])) {
+
+						foreach ($args[0] as $attr) {
+							static::validates($attr, $validator, $args[1]);
+						}
+
+					}
+					else {
+						static::validates($args[0], $validator, $args[1]);
+					}
+
+				}
+				else {
+
+					foreach ($args as $attr) {
+						static::validates($attr, $validator);
+					}
+
 				}
 
 			}
