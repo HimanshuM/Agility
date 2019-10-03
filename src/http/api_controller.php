@@ -3,8 +3,11 @@
 namespace Agility\Http;
 
 use Agility\Config;
+use Agility\Data\Exceptions\RecordNotFoundException;
 use Agility\Data\Model;
+use Agility\Routing\Dispatch;
 use Agility\Server\AbstractController;
+use Agility\Server\Exceptions\ParameterMissingException;
 use ArrayUtils\Arrays;
 use StringHelpers\Inflect;
 use StringHelpers\Str;
@@ -22,7 +25,10 @@ use StringHelpers\Str;
 		protected $jsonEncodeGrouping = "all";
 
 		function __construct() {
+
 			parent::__construct();
+			$this->setDefaultRescuers();
+
 		}
 
 		protected function conclude($response) {
@@ -135,6 +141,24 @@ use StringHelpers\Str;
 
 		function respond404($msg = []) {
 			$this->respond($msg, 404);
+		}
+
+		protected function rescueFrom($exception, $with) {
+			Dispatch::rescueFrom($exception, [$this, $with]);
+		}
+
+		private function setDefaultRescuers() {
+
+			$this->rescueFrom(RecordNotFoundException::class, function($exception, $response) {
+				$response->status(404);
+			});
+			$this->rescueFrom(ParameterMissingException::class, function($exception, $response) {
+
+				$response->status($exception->httpStatus);
+				$this->json(["error" => $exception->getMessage()]);
+
+			});
+
 		}
 
 	}
