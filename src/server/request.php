@@ -23,6 +23,7 @@ use AttributeHelper\Accessor;
 
 		protected $getParams;
 		protected $postParams;
+		protected $files;
 		protected $cookie;
 
 		protected $format;
@@ -32,11 +33,12 @@ use AttributeHelper\Accessor;
 			$this->request = $request;
 			$this->headers = new Arrays($request->header);
 			$this->params = new Arrays;
+			$this->files = new Arrays;
 			$this->cookie = new Arrays;
 			$this->compileParameters();
 
 			$this->methodsAsProperties("delete", "get", "options", "patch", "post", "put");
-			$this->readonly("host", "port", "headers", "ip", "method", "params", "uri", "getParams", "postParams", "cookie", "format");
+			$this->readonly("host", "port", "headers", "ip", "method", "params", "uri", "getParams", "postParams", "files", "cookie", "format");
 
 		}
 
@@ -61,6 +63,9 @@ use AttributeHelper\Accessor;
 
 			$this->getParams = new Arrays($this->request->get);
 			$this->postParams = new Arrays($this->request->post);
+			if ($this->postParams->exists("_method_") && in_array(strtolower($this->postParams["_method_"]), ["put", "patch"])) {
+				$this->method = strtolower($this->postParams["_method_"]);
+			}
 
 			if (!empty($this->request->cookie)) {
 
@@ -74,6 +79,33 @@ use AttributeHelper\Accessor;
 
 				if (empty($this->request->post)) {
 					$this->post = new Arrays(json_decode($this->request->rawContent(), true));
+				}
+
+			}
+
+			$this->compileFiles();
+
+		}
+
+		protected function compileFiles() {
+
+			if (empty($this->request->files)) {
+				return;
+			}
+
+			foreach ($this->request->files as $param => $value) {
+
+				if (isset($value[0])) {
+
+					$this->files[$param] = new Arrays;
+
+					foreach ($value as $key => $file) {
+						$this->files[$param][$key] = Upload::prepare($key, Upload::constructFileArray($key, $file));
+					}
+
+				}
+				else {
+					$this->files[$param] = Upload::prepare($param, $value);
 				}
 
 			}
