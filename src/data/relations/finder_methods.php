@@ -2,13 +2,16 @@
 
 namespace Agility\Data\Relations;
 
+use Agility\Data\Exceptions\RecordNotFoundException;
 use Agility\Data\Helpers\NameHelper;
 use Agility\Data\Relation;
 
 	/** FinderMethods
 	 * Finder methods look for records in the given table base upon the criteria.
 	 * If the records are found, they return the array of records;
-	 * if not found, they return false.
+ 	 *     if not found:
+ 	 *			finder methods: return false.
+ 	 *			fetcher methods: raise exception.
 	 */
 	trait FinderMethods {
 
@@ -16,10 +19,17 @@ use Agility\Data\Relation;
 			return (static::initializeRelation())->all;
 		}
 
+		// Return false on object not found
 		static function find($id) {
 			return static::findBy(static::$primaryKey, $id);
 		}
 
+		// Throws RecordNotFoundException on object not found
+		static function fetch($id) {
+			return static::fetchBy(static::$primaryKey, $id);
+		}
+
+		// Return false or empty array on object(s) not found
 		static function findBy($column, $value) {
 
 			$column = NameHelper::getStorableName($column);
@@ -34,7 +44,62 @@ use Agility\Data\Relation;
 
 		}
 
+		// Throws RecordNotFoundException on object(s) not found
+		static function fetchBy($column, $value) {
+
+			$column = NameHelper::getStorableName($column);
+
+			$value = Relation::resolveSearchValue($value);
+			if (!is_array($value)) {
+
+				$result = static::where(static::aquaTable()->$column->eq($value))->first;
+				if (empty($result)) {
+					throw new RecordNotFoundException(static::class, $column, $value);
+				}
+
+			}
+			else {
+
+				$result = static::where(static::aquaTable()->$column->in($value))->all;
+				if ($result->empty) {
+					throw new RecordNotFoundException(static::class, $column, $value);
+				}
+
+			}
+
+			return $result;
+
+		}
+
 		static function findByResolver($stub, $values) {
+
+			$attributes = static::resolveColumns($stub, $values);
+
+			$resultSet = static::where($attributes)->all;
+			if ($resultSet->empty) {
+				return false;
+			}
+			else {
+				return $resultSet->first;
+			}
+
+		}
+
+		static function fetchByResolver($stub, $values) {
+
+			$attributes = static::resolveColumns($stub, $values);
+
+			$resultSet = static::where($attributes)->all;
+			if ($resultSet->empty) {
+				throw new RecordNotFoundException(static::class, $attributes);
+			}
+			else {
+				return $resultSet->first;
+			}
+
+		}
+
+		static protected function resolveColumns($stub, $values) {
 
 			$matches = [];
 			$offset = 0;
@@ -56,13 +121,7 @@ use Agility\Data\Relation;
 				$attributes[NameHelper::getStorableName($stub)] = $values[0];
 			}
 
-			$resultSet = static::where($attributes)->all;
-			if ($resultSet->empty) {
-				return false;
-			}
-			else {
-				return $resultSet->first;
-			}
+			return $attributes;
 
 		}
 
