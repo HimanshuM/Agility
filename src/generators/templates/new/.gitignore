@@ -13,3 +13,10 @@ tmp/*
 # Ignore uploaded files in development
 storage/*
 !storage/.keep
+
+# Ignore libraries installed in vendor
+vendor/*
+!vendor/.keep
+
+# Ignore composer.lock as well
+composer.lock
