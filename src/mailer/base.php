@@ -8,7 +8,6 @@ use Agility\Server\AbstractController;
 use Agility\Templating\Render;
 use Agility\Templating\EmailTags;
 use ArrayUtils\Arrays;
-use PHPMailer\PHPMailer\PHPMailer;
 use StringHelpers\Str;
 
 	class Base extends AbstractController {

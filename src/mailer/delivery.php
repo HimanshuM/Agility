@@ -3,8 +3,11 @@
 namespace Agility\Mailer;
 
 use Agility\Application;
+use Agility\Config;
 use Agility\Chrono\Chronometer;
+use Agility\Logger\Log;
 use ArrayUtils\Arrays;
+use PHPMailer\PHPMailer\PHPMailer;
 use Swoole;
 
 	class Delivery {
