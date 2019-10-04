@@ -21,8 +21,9 @@ use AttributeHelper\Accessor;
 		protected $_unique = false;
 		protected $_onUpdate = null;
 		protected $_comment = "";
+		protected $_collation = false;
 
-		function __construct($name, $dataType = null, $nullable = true, $defaultValue = null, $autoIncrement = false, $indexed = false, $unique = false, $onUpdate = null, $comment = "") {
+		function __construct($name, $dataType = null, $nullable = true, $defaultValue = null, $autoIncrement = false, $indexed = false, $unique = false, $onUpdate = null, $comment = "", $collation = false) {
 
 			$this->_name = $name;
 			if (is_null($dataType)) {
@@ -39,6 +40,7 @@ use AttributeHelper\Accessor;
 			$this->_unique = $unique;
 			$this->_onUpdate = $onUpdate;
 			$this->_comment = $comment;
+			$this->_collation = $collation;
 
 			$this->prependUnderscore();
 			$this->disableStrictAccessibility();
@@ -109,12 +111,13 @@ use AttributeHelper\Accessor;
 			$defaultValue = $options["default"] ?? null;
 			$onUpdate = $options["onUpdate"] ?? null;
 			$comment = $options["comment"] ?? "";
+			$collation = $options["collation"] ?? false;
 			$indexed = false;
 			if ($dataType."" == "reference") {
 				$indexed = true;
 			}
 
-			return new Attribute($name, $dataType, $nullable, $defaultValue, false, $indexed, false, $onUpdate, $comment);
+			return new Attribute($name, $dataType, $nullable, $defaultValue, false, $indexed, false, $onUpdate, $comment, $collation);
 
 		}
 
@@ -130,6 +133,7 @@ use AttributeHelper\Accessor;
 				"unique" => $this->_unique,
 				"onUpdate" => $this->_onUpdate,
 				"comment" => $this->_comment,
+				"collation" => $this->_collation,
 			];
 
 		}
@@ -202,6 +206,10 @@ use AttributeHelper\Accessor;
 
 			if (!empty($this->_comment)) {
 				$query .= " COMMENT ".$this->_comment;
+			}
+
+			if (!empty($this->_collation)) {
+				$query .= " COLLATE ".$this->_collation;
 			}
 
 			if ($this->_autoIncrement === true) {
