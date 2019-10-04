@@ -1,6 +1,6 @@
 <?php
 
-namespace Agility\Data\Schema;
+namespace Agility\Data\Schema\Exceptions;
 
 use Exception;
 
