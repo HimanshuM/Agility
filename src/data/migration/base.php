@@ -96,11 +96,14 @@ use StringHelpers\Inflect;
 					}
 
 				}
-				else if (is_bool($arg) && empty($primaryKey)) {
+				elseif (is_bool($arg) && empty($primaryKey)) {
 					$primaryKey = $arg;
 				}
-				else if (is_callable($arg) && empty($callback)) {
+				elseif (is_callable($arg) && empty($callback)) {
 					$callback = $arg;
+				}
+				elseif (is_array($arg)) {
+					$options = array_merge($options, $arg);
 				}
 				else {
 					$options[] = $arg;
