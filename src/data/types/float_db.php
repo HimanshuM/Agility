@@ -2,7 +2,7 @@
 
 namespace Agility\Data\Types;
 
-	class Float extends Base {
+	class FloatDb extends Base {
 
 		function __construct($size = null) {
 

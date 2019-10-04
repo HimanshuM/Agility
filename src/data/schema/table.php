@@ -51,7 +51,7 @@ use StringHelpers\Inflect;
 
 		function __call($name, $args = []) {
 
-			$dataType = Base::getType($name == "string" ? "str" : $name);
+			$dataType = Base::getType($name);
 
 			if (count($args) == 0) {
 				throw new Exception("Attribute name not specified in call to ".$name."()", 1);

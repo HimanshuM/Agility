@@ -16,7 +16,8 @@ use StringHelpers\Str;
 			"string" => "str",
 			"int" => "integer",
 			"uint" => "u_int",
-			"datetime" => "datetime_db"
+			"datetime" => "datetime_db",
+			"float" => "float_db"
 		];
 
 		const ValidTypes = [
@@ -79,6 +80,10 @@ use StringHelpers\Str;
 				"scale" => $this->scale
 			];
 
+		}
+
+		static function raw($string) {
+			return new Raw($string);
 		}
 
 		static function register($className, $typeName = false) {
