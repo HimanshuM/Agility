@@ -27,8 +27,6 @@ use PDO;
 		protected $_username;
 		protected $_password;
 		protected $_extraConfig;
-		protected $_tablePrefix;
-		protected $_tableSuffix;
 
 		function __construct($connectionArray, $instanceType) {
 
@@ -39,10 +37,7 @@ use PDO;
 
 			$this->attemptConnection();
 
-			$this->readonly(
-				["tablePrefix", "_tablePrefix"],
-				["tableSuffix", "_tableSuffix"]
-			);
+			$this->readonly(["charSet", "_charSet"]);
 
 			return true;
 
@@ -76,24 +71,7 @@ use PDO;
 			$this->_username = $this->_setUsername($config);
 			$this->_password = $this->_setPassword($config);
 
-			$this->_tablePrefix = $this->_setTablePrefix($config);
-			$this->_tableSuffix = $this->_setTableSuffix($config);
-
 			$this->_extraConfig = $this->_setExtraConfig($config);
-
-			/*$i = 0;
-			while ($i < $this->_poolSize) {
-
-				$connection = $this->getPdoConnection(
-						$this->_setDsn(
-							$this->_dbName, $this->_host, $this->_port, $this->_unixSocket, $this->_charSet),
-						$this->_username, $this->_password, $this->_extraConfig
-					);
-				$this->_connectionPool->push($connection);
-
-				$i++;
-
-			}*/
 
 		}
 
@@ -161,7 +139,7 @@ use PDO;
 					return $this->delete($mysqlVisitor);
 				}
 				else if (is_a($query, Aqua\DescribeStatement::class)) {
-					return $this->query($mysqlVisitor);
+					return $this->query($mysqlVisitor, [], 15);
 				}
 
 			}
@@ -190,7 +168,7 @@ use PDO;
 
 			$stmt = $connection->prepare($sql);
 
-			if ($type == 0) {
+			if ($type == 0 || $type == 15) {
 				$stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, $this->_instanceType);
 			}
 			else if ($type == 4) {
@@ -223,7 +201,7 @@ use PDO;
 			}
 
 			$result = false;
-			if ($type == 0) {
+			if ($type == 0 || $type == 15) {
 				$result = $stmt->fetchAll();
 			}
 			else if ($type == 4) {
@@ -234,9 +212,6 @@ use PDO;
 				else {
 					$result = $stmt->fetchAll();
 				}
-
-			}
-			else if ($type == static::DDLStatement) {
 
 			}
 			else {
@@ -306,15 +281,10 @@ use PDO;
 
 		}
 
-		protected function _logQuery($connection, $sql, $params, $return = false) {
+		protected function _logQuery($connection, $sql, $params) {
 
 			foreach ($params as $param) {
 				$sql = preg_replace("/\?/", $connection->quote($param), $sql, 1);
-			}
-
-			// Not used anymore
-			if ($return) {
-				return $sql;
 			}
 
 			if (!getenv("AGILITY_NO_ECHO")) {
@@ -333,7 +303,7 @@ use PDO;
 
 			}
 
-			if ($type != 0 && $type != 4 && $type != 10) {
+			if ($type != 0 && $type != 4 && $type != 10 && $type != 15) {
 				throw new InvalidFetchTypeException($type);
 			}
 
@@ -366,7 +336,7 @@ use PDO;
 		}
 
 		private function _setCharacterSet($config) {
-			return $config["charset"] ?? null;
+			return $config["charset"] ?? "utf8mb4";
 		}
 
 		private function _setDBName($config) {
@@ -396,9 +366,6 @@ use PDO;
 			}
 
 			$configuration[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
-			// if (Configuration::environment() == "development") {
-			// 	$configuration[PDO::ATTR_ERRMODE] |= PDO::ERRMODE_WARNING;
-			// }
 
 			return $configuration;
 
@@ -420,14 +387,6 @@ use PDO;
 
 		private function _setPort($config) {
 			return $config["port"] ?? null;
-		}
-
-		private function _setTablePrefix($config) {
-			return $config["prefix"] ?? "";
-		}
-
-		private function _setTableSuffix($config) {
-			return $config["suffix"] ?? "";
 		}
 
 		private function _setUnixSocket($config) {
