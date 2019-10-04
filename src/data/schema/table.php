@@ -9,6 +9,7 @@ use Agility\Data\Types\DatetimeDb;
 use Agility\Exceptions\InvalidArgumentTypeException;
 use ArrayUtils\Arrays;
 use AttributeHelper\Accessor;
+use StringHelpers\Inflect;
 
 	class Table {
 
@@ -50,13 +51,7 @@ use AttributeHelper\Accessor;
 
 		function __call($name, $args = []) {
 
-			if ($name == "references") {
-				$name = "reference";
-			}
-			else if ($name == "string") {
-				$name = "str";
-			}
-			$dataType = Base::getType($name);
+			$dataType = Base::getType($name == "string" ? "str" : $name);
 
 			if (count($args) == 0) {
 				throw new Exception("Attribute name not specified in call to ".$name."()", 1);
@@ -83,13 +78,7 @@ use AttributeHelper\Accessor;
 		function column($attrName, $dataType, $options = []) {
 
 			if (!is_a($dataType, Base::class)) {
-
-				// if ($name == "string") {
-				// 	$name = "str";
-				// }
-
 				$dataType = Base::getType($dataType);
-
 			}
 
 			if (!empty($options["autoIncrement"]) && !is_a($dataType, "Agility\\Data\\Types\\Integer")) {
@@ -193,36 +182,7 @@ use AttributeHelper\Accessor;
 		}
 
 		protected function compileNonPolymorphicAttribute($attribute, $dataType) {
-
-			// $query = "`".$attribute->name."`";
-			// $query .= " ".$dataType;
-			// if ($attribute->dataType == "enum") {
-			// 	$query .= "(".$attribute->dataType->valuesString().")";
-			// }
-
-			// if (!$attribute->nullable) {
-			// 	$query .= " NOT NULL";
-			// }
-
-			// if (!is_null($attribute->defaultValue)) {
-			// 	$query .= " DEFAULT ".$this->connection->quote($attribute->defaultValue);
-			// }
-
-			// if (!is_null($attribute->onUpdate)) {
-			// 	$query .= " ON UPDATE ".$attribute->onUpdate;
-			// }
-
-			// if (!empty($attribute->comment)) {
-			// 	$query .= " COMMENT ".$attribute->comment;
-			// }
-
-			// if (!is_array($this->primaryKey) && $attribute->autoIncrement === true) {
-			// 	$query .= " AUTO_INCREMENT";
-			// }
-
-			// return $query;
 			return $attribute->toSql($this->connection);
-
 		}
 
 		protected function compilePrimaryKey() {
@@ -240,12 +200,33 @@ use AttributeHelper\Accessor;
 			if ($autoIncrement) {
 
 				if (!$this->primaryKey->empty) {
-					throw new MultipleAutoIncrementException($this->name);
+					throw new Exceptions\MultipleAutoIncrementException($this->name);
 				}
 
 			}
 
 			$this->primaryKey[] = $this->attributes[$attrName];
+
+		}
+
+		function references($referencedTable, $options = []) {
+
+			if (!empty($options["foreignKey"])) {
+
+				$options["foreignKey"] = Inflect::pluralize($referencedTable);
+				if (empty($options["columnName"])) {
+					$options["columnName"] = $referencedTable."_id";
+				}
+
+			}
+			elseif (!empty($options["polymorphic"])) {
+				$options["columnName"] = $referencedTable;
+			}
+			else {
+				throw new Exceptions\UndefinedReferenceTypeException($this->name, $referencedTable);
+			}
+
+			return $this->column($options["columnName"], "reference", $options);
 
 		}
 
