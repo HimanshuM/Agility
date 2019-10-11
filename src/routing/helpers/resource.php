@@ -15,7 +15,8 @@ use StringHelpers\Inflect;
 			"create",
 			"show",
 			"update",
-			"delete"
+			"delete",
+			"options"
 		];
 
 		const HttpActions = [
@@ -35,7 +36,8 @@ use StringHelpers\Inflect;
 			"show" => "get",
 			"edit" => "get",
 			"update" => "patch",
-			"delete" => "delete"
+			"delete" => "delete",
+			"options" => "options"
 		];
 
 		// Namespace of the controller

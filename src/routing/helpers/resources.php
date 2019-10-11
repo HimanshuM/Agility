@@ -22,6 +22,17 @@ use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 			foreach ($resource->actions as $action) {
 
 				$path = $resource->path;
+				if ($action == "options") {
+
+					$route = $this->constructRoute(Resource::ActionToMethod[$action], $path, $resource->controller, $options, $action);
+
+					$path = $resource->memberScope();
+					$route = $this->constructRoute(Resource::ActionToMethod[$action], $path, $resource->controller, $options, $action);
+
+					continue;
+
+				}
+
 				if ($action == "new") {
 					$path .= "/new";
 				}
