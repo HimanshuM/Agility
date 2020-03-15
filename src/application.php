@@ -109,20 +109,11 @@ use StringHelpers\Str;
 			$this->setupApplicationAutoloader();
 			$this->setupComposerAutoloader();
 			$this->initializeLogging();
-			$this->initializeDatabase();
 			$this->initializeRouting();
 			$this->initializeHttp();
 			$this->initializeSecurity();
 			$this->initializeMailer();
 			$this->setupCaching();
-
-		}
-
-		protected function initializeDatabase() {
-
-			if (!$this->noDatabase) {
-				Pool::initialize();
-			}
 
 		}
 
