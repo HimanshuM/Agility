@@ -11,7 +11,7 @@ use Agility\Configuration;
 			if (is_null(Configuration::document404())) {
 
 				if (Configuration::documentRoot()->has("public/404.html")) {
-					Configuration::document404("404.html");
+					Configuration::document404("public/404.html");
 				}
 				else {
 					Configuration::document404(false);
