@@ -38,7 +38,7 @@ use AttributeHelper\Accessor;
 			$this->compileParameters();
 
 			$this->methodsAsProperties("delete", "get", "options", "patch", "post", "put");
-			$this->readonly("host", "port", "headers", "ip", "method", "params", "uri", "getParams", "postParams", "files", "cookie", "format");
+			$this->readonly("host", "port", "headers", "ip", "method", "params", "uri", "getParams", "postParams", "files", "cookie", "format", "request");
 
 		}
 
