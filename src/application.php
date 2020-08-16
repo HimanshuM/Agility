@@ -138,7 +138,7 @@ use StringHelpers\Str;
 		}
 
 		protected function initializeSwoole() {
-			$this->_swoole = new \swoole_http_server(Configuration::host(), Configuration::port());
+			$this->_swoole = new \swoole_websocket_server(Configuration::host(), Configuration::port());
 		}
 
 		static function instance() {
