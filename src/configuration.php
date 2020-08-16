@@ -58,6 +58,8 @@ use ArrayUtils\Arrays;
 					static::$_instance->_addListener($setting, $args[1], $new);
 				}
 
+				return static::$_instance->_settings[$setting];
+
 			}
 			else if (static::$_instance->_settings->exists($setting)) {
 				return static::$_instance->_settings[$setting];

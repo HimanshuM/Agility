@@ -2,7 +2,6 @@
 
 namespace Agility\Console\Commands;
 
-use Agility\Console\Helpers\EchoHelper;
 use AttributeHelper\Accessor;
 use FileSystem;
 use MethodTriggers\Trigger;

@@ -34,7 +34,7 @@ use StringHelpers\Str;
 
 				AppLoader::setupApplicationAutoloader($appPath);
 
-				$namespaces[] = [$appPath->chdir("lib/tasks"), "Lib\\Tasks"];
+				$namespaces[] = [(clone $appPath)->chdir("lib/tasks"), "Lib\\Tasks"];
 
 			}
 

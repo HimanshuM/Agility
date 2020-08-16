@@ -1,0 +1,15 @@
+<?= $this->phpTagOpen(); ?>
+
+namespace App\Channels;
+
+use Agility\Sockets\Channel;
+
+	abstract class ApplicationChannel extends Channel {
+
+		function __construct() {
+			parent::__construct();
+		}
+
+	}
+
+<?= $this->phpTagClose(); ?>

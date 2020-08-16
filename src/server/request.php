@@ -38,7 +38,7 @@ use AttributeHelper\Accessor;
 			$this->compileParameters();
 
 			$this->methodsAsProperties("delete", "get", "options", "patch", "post", "put");
-			$this->readonly("host", "port", "headers", "ip", "method", "params", "uri", "getParams", "postParams", "files", "cookie", "format");
+			$this->readonly("host", "port", "headers", "ip", "method", "params", "uri", "getParams", "postParams", "files", "cookie", "format", "request");
 
 		}
 
@@ -78,7 +78,7 @@ use AttributeHelper\Accessor;
 			if ($this->method != "get") {
 
 				if (empty($this->request->post)) {
-					$this->post = new Arrays(json_decode($this->request->rawContent(), true));
+					$this->postParams = new Arrays(json_decode($this->request->rawContent(), true));
 				}
 
 			}

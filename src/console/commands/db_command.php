@@ -159,7 +159,7 @@ use StringHelpers\Str;
 			}
 			else {
 
-				$seeds = $this->appPath->parent->children("../db/seeds/$pick");
+				$seeds = $this->appPath->parent->children("../db/seeds/$file");
 				foreach ($seeds as $seed) {
 					$this->executeFile($seed);
 				}
@@ -170,7 +170,7 @@ use StringHelpers\Str;
 
 		protected function executeFile($file) {
 
-			echo "Running $file.php\n";
+			echo "Running $file\n";
 			require_once $file;
 
 		}

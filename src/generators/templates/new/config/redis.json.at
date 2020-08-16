@@ -1,0 +1,23 @@
+{
+	"development":[
+		{
+			"scheme":"tcp",
+			"host":"localhost",
+			"port":"6379"
+		}
+	],
+	"test":[
+		{
+			"scheme":"tcp",
+			"host":"localhost",
+			"port":"6379"
+		}
+	],
+	"production":[
+		{
+			"scheme":"tcp",
+			"host":"localhost",
+			"port":"6379"
+		}
+	]
+}
