@@ -6,6 +6,7 @@ use Agility\Configuration;
 use ArrayUtils\Arrays;
 use FileSystem\File;
 use Predis\Client;
+use Throwable;
 
 	final class Redis {
 
