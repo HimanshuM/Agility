@@ -2,12 +2,19 @@
 
 namespace Agility\Console\Commands;
 
+use Agility\Console\Helpers\EchoHelper;
+use Agility\Console\Helpers\OutputHelper;
 use Agility\Initializers\ApplicationInitializer;
+use Agility\Parser\Lexer;
+use Agility\Parser\SymbolTable;
 use Agility\Parser\Tokenizer;
 
 	class ConsoleCommand extends Base {
 
 		use ApplicationInitializer;
+		use EchoHelper;
+
+		protected $quite = false;
 
 		function perform($args) {
 
@@ -32,10 +39,13 @@ use Agility\Parser\Tokenizer;
 
 			readline_add_history($input);
 			try {
-				var_dump(Tokenizer::parse($input));
+
+				$tokens = Tokenizer::parse($input);
+				$this->echo("#B#=>#N# ".Lexer::use($tokens));
+
 			}
 			catch (\Exception $e) {
-				echo $e->getMessage()."\n";
+				$this->echo("#Red#".$e->getMessage()."#N#");
 			}
 
 			$this->repl();
@@ -44,7 +54,7 @@ use Agility\Parser\Tokenizer;
 
 		protected function prompt() {
 
-			echo "agility:> ";
+			OutputHelper::echo("#B##White#agility:>#N# ");
 			return readline();
 
 		}
