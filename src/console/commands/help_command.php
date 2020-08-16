@@ -9,10 +9,10 @@ use FileSystem\File;
 		function perform($args) {
 
 			if ($args->empty) {
-				$file = new File(__DIR__."/generators/help/README");
+				$file = File::open(__DIR__."/../../generators/templates/help/README");
 			}
 			else {
-				$file = new File(__DIR__."/generators/help/".$args->first);
+				$file = File::open(__DIR__."/../../generators/templates/help/".$args->first);
 			}
 
 			echo $file->read();
