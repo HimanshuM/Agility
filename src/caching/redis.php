@@ -92,7 +92,7 @@ use Throwable;
 				Redis::subscribeUsing($pubSub, $callback);
 			}
 			catch (Throwable $e) {
-				Redis::subscibe($channel, $callback);
+				Redis::subscribe($channel, $callback);
 			}
 
 		}
