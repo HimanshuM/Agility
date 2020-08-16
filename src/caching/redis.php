@@ -52,6 +52,13 @@ use Throwable;
 			$configuration = Configuration::redisConf(json_decode($configuration, true))[Configuration::environment()];
 			foreach ($configuration as $connectionName => $connectionArray) {
 
+				if ($connectionName == "default") {
+
+					Redis::$defaultConnection = $connectionArray;
+					continue;
+
+				}
+
 				Redis::$pool[$connectionName] = false;
 				if (is_null($connectionObject = Redis::attemptConnection($connectionArray))) {
 					throw new SqlConnectionFailedException("Could not connect to redis '".$connectionArray["database"]."'");
