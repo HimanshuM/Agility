@@ -7,6 +7,7 @@ use Agility\Data\Connection\Pool;
 use Agility\Routing\Dispatch;
 use Agility\Routing\Routes;
 use Agility\Server\StaticContent;
+use Agility\Sockets\Channels;
 use ArrayUtils\Arrays;
 use AttributeHelper\Accessor;
 use Error;
@@ -190,6 +191,7 @@ use StringHelpers\Str;
 
 			$this->configureSwoole();
 			$this->setupListner();
+			$this->setupSocketListener();
 			$this->executePostInitializers();
 			$this->setupSessionStoreCleanupRoutine();
 
@@ -216,6 +218,14 @@ use StringHelpers\Str;
 
 		protected function setupListner() {
 			$this->_swoole->on("request", [$this, "listner"]);
+		}
+
+		protected function setupSocketListener() {
+
+			$this->_swoole->on("open", [Channels::class, "listener"]);
+			$this->_swoole->on("message", [Channels::class, "onMessage"]);
+			$this->_swoole->on("close", [Channels::class, "onClose"]);
+
 		}
 
 		protected function setupSessionStoreCleanupRoutine() {
