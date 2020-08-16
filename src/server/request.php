@@ -78,7 +78,7 @@ use AttributeHelper\Accessor;
 			if ($this->method != "get") {
 
 				if (empty($this->request->post)) {
-					$this->post = new Arrays(json_decode($this->request->rawContent(), true));
+					$this->postParams = new Arrays(json_decode($this->request->rawContent(), true));
 				}
 
 			}
