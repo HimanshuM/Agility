@@ -202,7 +202,7 @@ namespace Agility\Parser;
 			}
 
 			$group = Token::grouper($this->grouperStart.$this->grouperEnd);
-			$group->children = Tokenizer::parse($string);
+			$group->children = Tokenizer::parse($string, false);
 
 			$this->grouperStart = $this->grouperEnd = false;
 			$this->grouper = 0;

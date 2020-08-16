@@ -41,12 +41,16 @@ namespace Agility\Parser;
 
 		}
 
+		function type() {
+			return $this->type;
+		}
+
 		static function integer($token) {
-			return new Token($token, "int");
+			return new Token($token, "integer");
 		}
 
 		static function float($token) {
-			return new Token($token, "float");
+			return new Token($token, "double");
 		}
 
 		static function word($token) {
