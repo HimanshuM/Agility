@@ -24,7 +24,7 @@ namespace Agility\Data\Types;
 				return $value;
 			}
 
-			return boolval($value);
+			return intval($value);
 
 		}
 
