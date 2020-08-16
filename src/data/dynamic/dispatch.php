@@ -50,11 +50,11 @@ use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 				}
 
 			}
-			else if (static::$_registeredFallbackCallable->exists(static::class)) {
+			else if (!static::metaStore()->registeredFallbackCallable->empty) {
 
 				$dynamicCall = new Call($args);
 
-				$callables = static::metaStore()->registeredFallbackCallable[static::class];
+				$callables = static::metaStore()->registeredFallbackCallable;
 				foreach ($callables as $callable) {
 
 					$response = $this->$callable($name, $dynamicCall);
@@ -113,13 +113,7 @@ use Phpm\Exceptions\PropertyExceptions\PropertyNotFoundException;
 		}
 
 		protected static function registerFallbackCallable($name) {
-
-			if (empty(static::$_registeredFallbackCallable)) {
-				static::$_registeredFallbackCallable = new Arrays;
-			}
-
-			static::$_registeredFallbackCallable[static::class] = $name;
-
+			static::metaStore()->registeredFallbackCallable = $name;
 		}
 
 		function valueOfPrimaryKey() {
