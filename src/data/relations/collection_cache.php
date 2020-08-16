@@ -56,7 +56,10 @@ namespace Agility\Data\Relations;
 		}
 
 		public function valid() {
-			return $this->arr->exists($this->_position);
+
+			$this->initializeCache();
+			return $this->cache->exists($this->_position);
+
 		}
 
 	}
