@@ -159,7 +159,7 @@ use StringHelpers\Str;
 			}
 			else {
 
-				$seeds = $this->appPath->parent->children("../db/seeds/$pick");
+				$seeds = $this->appPath->parent->children("../db/seeds/$file");
 				foreach ($seeds as $seed) {
 					$this->executeFile($seed);
 				}
