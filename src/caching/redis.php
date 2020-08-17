@@ -90,9 +90,9 @@ use Throwable;
 			return Redis::connection()->$method(...$args);
 		}
 
-		static function subscribe($channel, $callback) {
+		static function subscribe($channel, $callback, $connectionName = null) {
 
-			$pubSub = Redis::connection()->pubSubLoop();
+			$pubSub = Redis::connection($connectionName)->pubSubLoop();
 			$pubSub->subscribe($channel);
 
 			try {
