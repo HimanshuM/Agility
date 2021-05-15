@@ -171,7 +171,7 @@ use AttributeHelper\Accessor;
 				"post" => $this->postParams,
 				"headers" => $this->headers,
 				"cookies" => $this->cookie,
-				"files" => $this->fileParams->keys
+				"files" => $this->files->keys
 			];
 
 		}
