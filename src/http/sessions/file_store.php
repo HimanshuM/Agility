@@ -41,12 +41,14 @@ use Agility\Config;
 			$createdAt = Chronometer::fromTimestamp(intval($content[0]));
 			$serializedSession = $content[1];
 
-			if (Session::invalid($createdAt)) {
+			// Session invalidation has been deprecated this way
+			// Because it was not rolling, it was constant time
+			// if (Session::invalid($createdAt)) {
 
-				$sessionFile->delete();
-				return [false, false];
+			// 	$sessionFile->delete();
+			// 	return [false, false];
 
-			}
+			// }
 
 			return [unserialize($serializedSession), $createdAt];
 
