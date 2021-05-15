@@ -56,11 +56,11 @@ use FileSystem\FileSystem;
 
 		protected function reportError($exception, $die = false) {
 
-			$this->response->status(500);
 			if (!empty(static::$rescuers[get_class($exception)])) {
-				$this->invokeRescuer($exception, $this->response);
+				return $this->invokeRescuer($exception, $this->response);
 			}
 
+			$this->response->status(500);
 			if (Configuration::environment() != "development") {
 
 				Log::error($exception, ["request" => $this->request]);
