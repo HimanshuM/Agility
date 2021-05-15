@@ -2,6 +2,7 @@
 
 namespace Agility\Sockets;
 
+use Agility\Logger\Log;
 use Agility\Server\Parameter;
 use Throwable;
 
@@ -10,6 +11,7 @@ use Throwable;
 		protected $channel;
 		protected $request;
 		protected $params;
+		protected $session;
 
 		function __construct() {
 			$this->params = new Parameter;
@@ -20,7 +22,20 @@ use Throwable;
 			$object = new $channel($server, $request);
 			$object->channel = $server;
 			$object->request = $request;
+			$object->session = $request->identifySession();
 			$object->params->merge($object->request->getParams);
+
+			try {
+				$object->connect();
+			}
+			catch (Throwable $e) {
+
+				unset($object);
+				Log::error("Disconnecting websocket connection because: ".$e->getMessage());
+				$server->disconnect($request->request->fd);
+				return false;
+
+			}
 
 			$object->subscribed();
 			$object->enqueue();
@@ -30,6 +45,10 @@ use Throwable;
 		}
 
 		protected function enqueue() {
+
+		}
+
+		function connect() {
 
 		}
 

@@ -2,6 +2,7 @@
 
 namespace Agility\Sockets;
 
+use Agility\Logger\Log;
 use Agility\Server\Request;
 use Swoole\WebSocket\Server;
 use Swoole\Http\Request as SwooleRequest;
@@ -21,10 +22,14 @@ use Throwable;
 			}
 
 			$uri = substr($request->uri, strlen("/websockets"));
+			Log::info("Received WebSocket request at $uri");
 			$channel = Str::normalize($uri);
 
 			$channel = Channels::getName($channel);
-			Channels::$subscriptions[$request->request->fd] = Channel::invoke($channel, $server, $request);
+			$channel = Channel::invoke($channel, $server, $request);
+			if (!empty($channel)) {
+				Channels::$subscriptions[$request->request->fd] = $channel;
+			}
 
 		}
 
@@ -39,7 +44,11 @@ use Throwable;
 		static function onClose(Server $server, int $fd) {
 
 			try {
-				Channels::$subscriptions[$fd]->onClose($fd);
+
+				if ($channel = Channels::$subscriptions[$fd] ?? false) {
+					$channel->onClose($fd);
+				}
+
 			}
 			catch (Throwable $e) {}
 
