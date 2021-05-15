@@ -132,7 +132,7 @@ use ArrayUtils\Arrays;
 		}
 
 		static function invalid($createdAt) {
-			return mktime() - $createdAt->timestamp > Config::sessionStore()->expiry;
+			return time() - $createdAt->timestamp > Config::sessionStore()->expiry;
 		}
 
 		function invalidate() {

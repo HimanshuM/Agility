@@ -18,7 +18,7 @@ use Agility\Config;
 
 		function cleanup () {
 			// Because, we do not have the file creation time, we use the last access time
-			$this->storageLocation->scan(["atime" => (mktime() - Config::sessionStore()->expiry), false])->walk(":delete");
+			$this->storageLocation->scan(["atime" => (time() - Config::sessionStore()->expiry), false])->walk(":delete");
 		}
 
 		function deleteSession($session) {
