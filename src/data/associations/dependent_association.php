@@ -132,8 +132,6 @@ use StringHelpers\Str;
 					throw new Exceptions\HasManyThroughSourceNotFoundException($this->_through->_associatedName, $associatedThroughRelation, $this->_ownerClass);
 				}
 
-				var_dump($associatedThroughRelation);
-
 				$throughBelongsToAssociation = $throughClass::associationsCache()->belongsToAssociations[$associatedThroughRelation];
 				$throughForeignKey = Str::snakeCase($throughBelongsToAssociation->associatedForeignKey);
 				$throughOwnerPrimaryKey = $throughBelongsToAssociation->primaryKey;
