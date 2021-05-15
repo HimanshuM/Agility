@@ -67,14 +67,19 @@ use ArrayUtils\Arrays;
 
 		}
 
-		protected static function metaStore() {
+		protected static function metaStore($refresh = true) {
 
 			if (empty(static::$_metaStore)) {
 				static::$_metaStore = new Arrays;
 			}
 
 			if (!static::$_metaStore->exists(static::class)) {
+
 				static::$_metaStore[static::class] = new MetaStore;
+				if ($refresh) {
+					static::staticInitialize();
+				}
+
 			}
 
 			return static::$_metaStore[static::class];
@@ -83,13 +88,13 @@ use ArrayUtils\Arrays;
 
 		static function staticInitialize() {
 
-			if (static::metaStore()->modelInitialized) {
+			if (static::metaStore(false)->modelInitialized) {
 				return;
 			}
 
-			static::metaStore()->modelInitialized = true;
+			static::metaStore(false)->modelInitialized = true;
 
-			static::metaStore();
+			// static::metaStore();
 
 			static::connection();
 			static::tableName();
