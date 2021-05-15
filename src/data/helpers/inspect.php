@@ -37,6 +37,10 @@ namespace Agility\Data\Helpers;
 
 		}
 
+		function toArray() {
+			return json_decode($this->toJson, true);
+		}
+
 		function toJson() {
 			return json_encode($this->jsonSerialize());
 		}
