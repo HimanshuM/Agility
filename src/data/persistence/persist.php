@@ -201,7 +201,7 @@ use StringHelpers\Str;
 				$relation->where($where);
 			}
 
-			return $relation->execute();
+			return $relation/*->execute()*/;
 
 		}
 
