@@ -12,7 +12,7 @@ use StringHelpers\Str;
 
 		use Accessor;
 		use Helpers\Defaults;
-		use Helpers\Match;
+		use Helpers\Matches;
 		use Helpers\Resources;
 		use Helpers\Scope;
 		use Helpers\Verbs;

@@ -7,7 +7,7 @@ use Agility\Routing\Routes;
 use Closure;
 use Phpm\Exceptions\MethodExceptions\InvalidArgumentTypeException;
 
-	trait Match {
+	trait Matches {
 
 		function domain($domainName, $options = [], $callback) {
 
