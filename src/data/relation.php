@@ -161,6 +161,15 @@ use StringHelpers\Str;
 			return $this->defaultCallback($method, $args);
 		}
 
+		function create($params) {
+
+			$obj = $this->new($params);
+			$obj->save();
+
+			return $obj;
+
+		}
+
 		protected function defaultCallback($name, $args = []) {
 
 			$index = static::getIndex($name);
@@ -333,6 +342,7 @@ use StringHelpers\Str;
 		function leftJoin($with) {
 			return $this->join($with, "LeftJoin");
 		}
+
 		function new($params = []) {
 
 			if (!is_a($this->_statement, SelectStatement::class)) {
